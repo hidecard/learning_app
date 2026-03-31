@@ -16,6 +16,7 @@ class FirebaseService {
       return UserModel(
         id: user.uid,
         email: user.email ?? '',
+        name: user.email?.split('@')[0] ?? 'User',
         isPremium: false,
       );
     }
@@ -30,31 +31,52 @@ class FirebaseService {
     await _firestore.collection('profiles').doc(user.uid).set({
       'id': user.uid,
       'email': user.email,
+      'name': user.email?.split('@')[0] ?? 'User',
       'is_premium': false,
     });
   }
 
-  Future<bool> redeemKey(String keyCode) async {
-    // Check if key exists and not used
-    final query = await _firestore
-        .collection('activation_keys')
-        .where('key_code', isEqualTo: keyCode)
-        .where('is_used', isEqualTo: false)
-        .limit(1)
-        .get();
+  Future<void> updateUserProfile(UserModel userModel) async {
+    await _firestore.collection('profiles').doc(userModel.id).update(userModel.toJson());
+  }
 
-    if (query.docs.isEmpty) return false;
+  Future<Map<String, dynamic>> validateActivationKey(String keyCode) async {
+    try {
+      // Check if key exists and not used
+      final query = await _firestore
+          .collection('activation_keys')
+          .where('key_code', isEqualTo: keyCode)
+          .where('is_used', isEqualTo: false)
+          .limit(1)
+          .get();
 
-    final keyDoc = query.docs.first;
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) return false;
+      if (query.docs.isEmpty) {
+        return {'success': false, 'message': 'Invalid or already used activation key'};
+      }
 
-    // Mark key as used
-    await keyDoc.reference.update({'is_used': true});
+      final keyDoc = query.docs.first;
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) {
+        return {'success': false, 'message': 'User not authenticated'};
+      }
 
-    // Update user to premium
-    await _firestore.collection('profiles').doc(userId).update({'is_premium': true});
+      // Mark key as used
+      await keyDoc.reference.update({
+        'is_used': true,
+        'used_by': userId,
+        'used_at': FieldValue.serverTimestamp(),
+      });
 
-    return true;
+      return {'success': true, 'message': 'Activation key validated successfully'};
+    } catch (e) {
+      return {'success': false, 'message': 'Error validating activation key: $e'};
+    }
+  }
+
+  Future<void> removeUserActivationKey(String userId) async {
+    await _firestore.collection('profiles').doc(userId).update({
+      'is_premium': false,
+      'activation_key': FieldValue.delete(),
+    });
   }
 }
