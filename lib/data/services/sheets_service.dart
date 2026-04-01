@@ -1,14 +1,25 @@
 
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../core/constants.dart';
 import '../models/blog_model.dart';
 import '../models/course_model.dart';
+import 'connectivity_service.dart';
 
 class SheetsService {
   static Future<List<BlogModel>> fetchBlogs() async {
     try {
+      // Check connectivity first
+      final connectivityService = Get.find<ConnectivityService>();
+      if (!connectivityService.isConnected.value) {
+        if (kDebugMode) {
+          print('No internet connection - cannot fetch blogs');
+        }
+        return [];
+      }
+      
       if (kDebugMode) {
         print('Fetching blogs from: $BLOGS_ENDPOINT');
       }
@@ -42,6 +53,15 @@ class SheetsService {
 
   static Future<List<CourseModel>> fetchCourses() async {
     try {
+      // Check connectivity first
+      final connectivityService = Get.find<ConnectivityService>();
+      if (!connectivityService.isConnected.value) {
+        if (kDebugMode) {
+          print('No internet connection - cannot fetch courses');
+        }
+        return [];
+      }
+      
       if (kDebugMode) {
         print('Fetching courses from: $COURSES_ENDPOINT');
       }
