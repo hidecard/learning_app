@@ -1,0 +1,12 @@
+{
+  "name": "learning-app",
+  "version": "1.0.0",
+  "description": "Flutter Learning App Web Deployment",
+  "scripts": {
+    "build": "flutter build web --release",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^latest"
+  }
+}
