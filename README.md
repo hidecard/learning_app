@@ -1,15 +1,61 @@
 # Learning App
 
-A comprehensive Flutter learning application with web deployment support.
+A comprehensive Flutter learning application with video courses, blogs, and premium features.
 
 ## Features
 
-- 📱 Cross-platform mobile app
-- 🌐 Web version with Vercel deployment
-- 🔥 Firebase integration
-- 🎨 Modern UI with Material Design
-- ♿ Accessibility features
-- 🎭 Rich animations
+### Core Learning Features
+- Video course library with YouTube integration
+- Blog articles and tutorials
+- Premium content with activation keys
+- User authentication and profiles
+- Course progress tracking
+- Video player with custom controls
+
+### User Experience
+- Modern Material Design 3 UI
+- Full accessibility support (screen readers, high contrast, large text)
+- Smooth animations and transitions
+- Responsive design for mobile, tablet, and desktop
+- Dark/light theme support
+- Offline connectivity handling
+
+### Technical Features
+- Cross-platform (iOS, Android, Web)
+- Firebase backend integration
+- Google Sheets API for content management
+- Premium subscription system
+- Admin panel for content management
+- Real-time data synchronization
+
+## Tech Stack
+
+### Frontend Framework
+- **Flutter** - Cross-platform UI framework
+- **Dart** - Programming language
+
+### State Management
+- **GetX** - State management and navigation
+
+### Backend & Database
+- **Firebase Auth** - User authentication
+- **Firebase Firestore** - Real-time database
+- **Google Sheets API** - Content management system
+
+### UI/UX Libraries
+- **YouTube Player Flutter** - Video playback
+- **Material 3** - Design system
+- **Custom animations** - Fade, slide, scale transitions
+
+### Deployment
+- **Vercel** - Web hosting
+- **Firebase Hosting** - Alternative web deployment
+- **App Store/Play Store** - Mobile distribution
+
+### Development Tools
+- **Flutter SDK** - Development environment
+- **VS Code/Android Studio** - IDE support
+- **Git** - Version control
 
 ## Web Deployment
 
