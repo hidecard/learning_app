@@ -241,9 +241,11 @@ class ProfileTab extends StatelessWidget {
 
   Widget _buildMenuItems(BuildContext context, currentUser) {
     final authController = Get.find<AuthController>();
+    final isAdmin = currentUser.email == 'ak1500@gmail.com';
     final menuItems = [
       {'icon': Icons.person, 'title': 'Edit Profile', 'color': const Color(0xFF00C2FF)},
       {'icon': Icons.vpn_key, 'title': 'Activation Key', 'color': const Color(0xFF007BFF)},
+      if (isAdmin) {'icon': Icons.admin_panel_settings, 'title': 'Admin Panel', 'color': const Color(0xFF00C2FF)},
       {'icon': Icons.info, 'title': 'About', 'color': const Color(0xFF007BFF)},
       {'icon': Icons.logout, 'title': 'Logout', 'color': Colors.red},
     ];
@@ -290,6 +292,9 @@ class ProfileTab extends StatelessWidget {
             break;
           case 'Activation Key':
             Get.to(() => const ActivationKeyScreen());
+            break;
+          case 'Admin Panel':
+            Get.toNamed('/admin');
             break;
           case 'About':
             Get.to(() => const AboutScreen());
