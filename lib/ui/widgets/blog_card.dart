@@ -25,7 +25,7 @@ class BlogCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -60,7 +60,7 @@ class BlogCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00C2FF).withOpacity(0.1),
+                          color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -113,18 +113,18 @@ class BlogCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             Text(
               blog.content,
               style: TextStyle(
                 fontSize: 14,
-                color: const Color(0xFF3C4852).withOpacity(0.7),
+                color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                 height: 1.4,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             if (blog.imageUrl != null && blog.imageUrl!.isNotEmpty) ...[
               const SizedBox(height: 12),
               ClipRRect(
@@ -154,32 +154,29 @@ class BlogCard extends StatelessWidget {
                 ),
               ),
             ],
-            
+
             const SizedBox(height: 12),
-            
+
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     'ID: ${blog.id}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                 ),
                 const Spacer(),
                 Text(
                   'Views: ${blog.viewCount} | Likes: ${blog.likeCount}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
@@ -195,10 +192,7 @@ class BlogCard extends StatelessWidget {
         title: const Text('Delete Blog'),
         content: Text('Are you sure you want to delete "${blog.title}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               Get.back();

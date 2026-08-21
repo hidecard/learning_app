@@ -33,12 +33,14 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
     });
 
     try {
-      final result = await _activationService.activateKey(_keyController.text.trim());
-      
+      final result = await _activationService.activateKey(
+        _keyController.text.trim(),
+      );
+
       if (result['success']) {
         // Update user's premium status
         await authController.updatePremiumStatus(true);
-        
+
         Get.snackbar(
           'Success!',
           'Activation key validated successfully! Premium features unlocked.',
@@ -46,7 +48,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           colorText: Colors.white,
           duration: const Duration(seconds: 3),
         );
-        
+
         // Navigate back or to premium screen
         Get.back();
       } else {
@@ -87,9 +89,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Remove'),
           ),
         ],
@@ -100,14 +100,14 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
       try {
         await _activationService.removeActivationKey();
         await authController.updatePremiumStatus(false);
-        
+
         Get.snackbar(
           'Key Removed',
           'Activation key has been removed successfully.',
           backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
-        
+
         setState(() {
           _showCurrentKey = false;
         });
@@ -129,7 +129,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = authController.currentUser.value;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -146,10 +146,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
         actions: [
           if (_isAdmin())
             IconButton(
-              icon: const Icon(
-                Icons.key,
-                color: Color(0xFF00C2FF),
-              ),
+              icon: const Icon(Icons.key, color: Color(0xFF00C2FF)),
               onPressed: () {
                 Get.to(() => const KeyManagementScreen());
               },
@@ -175,8 +172,11 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: (currentUser?.isPremium == true ? Colors.green : const Color(0xFF00C2FF))
-                        .withOpacity(0.3),
+                    color:
+                        (currentUser?.isPremium == true
+                                ? Colors.green
+                                : const Color(0xFF00C2FF))
+                            .withValues(alpha: 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -188,18 +188,22 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(40),
                     ),
                     child: Icon(
-                      currentUser?.isPremium == true ? Icons.verified : Icons.vpn_key,
+                      currentUser?.isPremium == true
+                          ? Icons.verified
+                          : Icons.vpn_key,
                       size: 40,
                       color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    currentUser?.isPremium == true ? 'Premium Active' : 'Free Plan',
+                    currentUser?.isPremium == true
+                        ? 'Premium Active'
+                        : 'Free Plan',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -211,10 +215,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                     currentUser?.isPremium == true
                         ? 'All premium features are unlocked'
                         : 'Enter an activation key to unlock premium features',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -223,7 +224,8 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
             const SizedBox(height: 20),
 
             // Current Key Display
-            if (currentUser?.activationKey != null && currentUser!.activationKey!.isNotEmpty)
+            if (currentUser?.activationKey != null &&
+                currentUser!.activationKey!.isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -231,7 +233,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -258,7 +260,9 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                             });
                           },
                           icon: Icon(
-                            _showCurrentKey ? Icons.visibility_off : Icons.visibility,
+                            _showCurrentKey
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             size: 16,
                             color: const Color(0xFF00C2FF),
                           ),
@@ -279,7 +283,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                         color: const Color(0xFFF5F7FA),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFF00C2FF).withOpacity(0.3),
+                          color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -291,7 +295,9 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                                   : '•' * 20,
                               style: TextStyle(
                                 fontSize: 14,
-                                fontFamily: _showCurrentKey ? 'monospace' : null,
+                                fontFamily: _showCurrentKey
+                                    ? 'monospace'
+                                    : null,
                                 color: const Color(0xFF3C4852),
                                 letterSpacing: _showCurrentKey ? 2 : 3,
                               ),
@@ -343,7 +349,9 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
             const SizedBox(height: 20),
 
             // Add New Key Form (only show if not premium or no key)
-            if (currentUser?.isPremium != true || currentUser?.activationKey == null || currentUser!.activationKey!.isEmpty)
+            if (currentUser?.isPremium != true ||
+                currentUser?.activationKey == null ||
+                currentUser!.activationKey!.isEmpty)
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -351,7 +359,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -376,7 +384,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                         'advanced content, and priority support.',
                         style: TextStyle(
                           fontSize: 14,
-                          color: const Color(0xFF3C4852).withOpacity(0.7),
+                          color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                           height: 1.5,
                         ),
                       ),
@@ -384,14 +392,19 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                       TextFormField(
                         controller: _keyController,
                         decoration: InputDecoration(
-                          hintText: 'Enter activation key (e.g., XXXX-XXXX-XXXX-XXXX)',
+                          hintText:
+                              'Enter activation key (e.g., XXXX-XXXX-XXXX-XXXX)',
                           hintStyle: TextStyle(
-                            color: const Color(0xFF3C4852).withOpacity(0.5),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.5),
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: const Color(0xFF3C4852).withOpacity(0.2),
+                              color: const Color(
+                                0xFF3C4852,
+                              ).withValues(alpha: 0.2),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -438,7 +451,9 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
@@ -460,7 +475,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withOpacity(0.1),
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Column(
@@ -492,7 +507,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                     '• Keys are tied to your account and cannot be transferred',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF3C4852).withOpacity(0.7),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                   ),

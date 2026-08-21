@@ -12,7 +12,7 @@ class ActivationService {
     try {
       // Validate the key using Firebase service
       final result = await _firebaseService.validateActivationKey(key);
-      
+
       if (result['success']) {
         // Update user profile with activation key
         final userId = _auth.currentUser?.uid;
@@ -24,11 +24,13 @@ class ActivationService {
           });
         }
       }
-      
+
       return result;
-    } catch (e) {
-      print('Error activating key: $e');
-      return {'success': false, 'message': 'Error activating key: $e'};
+    } catch (_) {
+      return {
+        'success': false,
+        'message': 'Could not activate this key. Please try again.',
+      };
     }
   }
 
@@ -38,9 +40,7 @@ class ActivationService {
       if (userId != null) {
         await _firebaseService.removeUserActivationKey(userId);
       }
-    } catch (e) {
-      print('Error removing activation key: $e');
-    }
+    } catch (_) {}
   }
 
   Future<List<ActivationKeyModel>> getAvailableKeys() async {
@@ -54,7 +54,6 @@ class ActivationService {
           .map((doc) => ActivationKeyModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching keys: $e');
       return [];
     }
   }
@@ -70,7 +69,6 @@ class ActivationService {
           .map((doc) => ActivationKeyModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching used keys: $e');
       return [];
     }
   }
@@ -82,8 +80,6 @@ class ActivationService {
         'is_used': false,
         'created_at': FieldValue.serverTimestamp(),
       });
-    } catch (e) {
-      print('Error creating key: $e');
-    }
+    } catch (_) {}
   }
 }

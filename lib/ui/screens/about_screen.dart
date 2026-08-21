@@ -21,10 +21,7 @@ class AboutScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(0xFF00C2FF),
-          ),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
           onPressed: () => Get.back(),
         ),
       ),
@@ -40,7 +37,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -60,7 +57,7 @@ class AboutScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF00C2FF).withOpacity(0.3),
+                          color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 8),
                         ),
@@ -86,7 +83,7 @@ class AboutScreen extends StatelessWidget {
                     'Version 1.0.0',
                     style: TextStyle(
                       fontSize: 16,
-                      color: const Color(0xFF3C4852).withOpacity(0.7),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -94,7 +91,7 @@ class AboutScreen extends StatelessWidget {
                     'Unlock Your Potential',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF3C4852).withOpacity(0.6),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -111,7 +108,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -135,7 +132,7 @@ class AboutScreen extends StatelessWidget {
                     'you\'ll have everything you need to advance your skills and achieve your goals.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF3C4852).withOpacity(0.7),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                   ),
@@ -152,7 +149,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -203,7 +200,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -252,7 +249,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -295,7 +292,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -307,7 +304,7 @@ class AboutScreen extends StatelessWidget {
                     '© 2024 Nexus Tech',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF3C4852).withOpacity(0.7),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -315,7 +312,7 @@ class AboutScreen extends StatelessWidget {
                     'All rights reserved.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xFF3C4852).withOpacity(0.6),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -345,14 +342,10 @@ class AboutScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withOpacity(0.1),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFF00C2FF),
-              size: 20,
-            ),
+            child: Icon(icon, color: const Color(0xFF00C2FF), size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -372,7 +365,7 @@ class AboutScreen extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: const Color(0xFF3C4852).withOpacity(0.7),
+                    color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -383,7 +376,12 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactItem(IconData icon, String title, String value, String? url) {
+  Widget _buildContactItem(
+    IconData icon,
+    String title,
+    String value,
+    String? url,
+  ) {
     return InkWell(
       onTap: url != null ? () => _launchURL(url) : null,
       borderRadius: BorderRadius.circular(12),
@@ -394,14 +392,10 @@ class AboutScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withOpacity(0.1),
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF00C2FF),
-                size: 20,
-              ),
+              child: Icon(icon, color: const Color(0xFF00C2FF), size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -420,7 +414,9 @@ class AboutScreen extends StatelessWidget {
                     value,
                     style: TextStyle(
                       fontSize: 14,
-                      color: url != null ? const Color(0xFF00C2FF) : const Color(0xFF3C4852),
+                      color: url != null
+                          ? const Color(0xFF00C2FF)
+                          : const Color(0xFF3C4852),
                       fontWeight: FontWeight.w600,
                       decoration: url != null ? TextDecoration.underline : null,
                     ),
@@ -459,7 +455,7 @@ class AboutScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withOpacity(0.1),
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -485,7 +481,7 @@ class AboutScreen extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: 12,
-                      color: const Color(0xFF3C4852).withOpacity(0.7),
+                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -494,7 +490,7 @@ class AboutScreen extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: const Color(0xFF3C4852).withOpacity(0.6),
+              color: const Color(0xFF3C4852).withValues(alpha: 0.6),
             ),
           ],
         ),

@@ -18,7 +18,8 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin {
+class _AdminScreenState extends State<AdminScreen>
+    with TickerProviderStateMixin {
   final ActivationService _activationService = ActivationService();
   final TextEditingController _keyController = TextEditingController();
   List<ActivationKeyModel> availableKeys = [];
@@ -69,7 +70,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
     try {
       final available = await _activationService.getAvailableKeys();
       final used = await _activationService.getUsedKeys();
-      
+
       setState(() {
         availableKeys = available;
         usedKeys = used;
@@ -121,7 +122,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
   Future<void> _saveBlog(BlogModel blog) async {
     try {
       Map<String, dynamic> result;
-      
+
       if (blogs.any((b) => b.id == blog.id)) {
         // Update existing blog
         result = await SheetsService.updateBlog(blog);
@@ -136,14 +137,14 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
         throw Exception(result['error'] ?? 'Unknown error');
       }
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
   Future<void> _deleteBlog(String blogId) async {
     try {
       final result = await SheetsService.deleteBlog(blogId);
-      
+
       if (result['success'] == true) {
         await _loadBlogs();
         Get.snackbar(
@@ -167,11 +168,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
 
   void _showBlogForm({BlogModel? blog}) {
     Get.dialog(
-      BlogForm(
-        blog: blog,
-        onSave: _saveBlog,
-        onCancel: () => Get.back(),
-      ),
+      BlogForm(blog: blog, onSave: _saveBlog, onCancel: () => Get.back()),
     );
   }
 
@@ -197,7 +194,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
   Future<void> _saveCourseVideo(Map<String, dynamic> courseData) async {
     try {
       Map<String, dynamic> result;
-      
+
       if (courseData['row'] != null) {
         // Update existing course video
         result = await SheetsService.updateCourseVideo(
@@ -223,14 +220,14 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
         throw Exception(result['error'] ?? 'Unknown error');
       }
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
   Future<void> _deleteCourseVideo(int row) async {
     try {
       final result = await SheetsService.deleteCourseVideo(row);
-      
+
       if (result['success'] == true) {
         await _loadCourses();
         Get.snackbar(
@@ -281,7 +278,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
         bottom: TabBar(
           controller: _tabController,
           labelColor: const Color(0xFF00C2FF),
-          unselectedLabelColor: const Color(0xFF3C4852).withOpacity(0.6),
+          unselectedLabelColor: const Color(0xFF3C4852).withValues(alpha: 0.6),
           indicatorColor: const Color(0xFF00C2FF),
           tabs: const [
             Tab(text: 'Blogs'),
@@ -292,11 +289,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildBlogsTab(),
-          _buildCoursesTab(),
-          _buildKeysTab(),
-        ],
+        children: [_buildBlogsTab(), _buildCoursesTab(), _buildKeysTab()],
       ),
     );
   }
@@ -337,63 +330,59 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
           child: isBlogsLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF00C2FF),
+                    ),
                   ),
                 )
               : blogs.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.article_outlined,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No blogs found',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Create your first blog to get started',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: () => _showBlogForm(),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Create Blog'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00C2FF),
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.article_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
                       ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadBlogs,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: blogs.length,
-                        itemBuilder: (context, index) {
-                          final blog = blogs[index];
-                          return BlogCard(
-                            blog: blog,
-                            onEdit: () => _showBlogForm(blog: blog),
-                            onDelete: () => _deleteBlog(blog.id),
-                          );
-                        },
+                      const SizedBox(height: 16),
+                      Text(
+                        'No blogs found',
+                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create your first blog to get started',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => _showBlogForm(),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Create Blog'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00C2FF),
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadBlogs,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: blogs.length,
+                    itemBuilder: (context, index) {
+                      final blog = blogs[index];
+                      return BlogCard(
+                        blog: blog,
+                        onEdit: () => _showBlogForm(blog: blog),
+                        onDelete: () => _deleteBlog(blog.id),
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
@@ -435,63 +424,59 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
           child: isCoursesLoading
               ? const Center(
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF00C2FF),
+                    ),
                   ),
                 )
               : courses.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.video_library_outlined,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No course videos found',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Add your first course video to get started',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: () => _showCourseForm(),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add Video'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00C2FF),
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.video_library_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
                       ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadCourses,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: courses.length,
-                        itemBuilder: (context, index) {
-                          final course = courses[index];
-                          return CourseVideoCard(
-                            courseData: course,
-                            onEdit: () => _showCourseForm(courseData: course),
-                            onDelete: () => _deleteCourseVideo(course['row']),
-                          );
-                        },
+                      const SizedBox(height: 16),
+                      Text(
+                        'No course videos found',
+                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Add your first course video to get started',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => _showCourseForm(),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Video'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00C2FF),
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadCourses,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: courses.length,
+                    itemBuilder: (context, index) {
+                      final course = courses[index];
+                      return CourseVideoCard(
+                        courseData: course,
+                        onEdit: () => _showCourseForm(courseData: course),
+                        onDelete: () => _deleteCourseVideo(course['row']),
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
@@ -517,7 +502,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -540,7 +525,9 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
                         decoration: InputDecoration(
                           hintText: 'Enter key code (e.g., ABC-123)',
                           hintStyle: TextStyle(
-                            color: const Color(0xFF3C4852).withOpacity(0.6),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.6),
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -583,11 +570,11 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Available Keys Section
                 _buildKeysSection('Available Keys', availableKeys, false),
                 const SizedBox(height: 24),
-                
+
                 // Used Keys Section
                 _buildKeysSection('Used Keys', usedKeys, true),
               ],
@@ -595,7 +582,11 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
           );
   }
 
-  Widget _buildKeysSection(String title, List<ActivationKeyModel> keys, bool isUsedSection) {
+  Widget _buildKeysSection(
+    String title,
+    List<ActivationKeyModel> keys,
+    bool isUsedSection,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -603,7 +594,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -624,9 +615,14 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isUsedSection ? Colors.red.withOpacity(0.1) : const Color(0xFF00C2FF).withOpacity(0.1),
+                  color: isUsedSection
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -652,7 +648,7 @@ class _AdminScreenState extends State<AdminScreen> with TickerProviderStateMixin
                 child: Text(
                   'No ${isUsedSection ? 'used' : 'available'} keys',
                   style: TextStyle(
-                    color: const Color(0xFF3C4852).withOpacity(0.6),
+                    color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                   ),
                 ),
               ),

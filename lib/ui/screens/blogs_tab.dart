@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
 import '../../data/models/blog_model.dart';
-import 'blog_detail.dart';
 import '../../data/services/blog_service.dart';
 
 class BlogsTab extends StatefulWidget {
@@ -30,8 +28,8 @@ class _BlogsTabState extends State<BlogsTab> {
   String _selectedCategory = 'All';
   bool _isSearching = false;
   List<String> _categories = ['All'];
-  Map<String, bool> _likedStatus = {};
-  Map<String, bool> _loadingStates = {};
+  final Map<String, bool> _likedStatus = {};
+  final Map<String, bool> _loadingStates = {};
 
   @override
   void initState() {
@@ -57,23 +55,20 @@ class _BlogsTabState extends State<BlogsTab> {
   }
 
   void _extractCategoriesFromAPI() {
-    final Set<String> categorySet = {'All'};
-    
+    final categorySet = <String>{'All'};
     for (final blog in widget.blogs) {
-      if (blog.category.isNotEmpty) {
-        categorySet.add(blog.category);
+      if (blog.category.trim().isNotEmpty) {
+        categorySet.add(blog.category.trim());
       }
     }
-    
-    setState(() {
-      _categories = categorySet.toList();
-      _categories.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    });
+    final categories = categorySet.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    if (mounted) setState(() => _categories = categories);
   }
 
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
-    
+
     setState(() {
       if (query.isEmpty) {
         _isSearching = false;
@@ -91,21 +86,24 @@ class _BlogsTabState extends State<BlogsTab> {
 
   void _applyCategoryFilter() {
     if (_selectedCategory == 'All') {
-      _filteredBlogs = _isSearching 
+      _filteredBlogs = _isSearching
           ? widget.blogs.where((blog) {
               final title = blog.title.toLowerCase();
               final content = blog.content.toLowerCase();
-              return title.contains(_searchController.text.toLowerCase()) || content.contains(_searchController.text.toLowerCase());
+              return title.contains(_searchController.text.toLowerCase()) ||
+                  content.contains(_searchController.text.toLowerCase());
             }).toList()
           : widget.blogs;
     } else {
       _filteredBlogs = widget.blogs.where((blog) {
         final title = blog.title.toLowerCase();
         final content = blog.content.toLowerCase();
-        final matchesSearch = _isSearching 
-            ? title.contains(_searchController.text.toLowerCase()) || content.contains(_searchController.text.toLowerCase())
+        final matchesSearch = _isSearching
+            ? title.contains(_searchController.text.toLowerCase()) ||
+                  content.contains(_searchController.text.toLowerCase())
             : true;
-        final categoryMatch = blog.category.toLowerCase() == _selectedCategory.toLowerCase();
+        final categoryMatch =
+            blog.category.toLowerCase() == _selectedCategory.toLowerCase();
         return matchesSearch && categoryMatch;
       }).toList();
     }
@@ -142,21 +140,25 @@ class _BlogsTabState extends State<BlogsTab> {
               ),
             ),
             const Divider(),
-            Container(
+            SizedBox(
               height: 200,
               child: ListView.builder(
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
                   final isSelected = category == _selectedCategory;
-                  
+
                   return ListTile(
                     title: Text(
                       category,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: isSelected ? const Color(0xFF00C2FF) : const Color(0xFF3C4852),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isSelected
+                            ? const Color(0xFF00C2FF)
+                            : const Color(0xFF3C4852),
                       ),
                     ),
                     trailing: isSelected
@@ -179,49 +181,39 @@ class _BlogsTabState extends State<BlogsTab> {
   @override
   void didUpdateWidget(BlogsTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.blogs.length != widget.blogs.length || 
-        oldWidget.blogs.map((b) => b.id).join(',') != widget.blogs.map((b) => b.id).join(',')) {
+    if (oldWidget.blogs != widget.blogs) {
       _initializeLikedStatus();
-    }
-  }
-
-  Future<void> _checkLikedStatusForBlogs() async {
-    for (final blog in widget.blogs) {
-      final isLiked = await _blogService.isLikedByUser(blog.id);
-      final likeCount = await _blogService.getLikeCount(blog.id);
-      setState(() {
-        _likedStatus[blog.id] = isLiked;
-        _loadingStates[blog.id] = false;
-      });
-      
-      // Update the blog in the list with current like count
-      final blogIndex = widget.blogs.indexWhere((b) => b.id == blog.id);
-      if (blogIndex != -1) {
-        widget.blogs[blogIndex] = widget.blogs[blogIndex].copyWith(likeCount: likeCount);
-      }
+      _extractCategoriesFromAPI();
+      _applyCategoryFilter();
     }
   }
 
   Future<void> _toggleLike(BlogModel blog) async {
     if (_loadingStates[blog.id] == true) return;
-
-    setState(() {
-      _loadingStates[blog.id] = true;
-    });
+    setState(() => _loadingStates[blog.id] = true);
 
     try {
       await _blogService.toggleLike(blog.id);
-      final updatedBlog = await _blogService.updateBlogLikeCount(blog);
-      final isLiked = await _blogService.isLikedByUser(blog.id);
-      
+      final results = await Future.wait([
+        _blogService.getStats(blog.id),
+        _blogService.isLikedByUser(blog.id),
+      ]);
+      final stats = results[0] as BlogStats;
+      final isLiked = results[1] as bool;
+      final updatedBlog = blog.copyWith(
+        viewCount: stats.viewCount,
+        likeCount: stats.likeCount,
+      );
+      if (!mounted) return;
       setState(() {
         _likedStatus[blog.id] = isLiked;
         _loadingStates[blog.id] = false;
+        _filteredBlogs = _filteredBlogs
+            .map((item) => item.id == blog.id ? updatedBlog : item)
+            .toList(growable: false);
       });
-    } catch (e) {
-      setState(() {
-        _loadingStates[blog.id] = false;
-      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingStates[blog.id] = false);
     }
   }
 
@@ -245,14 +237,11 @@ class _BlogsTabState extends State<BlogsTab> {
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withOpacity(0.1),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(
-                Icons.filter_list,
-                color: Color(0xFF00C2FF),
-              ),
+              icon: const Icon(Icons.filter_list, color: Color(0xFF00C2FF)),
               onPressed: () {
                 _showCategoryFilter(context);
               },
@@ -270,7 +259,7 @@ class _BlogsTabState extends State<BlogsTab> {
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -284,16 +273,10 @@ class _BlogsTabState extends State<BlogsTab> {
                   color: Color(0xFF3C4852),
                   fontSize: 16,
                 ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: Color(0xFF00C2FF),
-                ),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF00C2FF)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: Color(0xFF00C2FF),
-                        ),
+                        icon: const Icon(Icons.clear, color: Color(0xFF00C2FF)),
                         onPressed: () {
                           _searchController.clear();
                         },
@@ -302,13 +285,10 @@ class _BlogsTabState extends State<BlogsTab> {
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(16),
               ),
-              style: const TextStyle(
-                color: Color(0xFF3C4852),
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Color(0xFF3C4852), fontSize: 16),
             ),
           ),
-          
+
           // Category Filter
           Container(
             height: 50,
@@ -319,29 +299,33 @@ class _BlogsTabState extends State<BlogsTab> {
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 final isSelected = category == _selectedCategory;
-                
+
                 return GestureDetector(
                   onTap: () => _onCategoryChanged(category),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       gradient: isSelected
                           ? LinearGradient(
-                              colors: [const Color(0xFF00C2FF), const Color(0xFF007BFF)],
+                              colors: [
+                                const Color(0xFF00C2FF),
+                                const Color(0xFF007BFF),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             )
                           : null,
-                      color: isSelected 
-                          ? null 
-                          : const Color(0xFFF5F7FA),
+                      color: isSelected ? null : const Color(0xFFF5F7FA),
                       borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: isSelected 
-                            ? Colors.transparent 
+                        color: isSelected
+                            ? Colors.transparent
                             : const Color(0xFFE0E0E0),
                         width: 1,
                       ),
@@ -354,7 +338,9 @@ class _BlogsTabState extends State<BlogsTab> {
                           height: 8,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isSelected ? Colors.white : const Color(0xFF00C2FF),
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF00C2FF),
                           ),
                         ),
                         if (isSelected) ...[
@@ -374,8 +360,12 @@ class _BlogsTabState extends State<BlogsTab> {
                             category,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected ? Colors.white : const Color(0xFF3C4852),
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF3C4852),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -387,326 +377,402 @@ class _BlogsTabState extends State<BlogsTab> {
               },
             ),
           ),
-          
+
           // Blog List
           Expanded(
             child: widget.isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF00C2FF),
+                      ),
                     ),
                   )
                 : widget.errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              widget.errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: widget.onRefresh,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00C2FF),
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Retry'),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.red,
+                          ),
                         ),
-                      )
-                    : _filteredBlogs.isEmpty
-                        ? Center(
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: widget.onRefresh,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00C2FF),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _filteredBlogs.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF00C2FF,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.article_outlined,
+                            size: 64,
+                            color: Color(0xFF00C2FF),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          _isSearching
+                              ? 'No blogs found'
+                              : 'No blogs available',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF3C4852),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Try adjusting your search or filters',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      widget.onRefresh();
+                    },
+                    color: const Color(0xFF00C2FF),
+                    child: ListView.builder(
+                      itemCount: _filteredBlogs.length,
+                      itemBuilder: (context, index) {
+                        final blog = _filteredBlogs[index];
+                        final isLiked = _likedStatus[blog.id] ?? false;
+                        final isLoading = _loadingStates[blog.id] ?? false;
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: InkWell(
+                            onTap: () =>
+                                Get.toNamed('/blog-detail', arguments: blog),
+                            borderRadius: BorderRadius.circular(20),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00C2FF).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
+                                // Blog image
+                                if (blog.imageUrl != null &&
+                                    blog.imageUrl!.isNotEmpty)
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(20),
+                                    ),
+                                    child: Image.network(
+                                      blog.imageUrl!,
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              height: 180,
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: [
+                                                    const Color(
+                                                      0xFF00C2FF,
+                                                    ).withValues(alpha: 0.1),
+                                                    const Color(
+                                                      0xFF00C2FF,
+                                                    ).withValues(alpha: 0.05),
+                                                  ],
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                Icons.image_not_supported,
+                                                size: 40,
+                                                color: const Color(
+                                                  0xFF00C2FF,
+                                                ).withValues(alpha: 0.5),
+                                              ),
+                                            );
+                                          },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        }
+                                        return Container(
+                                          height: 180,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                          ),
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              value:
+                                                  loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                  : null,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    const Color(0xFF00C2FF),
+                                                  ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.article_outlined,
-                                    size: 64,
-                                    color: Color(0xFF00C2FF),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  _isSearching ? 'No blogs found' : 'No blogs available',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF3C4852),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Try adjusting your search or filters',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: const Color(0xFF3C4852).withOpacity(0.7),
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              blog.title,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF3C4852),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(
+                                                0xFF00C2FF,
+                                              ).withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.visibility,
+                                                  color: Color(0xFF00C2FF),
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${blog.viewCount} view${blog.viewCount == 1 ? '' : 's'}',
+                                                  style: const TextStyle(
+                                                    color: Color(0xFF00C2FF),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        blog.category,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: const Color(
+                                            0xFF3C4852,
+                                          ).withValues(alpha: 0.7),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        blog.content.length > 100
+                                            ? '${blog.content.substring(0, 100)}...'
+                                            : blog.content,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: const Color(
+                                            0xFF3C4852,
+                                          ).withValues(alpha: 0.7),
+                                          height: 1.4,
+                                        ),
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () => _toggleLike(blog),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: isLiked
+                                                    ? Colors.red.withValues(
+                                                        alpha: 0.1,
+                                                      )
+                                                    : const Color(
+                                                        0xFF00C2FF,
+                                                      ).withValues(alpha: 0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  isLoading
+                                                      ? const SizedBox(
+                                                          width: 16,
+                                                          height: 16,
+                                                          child: CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                            valueColor:
+                                                                AlwaysStoppedAnimation<
+                                                                  Color
+                                                                >(
+                                                                  Color(
+                                                                    0xFF00C2FF,
+                                                                  ),
+                                                                ),
+                                                          ),
+                                                        )
+                                                      : Icon(
+                                                          isLiked
+                                                              ? Icons.favorite
+                                                              : Icons
+                                                                    .favorite_border,
+                                                          color: isLiked
+                                                              ? Colors.red
+                                                              : const Color(
+                                                                  0xFF3C4852,
+                                                                ).withValues(
+                                                                  alpha: 0.6,
+                                                                ),
+                                                          size: 16,
+                                                        ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    '${blog.likeCount} like${blog.likeCount == 1 ? '' : 's'}',
+                                                    style: TextStyle(
+                                                      color: isLiked
+                                                          ? Colors.red
+                                                          : const Color(
+                                                              0xFF3C4852,
+                                                            ).withValues(
+                                                              alpha: 0.6,
+                                                            ),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(
+                                                0xFF00C2FF,
+                                              ).withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.arrow_forward_ios,
+                                                  color: Color(0xFF00C2FF),
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                const Text(
+                                                  'Read More',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF00C2FF),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () async {
-                              widget.onRefresh();
-                            },
-                            color: const Color(0xFF00C2FF),
-                            child: ListView.builder(
-                              itemCount: _filteredBlogs.length,
-                              itemBuilder: (context, index) {
-                                final blog = _filteredBlogs[index];
-                                final isLiked = _likedStatus[blog.id] ?? false;
-                                final isLoading = _loadingStates[blog.id] ?? false;
-                                
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 5),
-                                      ),
-                                    ],
-                                  ),
-                                  child: InkWell(
-                                    onTap: () => Get.toNamed('/blog-detail', arguments: blog),
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // Blog image
-                                        if (blog.imageUrl != null && blog.imageUrl!.isNotEmpty)
-                                          ClipRRect(
-                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                            child: Image.network(
-                                              blog.imageUrl!,
-                                              height: 180,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 180,
-                                                  width: double.infinity,
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end: Alignment.bottomRight,
-                                                      colors: [
-                                                        const Color(0xFF00C2FF).withOpacity(0.1),
-                                                        const Color(0xFF00C2FF).withOpacity(0.05),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.image_not_supported,
-                                                    size: 40,
-                                                    color: const Color(0xFF00C2FF).withOpacity(0.5),
-                                                  ),
-                                                );
-                                              },
-                                              loadingBuilder: (context, child, loadingProgress) {
-                                                if (loadingProgress == null) return child;
-                                                return Container(
-                                                  height: 180,
-                                                  width: double.infinity,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                  ),
-                                                  child: Center(
-                                                    child: CircularProgressIndicator(
-                                                      value: loadingProgress.expectedTotalBytes != null
-                                                          ? loadingProgress.cumulativeBytesLoaded / 
-                                                              loadingProgress.expectedTotalBytes!
-                                                          : null,
-                                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                                        const Color(0xFF00C2FF),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      blog.title,
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: Color(0xFF3C4852),
-                                                      ),
-                                                      maxLines: 2,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(0xFF00C2FF).withOpacity(0.1),
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                          Icons.visibility,
-                                                          color: Color(0xFF00C2FF),
-                                                          size: 14,
-                                                        ),
-                                                        const SizedBox(width: 4),
-                                                        Text(
-                                                          '${blog.viewCount} view${blog.viewCount == 1 ? '' : 's'}',
-                                                          style: const TextStyle(
-                                                            color: Color(0xFF00C2FF),
-                                                            fontSize: 12,
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                blog.category,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: const Color(0xFF3C4852).withOpacity(0.7),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 12),
-                                              Text(
-                                                blog.content.length > 100 
-                                                    ? '${blog.content.substring(0, 100)}...' 
-                                                    : blog.content,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: const Color(0xFF3C4852).withOpacity(0.7),
-                                                  height: 1.4,
-                                                ),
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 12),
-                                              Row(
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () => _toggleLike(blog),
-                                                    child: Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                      decoration: BoxDecoration(
-                                                        color: isLiked ? Colors.red.withOpacity(0.1) : const Color(0xFF00C2FF).withOpacity(0.1),
-                                                        borderRadius: BorderRadius.circular(8),
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                          isLoading
-                                                              ? const SizedBox(
-                                                                  width: 16,
-                                                                  height: 16,
-                                                                  child: CircularProgressIndicator(
-                                                                    strokeWidth: 2,
-                                                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                                                      Color(0xFF00C2FF),
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                              : Icon(
-                                                                  isLiked ? Icons.favorite : Icons.favorite_border,
-                                                                  color: isLiked ? Colors.red : const Color(0xFF3C4852).withOpacity(0.6),
-                                                                  size: 16,
-                                                                ),
-                                                          const SizedBox(width: 4),
-                                                          Text(
-                                                            '${blog.likeCount} like${blog.likeCount == 1 ? '' : 's'}',
-                                                            style: TextStyle(
-                                                              color: isLiked ? Colors.red : const Color(0xFF3C4852).withOpacity(0.6),
-                                                              fontSize: 12,
-                                                              fontWeight: FontWeight.w600,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const Spacer(),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: const Color(0xFF00C2FF).withOpacity(0.1),
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                          Icons.arrow_forward_ios,
-                                                          color: Color(0xFF00C2FF),
-                                                          size: 14,
-                                                        ),
-                                                        const SizedBox(width: 4),
-                                                        const Text(
-                                                          'Read More',
-                                                          style: TextStyle(
-                                                            color: Color(0xFF00C2FF),
-                                                            fontSize: 12,
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
                           ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),

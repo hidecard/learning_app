@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -10,87 +9,98 @@ import 'connectivity_service.dart';
 
 class SheetsService {
   static const String _adminEmail = 'ak1500@gmail.com';
+  static const Duration _cacheLifetime = Duration(minutes: 2);
 
-  static Future<List<BlogModel>> fetchBlogs() async {
+  static List<BlogModel>? _blogsCache;
+  static DateTime? _blogsCachedAt;
+  static Future<List<BlogModel>>? _blogsRequest;
+  static List<CourseModel>? _coursesCache;
+  static DateTime? _coursesCachedAt;
+  static Future<List<CourseModel>>? _coursesRequest;
+
+  static bool get _online =>
+      !Get.isRegistered<ConnectivityService>() ||
+      Get.find<ConnectivityService>().isConnected.value;
+
+  static bool _isFresh(DateTime? cachedAt) =>
+      cachedAt != null && DateTime.now().difference(cachedAt) < _cacheLifetime;
+
+  static Future<List<BlogModel>> fetchBlogs({bool forceRefresh = false}) async {
+    if (!forceRefresh && _isFresh(_blogsCachedAt) && _blogsCache != null) {
+      return _blogsCache!;
+    }
+    if (!_online) return _blogsCache ?? const <BlogModel>[];
+    if (_blogsRequest != null) return _blogsRequest!;
+
+    final request = _fetchBlogs();
+    _blogsRequest = request;
     try {
-      final connectivityService = Get.find<ConnectivityService>();
-      if (!connectivityService.isConnected.value) {
-        if (kDebugMode) {
-          print('No internet connection - cannot fetch blogs');
-        }
-        return [];
-      }
-      
-      if (kDebugMode) {
-        print('Fetching blogs from: $BLOGS_ENDPOINT');
-      }
-      
-      final response = await http.get(Uri.parse(BLOGS_ENDPOINT));
-      
-      if (kDebugMode) {
-        print('Blogs response status: ${response.statusCode}');
-        print('Blogs response body: ${response.body}');
-      }
-      
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        if (kDebugMode) {
-          print('Parsed ${data.length} blogs');
-        }
-        return data.map((json) => BlogModel.fromJson(json)).toList();
-      } else {
-        if (kDebugMode) {
-          print('Failed to load blogs: ${response.statusCode}');
-        }
-        return [];
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching blogs: $e');
-      }
-      return [];
+      final blogs = await request;
+      _blogsCache = blogs;
+      _blogsCachedAt = DateTime.now();
+      return blogs;
+    } finally {
+      _blogsRequest = null;
     }
   }
 
-  static Future<List<CourseModel>> fetchCourses() async {
-    try {
-      final connectivityService = Get.find<ConnectivityService>();
-      if (!connectivityService.isConnected.value) {
-        if (kDebugMode) {
-          print('No internet connection - cannot fetch courses');
-        }
-        return [];
-      }
-      
-      if (kDebugMode) {
-        print('Fetching courses from: $COURSES_ENDPOINT');
-      }
-      
-      final response = await http.get(Uri.parse(COURSES_ENDPOINT));
-      
-      if (kDebugMode) {
-        print('Courses response status: ${response.statusCode}');
-        print('Courses response body: ${response.body}');
-      }
-      
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        if (kDebugMode) {
-          print('Parsed ${data.length} courses');
-        }
-        return data.map((json) => CourseModel.fromJson(json)).toList();
-      } else {
-        if (kDebugMode) {
-          print('Failed to load courses: ${response.statusCode}');
-        }
-        return [];
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching courses: $e');
-      }
-      return [];
+  static Future<List<BlogModel>> _fetchBlogs() async {
+    final response = await http
+        .get(Uri.parse(blogsEndpoint))
+        .timeout(const Duration(seconds: 12));
+    if (response.statusCode != 200) {
+      throw Exception('Unable to load blogs (${response.statusCode}).');
     }
+    final decoded = json.decode(response.body);
+    if (decoded is! List) {
+      throw const FormatException('Invalid blogs response.');
+    }
+
+    return decoded
+        .whereType<Map>()
+        .map((item) => BlogModel.fromJson(Map<String, dynamic>.from(item)))
+        .where((blog) => blog.id.isNotEmpty || blog.title.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  static Future<List<CourseModel>> fetchCourses({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _isFresh(_coursesCachedAt) && _coursesCache != null) {
+      return _coursesCache!;
+    }
+    if (!_online) return _coursesCache ?? const <CourseModel>[];
+    if (_coursesRequest != null) return _coursesRequest!;
+
+    final request = _fetchCourses();
+    _coursesRequest = request;
+    try {
+      final courses = await request;
+      _coursesCache = courses;
+      _coursesCachedAt = DateTime.now();
+      return courses;
+    } finally {
+      _coursesRequest = null;
+    }
+  }
+
+  static Future<List<CourseModel>> _fetchCourses() async {
+    final response = await http
+        .get(Uri.parse(coursesEndpoint))
+        .timeout(const Duration(seconds: 12));
+    if (response.statusCode != 200) {
+      throw Exception('Unable to load courses (${response.statusCode}).');
+    }
+    final decoded = json.decode(response.body);
+    if (decoded is! List) {
+      throw const FormatException('Invalid courses response.');
+    }
+
+    return decoded
+        .whereType<Map>()
+        .map((item) => CourseModel.fromJson(Map<String, dynamic>.from(item)))
+        .where((course) => course.title?.isNotEmpty == true)
+        .toList(growable: false);
   }
 
   // CRUD Operations for Blogs
@@ -101,19 +111,21 @@ class SheetsService {
         return {'success': false, 'error': 'No internet connection'};
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'create',
-        'type': 'blogs',
-        'admin': _adminEmail,
-        'id': blog.id,
-        'title': blog.title,
-        'content': blog.content,
-        'category': blog.category,
-        'image_url': blog.imageUrl ?? '',
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'create',
+          'type': 'blogs',
+          'admin': _adminEmail,
+          'id': blog.id,
+          'title': blog.title,
+          'content': blog.content,
+          'category': blog.category,
+          'image_url': blog.imageUrl ?? '',
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -135,19 +147,21 @@ class SheetsService {
         return {'success': false, 'error': 'No internet connection'};
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'update',
-        'type': 'blogs',
-        'admin': _adminEmail,
-        'id': blog.id,
-        'title': blog.title,
-        'content': blog.content,
-        'category': blog.category,
-        'image_url': blog.imageUrl,
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'update',
+          'type': 'blogs',
+          'admin': _adminEmail,
+          'id': blog.id,
+          'title': blog.title,
+          'content': blog.content,
+          'category': blog.category,
+          'image_url': blog.imageUrl,
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -169,15 +183,17 @@ class SheetsService {
         return {'success': false, 'error': 'No internet connection'};
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'delete',
-        'type': 'blogs',
-        'admin': _adminEmail,
-        'id': blogId,
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'delete',
+          'type': 'blogs',
+          'admin': _adminEmail,
+          'id': blogId,
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -205,18 +221,20 @@ class SheetsService {
         return {'success': false, 'error': 'No internet connection'};
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'create',
-        'type': 'courses',
-        'admin': _adminEmail,
-        'course_name': courseName,
-        'video_title': videoTitle,
-        'youtube_url': youtubeUrl,
-        'category': category,
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'create',
+          'type': 'courses',
+          'admin': _adminEmail,
+          'course_name': courseName,
+          'video_title': videoTitle,
+          'youtube_url': youtubeUrl,
+          'category': category,
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -256,10 +274,12 @@ class SheetsService {
       if (youtubeUrl != null) queryParams['youtube_url'] = youtubeUrl;
       if (category != null) queryParams['category'] = category;
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        sheetsApiBase,
+      ).replace(queryParameters: queryParams);
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -281,15 +301,17 @@ class SheetsService {
         return {'success': false, 'error': 'No internet connection'};
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'delete',
-        'type': 'courses',
-        'admin': _adminEmail,
-        'row': row.toString(),
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'delete',
+          'type': 'courses',
+          'admin': _adminEmail,
+          'row': row.toString(),
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data;
@@ -312,14 +334,16 @@ class SheetsService {
         return [];
       }
 
-      final uri = Uri.parse(SHEETS_API_BASE).replace(queryParameters: {
-        'operation': 'read',
-        'type': 'courses_raw',
-        'admin': _adminEmail,
-      });
+      final uri = Uri.parse(sheetsApiBase).replace(
+        queryParameters: {
+          'operation': 'read',
+          'type': 'courses_raw',
+          'admin': _adminEmail,
+        },
+      );
 
       final response = await http.get(uri);
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.cast<Map<String, dynamic>>();

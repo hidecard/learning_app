@@ -28,7 +28,7 @@ class CourseVideoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -62,7 +62,7 @@ class CourseVideoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3C4852).withOpacity(0.8),
+                          color: const Color(0xFF3C4852).withValues(alpha: 0.8),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -108,7 +108,7 @@ class CourseVideoCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             Row(
               children: [
                 Container(
@@ -117,7 +117,7 @@ class CourseVideoCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00C2FF).withOpacity(0.1),
+                    color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -131,22 +131,22 @@ class CourseVideoCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     'Row: $row',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                 ),
               ],
             ),
-            
+
             if (youtubeUrl.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
@@ -158,19 +158,12 @@ class CourseVideoCard extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.link,
-                      size: 16,
-                      color: Color(0xFF00C2FF),
-                    ),
+                    const Icon(Icons.link, size: 16, color: Color(0xFF00C2FF)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         youtubeUrl,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -201,12 +194,11 @@ class CourseVideoCard extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete Course Video'),
-        content: Text('Are you sure you want to delete "${courseData['video_title']}" from "${courseData['course_name']}"?'),
+        content: Text(
+          'Are you sure you want to delete "${courseData['video_title']}" from "${courseData['course_name']}"?',
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               Get.back();

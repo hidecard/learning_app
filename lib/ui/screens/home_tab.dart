@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
 import '../../data/models/blog_model.dart';
 import '../../data/models/course_model.dart';
-import '../../logic/controllers/auth_controller.dart';
-import 'blog_list.dart';
-import 'course_list.dart';
 import 'main_navigation.dart';
 
 class HomeTab extends StatefulWidget {
@@ -37,8 +33,8 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    _filteredCourses = widget.courses;
-    _filteredBlogs = widget.blogs;
+    _filteredCourses = List.of(widget.courses);
+    _filteredBlogs = List.of(widget.blogs);
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -49,9 +45,18 @@ class _HomeTabState extends State<HomeTab> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(HomeTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.blogs != widget.blogs ||
+        oldWidget.courses != widget.courses) {
+      _onSearchChanged();
+    }
+  }
+
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
-    
+
     setState(() {
       if (query.isEmpty) {
         _isSearching = false;
@@ -63,7 +68,7 @@ class _HomeTabState extends State<HomeTab> {
           final title = course.title?.toLowerCase() ?? '';
           return title.contains(query);
         }).toList();
-        
+
         _filteredBlogs = widget.blogs.where((blog) {
           final title = blog.title.toLowerCase();
           final content = blog.content.toLowerCase();
@@ -75,8 +80,6 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
-    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: CustomScrollView(
@@ -114,7 +117,7 @@ class _HomeTabState extends State<HomeTab> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             letterSpacing: 1,
                           ),
                         ),
@@ -123,7 +126,7 @@ class _HomeTabState extends State<HomeTab> {
                           'Continue your learning journey',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -176,10 +179,10 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -188,18 +191,18 @@ class _HomeTabState extends State<HomeTab> {
         decoration: InputDecoration(
           hintText: 'Search courses, blogs...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
                   icon: Icon(
                     Icons.clear,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                   onPressed: () {
                     _searchController.clear();
@@ -209,80 +212,16 @@ class _HomeTabState extends State<HomeTab> {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(14),
         ),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
     );
   }
 
-  Widget _buildCategoryGrid() {
-    final categories = [
-      {'icon': Icons.code, 'label': 'Programming', 'color': const Color(0xFF00C2FF)},
-      {'icon': Icons.design_services, 'label': 'Design', 'color': const Color(0xFF007BFF)},
-      {'icon': Icons.business, 'label': 'Business', 'color': const Color(0xFF1A4BCC)},
-      {'icon': Icons.language, 'label': 'Language', 'color': const Color(0xFF00C2FF)},
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.5,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) {
-        final category = categories[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: (category['color'] as Color).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  category['icon'] as IconData,
-                  color: category['color'] as Color,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                category['label'] as String,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF3C4852),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSectionHeader(String title, String action, VoidCallback onAction) {
+  Widget _buildSectionHeader(
+    String title,
+    String action,
+    VoidCallback onAction,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
@@ -339,11 +278,7 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.grey[300]!,
-            Colors.grey[100]!,
-            Colors.grey[300]!,
-          ],
+          colors: [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
           stops: [0.0, 0.5, 1.0],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
@@ -355,9 +290,9 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget _buildFeaturedCourses() {
     final coursesToShow = _isSearching ? _filteredCourses : widget.courses;
-    
+
     if (widget.isLoading) {
-      return Container(
+      return SizedBox(
         height: 240, // Increased height to accommodate top/bottom margins
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -371,7 +306,7 @@ class _HomeTabState extends State<HomeTab> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -402,16 +337,13 @@ class _HomeTabState extends State<HomeTab> {
         child: Center(
           child: Text(
             _isSearching ? 'No courses found' : 'No courses available',
-            style: const TextStyle(
-              color: Color(0xFF3C4852),
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Color(0xFF3C4852), fontSize: 14),
           ),
         ),
       );
     }
 
-    return Container(
+    return SizedBox(
       height: 240, // Increased height to accommodate top/bottom margins
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -428,7 +360,7 @@ class _HomeTabState extends State<HomeTab> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -471,9 +403,14 @@ class _HomeTabState extends State<HomeTab> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00C2FF).withOpacity(0.1),
+                            color: const Color(
+                              0xFF00C2FF,
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -499,42 +436,45 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget _buildLatestBlogs() {
     final blogsToShow = _isSearching ? _filteredBlogs : widget.blogs;
-    
+
     if (widget.isLoading) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 0),
         child: Column(
-          children: List.generate(2, (index) => Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _buildSkeletonLoader(height: 70, width: 70),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSkeletonLoader(height: 16, width: 250),
-                      const SizedBox(height: 16),
-                      _buildSkeletonLoader(height: 12, width: 180),
-                    ],
+          children: List.generate(
+            2,
+            (index) => Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
                   ),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                children: [
+                  _buildSkeletonLoader(height: 70, width: 70),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSkeletonLoader(height: 16, width: 250),
+                        const SizedBox(height: 16),
+                        _buildSkeletonLoader(height: 12, width: 180),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ),
         ),
       );
     }
@@ -545,10 +485,7 @@ class _HomeTabState extends State<HomeTab> {
         child: Center(
           child: Text(
             _isSearching ? 'No blogs found' : 'No blogs available',
-            style: const TextStyle(
-              color: Color(0xFF3C4852),
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Color(0xFF3C4852), fontSize: 14),
           ),
         ),
       );
@@ -568,7 +505,7 @@ class _HomeTabState extends State<HomeTab> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -599,7 +536,7 @@ class _HomeTabState extends State<HomeTab> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          blog.title ?? 'Untitled Blog',
+                          blog.title.isEmpty ? 'Untitled Blog' : blog.title,
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF3C4852),
@@ -612,9 +549,14 @@ class _HomeTabState extends State<HomeTab> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00C2FF).withOpacity(0.1),
+                                color: const Color(
+                                  0xFF00C2FF,
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -639,9 +581,12 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                             const SizedBox(width: 16),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(

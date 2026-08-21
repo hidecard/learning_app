@@ -66,7 +66,8 @@ class DefaultFirebaseOptions {
     projectId: 'messager-4abd8',
     databaseURL: 'https://messager-4abd8.firebaseio.com',
     storageBucket: 'messager-4abd8.appspot.com',
-    iosClientId: '650985879545-pj6lm1308m44ml5i5liri3n22tmln260.apps.googleusercontent.com',
+    iosClientId:
+        '650985879545-pj6lm1308m44ml5i5liri3n22tmln260.apps.googleusercontent.com',
     iosBundleId: 'com.example.learningApp',
   );
 
@@ -77,7 +78,8 @@ class DefaultFirebaseOptions {
     projectId: 'messager-4abd8',
     databaseURL: 'https://messager-4abd8.firebaseio.com',
     storageBucket: 'messager-4abd8.appspot.com',
-    iosClientId: '650985879545-pj6lm1308m44ml5i5liri3n22tmln260.apps.googleusercontent.com',
+    iosClientId:
+        '650985879545-pj6lm1308m44ml5i5liri3n22tmln260.apps.googleusercontent.com',
     iosBundleId: 'com.example.learningApp',
   );
 

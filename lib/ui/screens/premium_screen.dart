@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
 import '../../logic/controllers/premium_controller.dart';
 import '../../logic/controllers/auth_controller.dart';
 
@@ -51,7 +50,7 @@ class PremiumScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF00C2FF).withOpacity(0.3),
+                        color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -74,9 +73,9 @@ class PremiumScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Unlock all features',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 40),
                 Container(
@@ -86,7 +85,7 @@ class PremiumScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -103,10 +102,26 @@ class PremiumScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _buildBenefitItem(Icons.play_circle, 'Unlimited Videos', 'Access all premium courses'),
-                      _buildBenefitItem(Icons.download, 'Download Content', 'Offline viewing available'),
-                      _buildBenefitItem(Icons.hd, 'HD Quality', 'Watch in high definition'),
-                      _buildBenefitItem(Icons.support_agent, 'Priority Support', 'Get help faster'),
+                      _buildBenefitItem(
+                        Icons.play_circle,
+                        'Unlimited Videos',
+                        'Access all premium courses',
+                      ),
+                      _buildBenefitItem(
+                        Icons.download,
+                        'Download Content',
+                        'Offline viewing available',
+                      ),
+                      _buildBenefitItem(
+                        Icons.hd,
+                        'HD Quality',
+                        'Watch in high definition',
+                      ),
+                      _buildBenefitItem(
+                        Icons.support_agent,
+                        'Priority Support',
+                        'Get help faster',
+                      ),
                     ],
                   ),
                 ),
@@ -114,42 +129,14 @@ class PremiumScreen extends StatelessWidget {
                 if (authController.currentUser.value?.isPremium == true)
                   _buildActiveStatus()
                 else
-                  _buildActivationForm(premiumController, keyController, context),
+                  _buildActivationForm(
+                    premiumController,
+                    keyController,
+                    context,
+                  ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLiquidGlassCard({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: const Color(0xFF00C2FF).withOpacity(0.05),
-            blurRadius: 15,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: child,
         ),
       ),
     );
@@ -163,14 +150,10 @@ class PremiumScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withOpacity(0.1),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: const Color(0xFF00C2FF),
-            ),
+            child: Icon(icon, size: 20, color: const Color(0xFF00C2FF)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -190,7 +173,7 @@ class PremiumScreen extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: const Color(0xFF3C4852).withOpacity(0.7),
+                    color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -201,7 +184,11 @@ class PremiumScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActivationForm(PremiumController premiumController, TextEditingController keyController, BuildContext context) {
+  Widget _buildActivationForm(
+    PremiumController premiumController,
+    TextEditingController keyController,
+    BuildContext context,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -209,7 +196,7 @@ class PremiumScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -230,51 +217,68 @@ class PremiumScreen extends StatelessWidget {
             controller: keyController,
             decoration: InputDecoration(
               labelText: 'Activation Key',
-              labelStyle: TextStyle(color: const Color(0xFF00C2FF).withOpacity(0.7)),
-              prefixIcon: Icon(Icons.vpn_key, color: const Color(0xFF00C2FF).withOpacity(0.7)),
+              labelStyle: TextStyle(
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.7),
+              ),
+              prefixIcon: Icon(
+                Icons.vpn_key,
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.7),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Color(0xFF00C2FF)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF00C2FF), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF00C2FF),
+                  width: 2,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF00C2FF).withOpacity(0.5)),
+                borderSide: BorderSide(
+                  color: const Color(0xFF00C2FF).withValues(alpha: 0.5),
+                ),
               ),
             ),
             style: const TextStyle(color: Color(0xFF3C4852)),
           ),
           const SizedBox(height: 20),
-          Obx(() => premiumController.isRedeeming.value
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
-                  ),
-                )
-              : ElevatedButton(
-                  onPressed: () {
-                    if (keyController.text.isNotEmpty) {
-                      premiumController.redeemKey(keyController.text.trim());
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00C2FF),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          Obx(
+            () => premiumController.isRedeeming.value
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF00C2FF),
+                      ),
+                    ),
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      if (keyController.text.isNotEmpty) {
+                        premiumController.redeemKey(keyController.text.trim());
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00C2FF),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Activate Premium',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                  child: const Center(
-                    child: Text(
-                      'Activate Premium',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )),
+          ),
         ],
       ),
     );
@@ -288,7 +292,7 @@ class PremiumScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -299,7 +303,7 @@ class PremiumScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withOpacity(0.1),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -321,7 +325,7 @@ class PremiumScreen extends StatelessWidget {
           Text(
             'Enjoy all premium features',
             style: TextStyle(
-              color: const Color(0xFF3C4852).withOpacity(0.7),
+              color: const Color(0xFF3C4852).withValues(alpha: 0.7),
               fontSize: 14,
             ),
           ),

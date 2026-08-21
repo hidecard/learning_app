@@ -29,10 +29,18 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
   @override
   void initState() {
     super.initState();
-    _courseNameController = TextEditingController(text: widget.courseData?['course_name'] ?? '');
-    _videoTitleController = TextEditingController(text: widget.courseData?['video_title'] ?? '');
-    _youtubeUrlController = TextEditingController(text: widget.courseData?['youtube_url'] ?? '');
-    _categoryController = TextEditingController(text: widget.courseData?['category'] ?? '');
+    _courseNameController = TextEditingController(
+      text: widget.courseData?['course_name'] ?? '',
+    );
+    _videoTitleController = TextEditingController(
+      text: widget.courseData?['video_title'] ?? '',
+    );
+    _youtubeUrlController = TextEditingController(
+      text: widget.courseData?['youtube_url'] ?? '',
+    );
+    _categoryController = TextEditingController(
+      text: widget.courseData?['category'] ?? '',
+    );
   }
 
   @override
@@ -66,7 +74,9 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
       Get.back();
       Get.snackbar(
         'Success',
-        widget.courseData == null ? 'Course video created successfully' : 'Course video updated successfully',
+        widget.courseData == null
+            ? 'Course video created successfully'
+            : 'Course video updated successfully',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -84,7 +94,6 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -99,7 +108,9 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.courseData == null ? 'Add Course Video' : 'Edit Course Video',
+                widget.courseData == null
+                    ? 'Add Course Video'
+                    : 'Edit Course Video',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -107,7 +118,7 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -122,13 +133,18 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
-                        validator: (value) => ValidationHelper.validateRequired(value, 'course name'),
+                        validator: (value) => ValidationHelper.validateRequired(
+                          value,
+                          'course name',
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _videoTitleController,
                         decoration: InputDecoration(
@@ -139,13 +155,18 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
-                        validator: (value) => ValidationHelper.validateRequired(value, 'video title'),
+                        validator: (value) => ValidationHelper.validateRequired(
+                          value,
+                          'video title',
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _youtubeUrlController,
                         decoration: InputDecoration(
@@ -156,14 +177,17 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
-                          helperText: 'Supported formats: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID',
+                          helperText:
+                              'Supported formats: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID',
                         ),
                         validator: ValidationHelper.validateYouTubeUrl,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _categoryController,
                         decoration: InputDecoration(
@@ -174,18 +198,23 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
-                        validator: (value) => ValidationHelper.validateRequired(value, 'category'),
+                        validator: (value) => ValidationHelper.validateRequired(
+                          value,
+                          'category',
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               Row(
                 children: [
                   Expanded(
@@ -222,7 +251,9 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Text('Save'),

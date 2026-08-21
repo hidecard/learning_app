@@ -7,38 +7,29 @@ class VideoPlayerScreen extends StatefulWidget {
   final VideoInfo video;
   final String? courseTitle;
 
-  const VideoPlayerScreen({
-    super.key,
-    required this.video,
-    this.courseTitle,
-  });
+  const VideoPlayerScreen({super.key, required this.video, this.courseTitle});
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late YoutubePlayerController _controller;
-  bool _isPlayerReady = false;
+  YoutubePlayerController? _controller;
+  bool _hasReportedError = false;
 
   @override
   void initState() {
     super.initState();
-    
+
     final youtubeId = widget.video.youtubeId;
-    print('YouTube ID: $youtubeId');
-    print('YouTube URL: ${widget.video.youtubeUrl}');
-    print('Video title: ${widget.video.title}');
-    
     if (youtubeId == null || youtubeId.isEmpty) {
-      print('Error: Invalid YouTube ID');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.snackbar('Error', 'Invalid video URL');
         Navigator.pop(context);
       });
       return;
     }
-    
+
     _controller = YoutubePlayerController(
       initialVideoId: youtubeId,
       flags: const YoutubePlayerFlags(
@@ -52,49 +43,51 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _listener() {
-    if (_isPlayerReady && mounted && !_controller.value.isFullScreen) {
-      setState(() {});
+    final controller = _controller;
+    if (controller == null ||
+        !mounted ||
+        !controller.value.hasError ||
+        _hasReportedError) {
+      return;
     }
-    
-    // Check for player errors - PlayerState doesn't have an error state, so we'll check other conditions
-    if (_controller.value.hasError) {
-      print('YouTube player error occurred');
-      if (mounted) {
-        Get.snackbar('Error', 'Failed to load video. Please try again.');
-      }
-    }
-    
-    // Log player state for debugging
-    print('Player state: ${_controller.value.playerState}');
-    print('Has error: ${_controller.value.hasError}');
+    _hasReportedError = true;
+    Get.snackbar(
+      'Video unavailable',
+      'Failed to load this video. Please try again.',
+    );
   }
 
   @override
   void deactivate() {
-    _controller.pause();
+    _controller?.pause();
     super.deactivate();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Video unavailable')),
+        body: const Center(child: Text('This video link is not valid.')),
+      );
+    }
+
     return YoutubePlayerBuilder(
       player: YoutubePlayer(
-        controller: _controller,
+        controller: controller,
         showVideoProgressIndicator: true,
         progressIndicatorColor: const Color(0xFF00C2FF),
         progressColors: const ProgressBarColors(
           playedColor: Color(0xFF00C2FF),
           handleColor: Color(0xFF007BFF),
         ),
-        onReady: () {
-          _isPlayerReady = true;
-        },
         onEnded: (metadata) {
           _showVideoCompletedDialog();
         },
@@ -105,34 +98,41 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           builder: (context, constraints) {
             final isTablet = constraints.maxWidth > 600;
             final isDesktop = constraints.maxWidth > 1200;
-            
+
             return Column(
               children: [
                 // Custom App Bar with Glass Effect
                 Container(
-                  height: MediaQuery.of(context).padding.top + (isTablet ? 80 : 60),
+                  height:
+                      MediaQuery.of(context).padding.top + (isTablet ? 80 : 60),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.8),
+                        Colors.black.withValues(alpha: 0.8),
                         Colors.transparent,
                       ],
                     ),
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 24 : 16,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.white),
+                              icon: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                              ),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -156,7 +156,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   Text(
                                     widget.courseTitle!,
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
                                       fontSize: isTablet ? 14 : 12,
                                     ),
                                     maxLines: 1,
@@ -167,11 +169,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon: const Icon(Icons.share, color: Colors.white),
+                              icon: const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                              ),
                               onPressed: _shareVideo,
                             ),
                           ),
@@ -180,7 +185,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Video Player
                 Expanded(
                   flex: isDesktop ? 3 : 2,
@@ -191,15 +196,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         constraints: BoxConstraints(
                           maxWidth: isDesktop ? 1200 : double.infinity,
                         ),
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: player,
-                        ),
+                        child: AspectRatio(aspectRatio: 16 / 9, child: player),
                       ),
                     ),
                   ),
                 ),
-                
+
                 // Video Info Panel
                 Container(
                   decoration: BoxDecoration(
@@ -210,7 +212,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, -5),
                       ),
@@ -226,15 +228,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           height: 4,
                           margin: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
-                      
+
                       // Video Title and Category
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 32 : 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 32 : 20,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -249,10 +253,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             SizedBox(height: isTablet ? 12 : 8),
                             if (widget.video.category != null)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF00C2FF), Color(0xFF007BFF)],
+                                    colors: [
+                                      Color(0xFF00C2FF),
+                                      Color(0xFF007BFF),
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -268,12 +278,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           ],
                         ),
                       ),
-                      
+
                       SizedBox(height: isTablet ? 24 : 20),
-                      
+
                       // Action Buttons
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: isTablet ? 32 : 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 32 : 20,
+                        ),
                         child: Row(
                           children: [
                             Expanded(
@@ -305,7 +317,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           ],
                         ),
                       ),
-                      
+
                       SizedBox(height: isTablet ? 24 : 20),
                     ],
                   ),
@@ -329,25 +341,21 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
         child: Column(
           children: [
-            Icon(
-              icon, 
-              color: Colors.white, 
-              size: isTablet ? 24 : 20
-            ),
+            Icon(icon, color: Colors.white, size: isTablet ? 24 : 20),
             SizedBox(height: isTablet ? 8 : 4),
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: isTablet ? 14 : 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -395,7 +403,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Replay', style: TextStyle(color: Color(0xFF00C2FF))),
+            child: const Text(
+              'Replay',
+              style: TextStyle(color: Color(0xFF00C2FF)),
+            ),
           ),
           ElevatedButton(
             onPressed: () {

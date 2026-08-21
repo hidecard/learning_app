@@ -5,7 +5,7 @@ class UserModel {
   final bool isPremium;
   final String? activationKey;
 
-  UserModel({
+  const UserModel({
     required this.id,
     required this.email,
     required this.name,
@@ -14,12 +14,15 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final email = (json['email'] as String? ?? '').trim();
     return UserModel(
-      id: json['id'] ?? '',
-      email: json['email'] ?? '',
-      name: json['name'] ?? json['email']?.split('@')[0] ?? 'User',
-      isPremium: json['is_premium'] ?? false,
-      activationKey: json['activation_key'],
+      id: json['id'] as String? ?? '',
+      email: email,
+      name: (json['name'] as String?)?.trim().isNotEmpty == true
+          ? (json['name'] as String).trim()
+          : (email.isEmpty ? 'User' : email.split('@').first),
+      isPremium: json['is_premium'] as bool? ?? false,
+      activationKey: json['activation_key'] as String?,
     );
   }
 
@@ -28,7 +31,7 @@ class UserModel {
     'email': email,
     'name': name,
     'is_premium': isPremium,
-    'activation_key': activationKey,
+    if (activationKey != null) 'activation_key': activationKey,
   };
 
   UserModel copyWith({
@@ -37,13 +40,16 @@ class UserModel {
     String? name,
     bool? isPremium,
     String? activationKey,
+    bool clearActivationKey = false,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
       isPremium: isPremium ?? this.isPremium,
-      activationKey: activationKey ?? this.activationKey,
+      activationKey: clearActivationKey
+          ? null
+          : activationKey ?? this.activationKey,
     );
   }
 }

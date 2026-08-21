@@ -7,7 +7,6 @@ import '../../data/models/course_model.dart';
 import '../../logic/controllers/auth_controller.dart';
 import 'blog_list.dart';
 import 'course_list.dart';
-import 'dart:math';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +15,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<BlogModel> blogs = [];
   List<CourseModel> courses = [];
@@ -56,9 +56,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     setState(() {
       _isReloading = true;
     });
-    
+
     await _loadData();
-    
+
     setState(() {
       _isReloading = false;
     });
@@ -67,18 +67,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int? _calculateUserAge() {
     final user = Get.find<AuthController>().currentUser.value;
     if (user?.email == null) return null;
-    
+
     // Extract age from email or use default
     final email = user!.email;
     if (email.contains('ak1500@gmail.com')) {
       return 25; // Admin age
     } else if (email.contains('@')) {
       // Simple age calculation based on email domain
-      final domains = {'@gmail.com': 22, '@yahoo.com': 24, '@hotmail.com': 25, '@outlook.com': 23};
+      final domains = {
+        '@gmail.com': 22,
+        '@yahoo.com': 24,
+        '@hotmail.com': 25,
+        '@outlook.com': 23,
+      };
       final domain = email.split('@').last;
       return domains[domain] ?? 20;
     }
-    
+
     return 20; // Default age
   }
 
@@ -87,20 +92,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       isLoading = true;
       errorMessage = null;
     });
-    
+
     try {
       final fetchedBlogs = await SheetsService.fetchBlogs();
       final fetchedCourses = await SheetsService.fetchCourses();
-      
+
       // Update view counts and like counts for blogs from Firebase
       final blogsWithCounts = await Future.wait(
         fetchedBlogs.map((blog) async {
           final viewCount = await _blogService.getViewCount(blog.id);
           final likeCount = await _blogService.getLikeCount(blog.id);
           return blog.copyWith(viewCount: viewCount, likeCount: likeCount);
-        })
+        }),
       );
-      
+
       setState(() {
         blogs = blogsWithCounts;
         courses = fetchedCourses;
@@ -118,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
     final userAge = _calculateUserAge();
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -158,13 +163,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     if (userAge != null)
                       Container(
                         margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Age: ${userAge} years',
+                          'Age: $userAge years',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.white,
@@ -175,9 +183,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     if (_isReloading)
                       Container(
                         margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -188,7 +199,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               height: 12,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -225,13 +238,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 Container(
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00C2FF).withOpacity(0.1),
+                    color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
                     icon: Icon(
-                      authController.currentUser.value?.isPremium == true 
-                          ? Icons.verified 
+                      authController.currentUser.value?.isPremium == true
+                          ? Icons.verified
                           : Icons.key,
                       color: const Color(0xFF00C2FF),
                     ),
@@ -241,14 +254,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 Container(
                   margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00C2FF).withOpacity(0.1),
+                    color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: Icon(
-                      Icons.logout,
-                      color: const Color(0xFF00C2FF),
-                    ),
+                    icon: Icon(Icons.logout, color: const Color(0xFF00C2FF)),
                     onPressed: () => authController.signOut(),
                   ),
                 ),
@@ -262,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -275,7 +285,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                     labelColor: Colors.white,
-                    unselectedLabelColor: const Color(0xFF3C4852).withOpacity(0.6),
+                    unselectedLabelColor: const Color(
+                      0xFF3C4852,
+                    ).withValues(alpha: 0.6),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(4),
                     tabs: [
@@ -294,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
             SliverToBoxAdapter(
               child: isLoading
-                  ? Container(
+                  ? SizedBox(
                       height: 300,
                       child: Center(
                         child: Column(
@@ -308,56 +320,63 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             const SizedBox(height: 16),
                             Text(
                               'Loading content...',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7),
+                                  ),
                             ),
                           ],
                         ),
                       ),
                     )
                   : errorMessage != null
-                      ? Container(
-                          height: 300,
-                          padding: const EdgeInsets.all(24),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Icon(
-                                    Icons.error_outline,
-                                    size: 48,
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  errorMessage!,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: _loadData,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF00C2FF),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
+                  ? Container(
+                      height: 300,
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.error.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
                             ),
-                          ),
-                        )
-                      : Container(),
+                            const SizedBox(height: 16),
+                            Text(
+                              errorMessage!,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: _loadData,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF00C2FF),
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(),
             ),
             if (!isLoading && errorMessage == null)
               SliverFillRemaining(
@@ -386,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00C2FF).withOpacity(0.3),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -396,10 +415,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           onPressed: _loadData,
           backgroundColor: Colors.transparent,
           elevation: 0,
-          child: const Icon(
-            Icons.refresh,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.refresh, color: Colors.white),
         ),
       ),
     );

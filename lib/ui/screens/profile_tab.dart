@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../data/models/user_model.dart';
 import '../../logic/controllers/auth_controller.dart';
 import 'edit_profile_screen.dart';
 import 'about_screen.dart';
@@ -11,7 +12,7 @@ class ProfileTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: Obx(() {
@@ -23,7 +24,7 @@ class ProfileTab extends StatelessWidget {
             ),
           );
         }
-        
+
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -38,7 +39,7 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(currentUser) {
+  Widget _buildProfileHeader(UserModel currentUser) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -62,18 +63,14 @@ class ProfileTab extends StatelessWidget {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(50),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 3,
                   ),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  size: 50,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.person, size: 50, color: Colors.white),
               ),
               const SizedBox(height: 15),
               // User Name with better typography
@@ -89,16 +86,19 @@ class ProfileTab extends StatelessWidget {
               const SizedBox(height: 6),
               // Email with subtle styling
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
                   currentUser.email,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -106,19 +106,24 @@ class ProfileTab extends StatelessWidget {
               const SizedBox(height: 12),
               // Premium Status with enhanced styling
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: currentUser.isPremium 
-                      ? Colors.white 
-                      : Colors.white.withOpacity(0.2),
+                  color: currentUser.isPremium
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: currentUser.isPremium ? [
-                    BoxShadow(
-                      color: Colors.white.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ] : null,
+                  boxShadow: currentUser.isPremium
+                      ? [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -126,8 +131,8 @@ class ProfileTab extends StatelessWidget {
                     Icon(
                       currentUser.isPremium ? Icons.verified : Icons.lock,
                       size: 18,
-                      color: currentUser.isPremium 
-                          ? const Color(0xFF00C2FF) 
+                      color: currentUser.isPremium
+                          ? const Color(0xFF00C2FF)
                           : Colors.white,
                     ),
                     const SizedBox(width: 6),
@@ -136,8 +141,8 @@ class ProfileTab extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: currentUser.isPremium 
-                            ? const Color(0xFF00C2FF) 
+                        color: currentUser.isPremium
+                            ? const Color(0xFF00C2FF)
                             : Colors.white,
                       ),
                     ),
@@ -152,100 +157,25 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsCards() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatCard(
-              'Courses',
-              '12',
-              Icons.school,
-              const Color(0xFF00C2FF),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              'Completed',
-              '8',
-              Icons.check_circle,
-              const Color(0xFF007BFF),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              'Certificates',
-              '5',
-              Icons.card_membership,
-              const Color(0xFF1A4BCC),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF3C4852),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF3C4852).withOpacity(0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuItems(BuildContext context, currentUser) {
-    final authController = Get.find<AuthController>();
+  Widget _buildMenuItems(BuildContext context, UserModel currentUser) {
     final isAdmin = currentUser.email == 'ak1500@gmail.com';
     final menuItems = [
-      {'icon': Icons.person, 'title': 'Edit Profile', 'color': const Color(0xFF00C2FF)},
-      {'icon': Icons.vpn_key, 'title': 'Activation Key', 'color': const Color(0xFF007BFF)},
-      if (isAdmin) {'icon': Icons.admin_panel_settings, 'title': 'Admin Panel', 'color': const Color(0xFF00C2FF)},
+      {
+        'icon': Icons.person,
+        'title': 'Edit Profile',
+        'color': const Color(0xFF00C2FF),
+      },
+      {
+        'icon': Icons.vpn_key,
+        'title': 'Activation Key',
+        'color': const Color(0xFF007BFF),
+      },
+      if (isAdmin)
+        {
+          'icon': Icons.admin_panel_settings,
+          'title': 'Admin Panel',
+          'color': const Color(0xFF00C2FF),
+        },
       {'icon': Icons.info, 'title': 'About', 'color': const Color(0xFF007BFF)},
       {'icon': Icons.logout, 'title': 'Logout', 'color': Colors.red},
     ];
@@ -258,7 +188,7 @@ class ProfileTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -281,9 +211,16 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title, Color color, bool isLast, currentUser) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    Color color,
+    bool isLast,
+    UserModel currentUser,
+  ) {
     final authController = Get.find<AuthController>();
-    
+
     return InkWell(
       onTap: () {
         switch (title) {
@@ -304,7 +241,9 @@ class ProfileTab extends StatelessWidget {
             break;
         }
       },
-      borderRadius: isLast ? const BorderRadius.vertical(bottom: Radius.circular(20)) : null,
+      borderRadius: isLast
+          ? const BorderRadius.vertical(bottom: Radius.circular(20))
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -312,14 +251,10 @@ class ProfileTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 20,
-              ),
+              child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -333,11 +268,13 @@ class ProfileTab extends StatelessWidget {
               ),
             ),
             // Show activation key status if user has one
-            if (title == 'Activation Key' && currentUser.activationKey != null && currentUser.activationKey!.isNotEmpty)
+            if (title == 'Activation Key' &&
+                currentUser.activationKey != null &&
+                currentUser.activationKey!.isNotEmpty)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -349,7 +286,7 @@ class ProfileTab extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: const Color(0xFF3C4852).withOpacity(0.6),
+              color: const Color(0xFF3C4852).withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -363,18 +300,13 @@ class ProfileTab extends StatelessWidget {
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               Get.back();
               authController.signOut();
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Logout'),
           ),
         ],

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../logic/controllers/auth_controller.dart';
 import '../../data/models/course_model.dart';
-import '../../logic/controllers/premium_controller.dart';
 import 'premium_screen.dart';
 import 'video_player_screen.dart';
 
@@ -16,7 +14,6 @@ class CourseDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<VideoInfo> videos = course.videos ?? [];
     final authController = Get.find<AuthController>();
-    final premiumController = Get.find<PremiumController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -70,15 +67,40 @@ class CourseDetail extends StatelessWidget {
                         if (isTablet)
                           Row(
                             children: [
-                              Expanded(child: _buildStatCard(icon: Icons.video_library, label: '${videos.length} Videos')),
+                              Expanded(
+                                child: _buildStatCard(
+                                  icon: Icons.video_library,
+                                  label: '${videos.length} Videos',
+                                ),
+                              ),
                               const SizedBox(width: 12),
-                              Expanded(child: _buildStatCard(icon: Icons.lock_open, label: '${videos.where((v) => videos.indexOf(v) < 10).length} Free')),
+                              Expanded(
+                                child: _buildStatCard(
+                                  icon: Icons.lock_open,
+                                  label:
+                                      '${videos.where((v) => videos.indexOf(v) < 10).length} Free',
+                                ),
+                              ),
                               const SizedBox(width: 12),
-                              Expanded(child: _buildStatCard(
-                                icon: Icons.star,
-                                label: authController.currentUser.value?.isPremium == true ? 'Premium' : 'Free',
-                                isHighlighted: authController.currentUser.value?.isPremium == true,
-                              )),
+                              Expanded(
+                                child: _buildStatCard(
+                                  icon: Icons.star,
+                                  label:
+                                      authController
+                                              .currentUser
+                                              .value
+                                              ?.isPremium ==
+                                          true
+                                      ? 'Premium'
+                                      : 'Free',
+                                  isHighlighted:
+                                      authController
+                                          .currentUser
+                                          .value
+                                          ?.isPremium ==
+                                      true,
+                                ),
+                              ),
                             ],
                           )
                         else
@@ -86,12 +108,31 @@ class CourseDetail extends StatelessWidget {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              _buildStatCard(icon: Icons.video_library, label: '${videos.length} Videos'),
-                              _buildStatCard(icon: Icons.lock_open, label: '${videos.where((v) => videos.indexOf(v) < 10).length} Free'),
+                              _buildStatCard(
+                                icon: Icons.video_library,
+                                label: '${videos.length} Videos',
+                              ),
+                              _buildStatCard(
+                                icon: Icons.lock_open,
+                                label:
+                                    '${videos.where((v) => videos.indexOf(v) < 10).length} Free',
+                              ),
                               _buildStatCard(
                                 icon: Icons.star,
-                                label: authController.currentUser.value?.isPremium == true ? 'Premium' : 'Free',
-                                isHighlighted: authController.currentUser.value?.isPremium == true,
+                                label:
+                                    authController
+                                            .currentUser
+                                            .value
+                                            ?.isPremium ==
+                                        true
+                                    ? 'Premium'
+                                    : 'Free',
+                                isHighlighted:
+                                    authController
+                                        .currentUser
+                                        .value
+                                        ?.isPremium ==
+                                    true,
                               ),
                             ],
                           ),
@@ -102,27 +143,25 @@ class CourseDetail extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Video List
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isTablet = constraints.maxWidth > 600;
-                
+
                 return ListView.builder(
                   padding: EdgeInsets.all(isTablet ? 20 : 16),
                   itemCount: videos.length,
                   itemBuilder: (context, index) {
                     final video = videos[index];
-                    final isLocked = index >= 10 && !(authController.currentUser.value?.isPremium ?? false);
+                    final isLocked =
+                        index >= 10 &&
+                        !(authController.currentUser.value?.isPremium ?? false);
                     final videoNumber = index + 1;
 
                     return GestureDetector(
                       onTap: () {
-                        print('Video tapped: ${video.title}');
-                        print('YouTube ID: ${video.youtubeId}');
-                        print('Is locked: $isLocked');
-                        
                         if (isLocked) {
                           _showPremiumDialog(context);
                         } else {
@@ -136,7 +175,7 @@ class CourseDetail extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -157,7 +196,8 @@ class CourseDetail extends StatelessWidget {
                                 fit: StackFit.expand,
                                 children: [
                                   // Thumbnail Image
-                                  if (video.displayThumbnailUrl != null && !isLocked)
+                                  if (video.displayThumbnailUrl != null &&
+                                      !isLocked)
                                     ClipRRect(
                                       borderRadius: const BorderRadius.only(
                                         topLeft: Radius.circular(20),
@@ -166,35 +206,51 @@ class CourseDetail extends StatelessWidget {
                                       child: Image.network(
                                         video.displayThumbnailUrl!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [
-                                                  const Color(0xFF00C2FF).withOpacity(0.8),
-                                                  const Color(0xFF007BFF).withOpacity(0.8),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      const Color(
+                                                        0xFF00C2FF,
+                                                      ).withValues(alpha: 0.8),
+                                                      const Color(
+                                                        0xFF007BFF,
+                                                      ).withValues(alpha: 0.8),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                         loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
                                           return Container(
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                 colors: [
-                                                  const Color(0xFF00C2FF).withOpacity(0.8),
-                                                  const Color(0xFF007BFF).withOpacity(0.8),
+                                                  const Color(
+                                                    0xFF00C2FF,
+                                                  ).withValues(alpha: 0.8),
+                                                  const Color(
+                                                    0xFF007BFF,
+                                                  ).withValues(alpha: 0.8),
                                                 ],
                                               ),
                                             ),
                                             child: Center(
                                               child: CircularProgressIndicator(
                                                 color: Colors.white,
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded! /
-                                                        loadingProgress.expectedTotalBytes!
+                                                value:
+                                                    loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          loadingProgress
+                                                              .expectedTotalBytes!
                                                     : null,
                                               ),
                                             ),
@@ -207,13 +263,17 @@ class CourseDetail extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            const Color(0xFF00C2FF).withOpacity(0.8),
-                                            const Color(0xFF007BFF).withOpacity(0.8),
+                                            const Color(
+                                              0xFF00C2FF,
+                                            ).withValues(alpha: 0.8),
+                                            const Color(
+                                              0xFF007BFF,
+                                            ).withValues(alpha: 0.8),
                                           ],
                                         ),
                                       ),
                                     ),
-                                  
+
                                   // Video Number
                                   Positioned(
                                     left: 16,
@@ -226,7 +286,9 @@ class CourseDetail extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.2),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -244,43 +306,59 @@ class CourseDetail extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Lock Icon or Play Icon
                                   Center(
                                     child: Container(
                                       width: isTablet ? 70 : 60,
                                       height: isTablet ? 70 : 60,
                                       decoration: BoxDecoration(
-                                        color: isLocked 
-                                            ? Colors.white.withOpacity(0.3)
+                                        color: isLocked
+                                            ? Colors.white.withValues(
+                                                alpha: 0.3,
+                                              )
                                             : Colors.white,
                                         shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.3),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.3,
+                                            ),
                                             blurRadius: 15,
                                             offset: const Offset(0, 5),
                                           ),
                                         ],
                                       ),
                                       child: Icon(
-                                        isLocked ? Icons.lock : Icons.play_arrow,
+                                        isLocked
+                                            ? Icons.lock
+                                            : Icons.play_arrow,
                                         size: isTablet ? 36 : 32,
-                                        color: isLocked ? Colors.white : const Color(0xFF007BFF),
+                                        color: isLocked
+                                            ? Colors.white
+                                            : const Color(0xFF007BFF),
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Duration Badge
-                                  if (!isLocked && video.durationFormatted != null)
+                                  if (!isLocked &&
+                                      video.durationFormatted != null)
                                     Positioned(
                                       right: 16,
                                       bottom: 16,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.7),
-                                          borderRadius: BorderRadius.circular(6),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
                                         child: Text(
                                           video.durationFormatted!,
@@ -295,7 +373,7 @@ class CourseDetail extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            
+
                             // Video Info
                             Padding(
                               padding: EdgeInsets.all(isTablet ? 20 : 16),
@@ -312,18 +390,25 @@ class CourseDetail extends StatelessWidget {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  
+
                                   SizedBox(height: isTablet ? 12 : 8),
-                                  
+
                                   // Category and Lock Status
                                   Row(
                                     children: [
                                       if (video.category != null)
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF00C2FF).withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: const Color(
+                                              0xFF00C2FF,
+                                            ).withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Text(
                                             video.category!,
@@ -334,19 +419,30 @@ class CourseDetail extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                      
+
                                       if (isLocked) ...[
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: Colors.orange.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: Colors.orange.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: const [
-                                              Icon(Icons.lock, size: 12, color: Colors.orange),
+                                              Icon(
+                                                Icons.lock,
+                                                size: 12,
+                                                color: Colors.orange,
+                                              ),
                                               SizedBox(width: 4),
                                               Text(
                                                 'Premium',
@@ -360,13 +456,17 @@ class CourseDetail extends StatelessWidget {
                                           ),
                                         ),
                                       ],
-                                      
+
                                       const Spacer(),
-                                      
+
                                       Icon(
-                                        isLocked ? Icons.lock_outline : Icons.play_circle_outline,
+                                        isLocked
+                                            ? Icons.lock_outline
+                                            : Icons.play_circle_outline,
                                         size: isTablet ? 22 : 20,
-                                        color: isLocked ? Colors.orange : const Color(0xFF00C2FF),
+                                        color: isLocked
+                                            ? Colors.orange
+                                            : const Color(0xFF00C2FF),
                                       ),
                                     ],
                                   ),
@@ -393,27 +493,16 @@ class CourseDetail extends StatelessWidget {
       return;
     }
 
-    print('Playing video: $title');
-    print('YouTube ID: $youtubeId');
-    print('Course object: $course');
-    print('Course title: ${course?.title}');
-
     // Create VideoInfo with proper YouTube URL and null safety
     final video = VideoInfo(
       title: title ?? 'Video',
       youtubeUrl: 'https://www.youtube.com/watch?v=$youtubeId',
     );
 
-    print('Created video object with title: ${video.title}');
-
     // Safely get course title
     final courseTitle = course?.title?.toString() ?? 'Course';
-    print('Final course title: $courseTitle');
 
-    Get.to(() => VideoPlayerScreen(
-      video: video,
-      courseTitle: courseTitle,
-    ));
+    Get.to(() => VideoPlayerScreen(video: video, courseTitle: courseTitle));
   }
 
   Widget _buildStatCard({
@@ -424,23 +513,19 @@ class CourseDetail extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isHighlighted 
-            ? Colors.white.withOpacity(0.3)
-            : Colors.white.withOpacity(0.2),
+        color: isHighlighted
+            ? Colors.white.withValues(alpha: 0.3)
+            : Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 16,
-          ),
+          Icon(icon, color: Colors.white, size: 16),
           const SizedBox(width: 6),
           Text(
             label,
@@ -459,9 +544,7 @@ class CourseDetail extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: const [
             Icon(Icons.lock, color: Colors.orange),
@@ -522,10 +605,7 @@ class CourseDetail extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.green),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(text, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }

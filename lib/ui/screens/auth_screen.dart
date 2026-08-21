@@ -25,13 +25,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
   }
 
@@ -53,8 +49,8 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             end: Alignment.bottomCenter,
             colors: [
               const Color(0xFF00C2FF),
-              const Color(0xFF00C2FF).withOpacity(0.8),
-              const Color(0xFF00C2FF).withOpacity(0.6),
+              const Color(0xFF00C2FF).withValues(alpha: 0.8),
+              const Color(0xFF00C2FF).withValues(alpha: 0.6),
               Colors.white,
             ],
           ),
@@ -73,14 +69,16 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
-                    Obx(() => Lottie.asset(
-                      isLogin.value 
-                        ? 'assets/animation/login.json'
-                        : 'assets/animation/register.json',
-                      width: 250,
-                      height: 200,
-                      fit: BoxFit.contain,
-                    )),
+                    Obx(
+                      () => Lottie.asset(
+                        isLogin.value
+                            ? 'assets/animation/login.json'
+                            : 'assets/animation/register.json',
+                        width: 250,
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                     const SizedBox(height: 32),
                     Text(
                       'Welcome Back!',
@@ -92,7 +90,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      isLogin.value ? 'Sign in to continue learning' : 'Create your account to start learning',
+                      isLogin.value
+                          ? 'Sign in to continue learning'
+                          : 'Create your account to start learning',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -108,7 +108,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -121,7 +121,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                             decoration: InputDecoration(
                               labelText: 'Email Address',
                               labelStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                               prefixIcon: Icon(
                                 Icons.email_outlined,
@@ -130,7 +132,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outline.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -151,7 +155,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                             decoration: InputDecoration(
                               labelText: 'Password',
                               labelStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                               prefixIcon: Icon(
                                 Icons.lock_outline,
@@ -160,7 +166,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outline.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -175,79 +183,101 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                             ),
                           ),
                           const SizedBox(height: 32),
-                          Obx(() => authController.isLoading.value
-                            ? SizedBox(
-                                height: 50,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).colorScheme.primary,
+                          Obx(
+                            () => authController.isLoading.value
+                                ? SizedBox(
+                                    height: 50,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (emailController.text.isNotEmpty &&
+                                            passwordController
+                                                .text
+                                                .isNotEmpty) {
+                                          if (isLogin.value) {
+                                            await authController.signIn(
+                                              emailController.text,
+                                              passwordController.text,
+                                            );
+                                          } else {
+                                            await authController.signUp(
+                                              emailController.text,
+                                              passwordController.text,
+                                            );
+                                          }
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFF00C2FF,
+                                        ),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        isLogin.value
+                                            ? 'Sign In'
+                                            : 'Create Account',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                            : SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    if (emailController.text.isNotEmpty && 
-                                        passwordController.text.isNotEmpty) {
-                                      if (isLogin.value) {
-                                        await authController.signIn(
-                                          emailController.text, 
-                                          passwordController.text
-                                        );
-                                      } else {
-                                        await authController.signUp(
-                                          emailController.text, 
-                                          passwordController.text
-                                        );
-                                      }
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF00C2FF),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    isLogin.value ? 'Sign In' : 'Create Account',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              )),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Obx(() => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isLogin.value ? 'Don\'t have an account? ' : 'Already have an account? ',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    Obx(
+                      () => Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            isLogin.value
+                                ? 'Don\'t have an account? '
+                                : 'Already have an account? ',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () => isLogin.value = !isLogin.value,
-                          child: Text(
-                            isLogin.value ? 'Sign Up' : 'Sign In',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
+                          GestureDetector(
+                            onTap: () => isLogin.value = !isLogin.value,
+                            child: Text(
+                              isLogin.value ? 'Sign Up' : 'Sign In',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
-                        ),
-                      ],
-                    )),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),

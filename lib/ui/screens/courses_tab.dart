@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
 import '../../data/models/course_model.dart';
-import 'course_detail.dart';
 
 class CoursesTab extends StatefulWidget {
   final List<CourseModel> courses;
@@ -46,7 +44,7 @@ class _CoursesTabState extends State<CoursesTab> {
 
   void _extractCategoriesFromAPI() {
     final Set<String> categorySet = {'All'};
-    
+
     for (final course in widget.courses) {
       if (course.videos != null) {
         for (final video in course.videos!) {
@@ -56,7 +54,7 @@ class _CoursesTabState extends State<CoursesTab> {
         }
       }
     }
-    
+
     setState(() {
       _categories = categorySet.toList();
       _categories.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
@@ -65,7 +63,7 @@ class _CoursesTabState extends State<CoursesTab> {
 
   void _onSearchChanged() {
     final query = _searchController.text.toLowerCase();
-    
+
     setState(() {
       if (query.isEmpty) {
         _isSearching = false;
@@ -82,7 +80,7 @@ class _CoursesTabState extends State<CoursesTab> {
 
   void _applyCategoryFilter() {
     if (_selectedCategory == 'All') {
-      _filteredCourses = _isSearching 
+      _filteredCourses = _isSearching
           ? widget.courses.where((course) {
               final title = course.title?.toLowerCase() ?? '';
               return title.contains(_searchController.text.toLowerCase());
@@ -91,14 +89,20 @@ class _CoursesTabState extends State<CoursesTab> {
     } else {
       _filteredCourses = widget.courses.where((course) {
         final title = course.title?.toLowerCase() ?? '';
-        final matchesSearch = _isSearching 
+        final matchesSearch = _isSearching
             ? title.contains(_searchController.text.toLowerCase())
             : true;
-        
+
         // Check if course has videos with the selected category
-        final hasCategory = course.videos?.any((video) => 
-            video.category != null && video.category!.toLowerCase() == _selectedCategory.toLowerCase()) ?? false;
-        
+        final hasCategory =
+            course.videos?.any(
+              (video) =>
+                  video.category != null &&
+                  video.category!.toLowerCase() ==
+                      _selectedCategory.toLowerCase(),
+            ) ??
+            false;
+
         return matchesSearch && hasCategory;
       }).toList();
     }
@@ -128,21 +132,25 @@ class _CoursesTabState extends State<CoursesTab> {
               ),
             ),
             const Divider(),
-            Container(
+            SizedBox(
               height: 200,
               child: ListView.builder(
                 itemCount: _categories.length,
                 itemBuilder: (context, index) {
                   final category = _categories[index];
                   final isSelected = category == _selectedCategory;
-                  
+
                   return ListTile(
                     title: Text(
                       category,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: isSelected ? const Color(0xFF00C2FF) : const Color(0xFF3C4852),
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isSelected
+                            ? const Color(0xFF00C2FF)
+                            : const Color(0xFF3C4852),
                       ),
                     ),
                     trailing: isSelected
@@ -189,14 +197,11 @@ class _CoursesTabState extends State<CoursesTab> {
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withOpacity(0.1),
+              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(
-                Icons.filter_list,
-                color: Color(0xFF00C2FF),
-              ),
+              icon: const Icon(Icons.filter_list, color: Color(0xFF00C2FF)),
               onPressed: () {
                 _showCategoryFilter(context);
               },
@@ -214,7 +219,7 @@ class _CoursesTabState extends State<CoursesTab> {
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -228,16 +233,10 @@ class _CoursesTabState extends State<CoursesTab> {
                   color: Color(0xFF3C4852),
                   fontSize: 16,
                 ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: Color(0xFF00C2FF),
-                ),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF00C2FF)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: Color(0xFF00C2FF),
-                        ),
+                        icon: const Icon(Icons.clear, color: Color(0xFF00C2FF)),
                         onPressed: () {
                           _searchController.clear();
                         },
@@ -246,13 +245,10 @@ class _CoursesTabState extends State<CoursesTab> {
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(16),
               ),
-              style: const TextStyle(
-                color: Color(0xFF3C4852),
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Color(0xFF3C4852), fontSize: 16),
             ),
           ),
-          
+
           // Category Filter
           Container(
             height: 50,
@@ -263,29 +259,33 @@ class _CoursesTabState extends State<CoursesTab> {
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 final isSelected = category == _selectedCategory;
-                
+
                 return GestureDetector(
                   onTap: () => _onCategoryChanged(category),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       gradient: isSelected
                           ? LinearGradient(
-                              colors: [const Color(0xFF00C2FF), const Color(0xFF007BFF)],
+                              colors: [
+                                const Color(0xFF00C2FF),
+                                const Color(0xFF007BFF),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             )
                           : null,
-                      color: isSelected 
-                          ? null 
-                          : const Color(0xFFF5F7FA),
+                      color: isSelected ? null : const Color(0xFFF5F7FA),
                       borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: isSelected 
-                            ? Colors.transparent 
+                        color: isSelected
+                            ? Colors.transparent
                             : const Color(0xFFE0E0E0),
                         width: 1,
                       ),
@@ -298,7 +298,9 @@ class _CoursesTabState extends State<CoursesTab> {
                           height: 8,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isSelected ? Colors.white : const Color(0xFF00C2FF),
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF00C2FF),
                           ),
                         ),
                         if (isSelected) ...[
@@ -318,8 +320,12 @@ class _CoursesTabState extends State<CoursesTab> {
                             category,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected ? Colors.white : const Color(0xFF3C4852),
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? Colors.white
+                                  : const Color(0xFF3C4852),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -331,97 +337,103 @@ class _CoursesTabState extends State<CoursesTab> {
               },
             ),
           ),
-          
+
           // Course List
           Expanded(
             child: widget.isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF00C2FF),
+                      ),
                     ),
                   )
                 : widget.errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              widget.errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: widget.onRefresh,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00C2FF),
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      )
-                    : _filteredCourses.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00C2FF).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Icon(
-                                    Icons.school_outlined,
-                                    size: 64,
-                                    color: Color(0xFF00C2FF),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  _isSearching ? 'No courses found' : 'No courses available',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF3C4852),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Try adjusting your search or filters',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF3C4852).withOpacity(0.7),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () async {
-                              widget.onRefresh();
-                            },
-                            color: const Color(0xFF00C2FF),
-                            child: _buildCoursesList(),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
                           ),
+                          child: const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.red,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: widget.onRefresh,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00C2FF),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _filteredCourses.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFF00C2FF,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.school_outlined,
+                            size: 64,
+                            color: Color(0xFF00C2FF),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          _isSearching
+                              ? 'No courses found'
+                              : 'No courses available',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF3C4852),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Try adjusting your search or filters',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF3C4852).withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      widget.onRefresh();
+                    },
+                    color: const Color(0xFF00C2FF),
+                    child: _buildCoursesList(),
+                  ),
           ),
         ],
       ),
@@ -437,7 +449,7 @@ class _CoursesTabState extends State<CoursesTab> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withOpacity(0.1),
+                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
@@ -460,7 +472,7 @@ class _CoursesTabState extends State<CoursesTab> {
               'Pull down to refresh',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF3C4852).withOpacity(0.7),
+                color: Color(0xFF3C4852).withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -486,7 +498,7 @@ class _CoursesTabState extends State<CoursesTab> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -519,11 +531,7 @@ class _CoursesTabState extends State<CoursesTab> {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.school,
-              color: Colors.white,
-              size: 50,
-            ),
+            child: const Icon(Icons.school, color: Colors.white, size: 50),
           ),
           const SizedBox(height: 16),
           Text(
@@ -539,11 +547,7 @@ class _CoursesTabState extends State<CoursesTab> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(
-                Icons.play_circle,
-                color: Color(0xFF00C2FF),
-                size: 16,
-              ),
+              const Icon(Icons.play_circle, color: Color(0xFF00C2FF), size: 16),
               const SizedBox(width: 4),
               Text(
                 '${course.videos?.length ?? 0} videos',
@@ -557,7 +561,7 @@ class _CoursesTabState extends State<CoursesTab> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C2FF).withOpacity(0.1),
+                  color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -583,38 +587,6 @@ class _CoursesTabState extends State<CoursesTab> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLiquidGlassCard({required Widget child, double padding = 16.0}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-          BoxShadow(
-            color: const Color(0xFF00C2FF).withOpacity(0.05),
-            blurRadius: 15,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: Padding(
-          padding: EdgeInsets.all(padding),
-          child: child,
-        ),
       ),
     );
   }

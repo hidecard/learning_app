@@ -2,10 +2,7 @@ class KeyModel {
   final String keyCode;
   final bool isUsed;
 
-  KeyModel({
-    required this.keyCode,
-    required this.isUsed,
-  });
+  KeyModel({required this.keyCode, required this.isUsed});
 
   factory KeyModel.fromJson(Map<String, dynamic> json) {
     return KeyModel(

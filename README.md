@@ -1,99 +1,62 @@
-# Learning App
+# Nexus Tech Learning App
 
-A comprehensive Flutter learning application with video courses, blogs, and premium features.
+A polished cross-platform Flutter learning application for video courses, technical articles, and premium learning content. The app combines a Material 3 interface with Firebase authentication and Firestore-backed user and engagement data, while Google Sheets provides a lightweight content-management workflow.
 
-## Features
+## Highlights
 
-### Core Learning Features
-- Video course library with YouTube integration
-- Blog articles and tutorials
-- Premium content with activation keys
-- User authentication and profiles
-- Course progress tracking
-- Video player with custom controls
+- Browse searchable video courses and learning articles.
+- Watch YouTube lessons with responsive controls and premium content gating.
+- Track blog views and likes with transactional Firestore updates.
+- Sign up, sign in, edit a profile, and redeem premium activation keys.
+- Use the app across Android, iOS, Web, macOS, Windows, and Linux.
+- Switch between light and dark themes with an accessible Material 3 navigation experience.
+- Continue seeing cached course and article data during short-lived network interruptions.
+- Receive a clear offline recovery screen instead of a nested or broken application shell.
+- Use the admin panel for course, blog, and activation-key management.
 
-### User Experience
-- Modern Material Design 3 UI
-- Full accessibility support (screen readers, high contrast, large text)
-- Smooth animations and transitions
-- Responsive design for mobile, tablet, and desktop
-- Dark/light theme support
-- Offline connectivity handling
+## Technology
 
-### Technical Features
-- Cross-platform (iOS, Android, Web)
-- Firebase backend integration
-- Google Sheets API for content management
-- Premium subscription system
-- Admin panel for content management
-- Real-time data synchronization
+| Area | Technology |
+| --- | --- |
+| UI | Flutter, Dart, Material 3 |
+| State and navigation | GetX |
+| Authentication | Firebase Auth |
+| Database and engagement | Cloud Firestore |
+| Content source | Google Apps Script / Google Sheets |
+| Video playback | youtube_player_flutter |
+| Deployment | Vercel or Firebase Hosting |
 
-## Tech Stack
+## Local development
 
-### Frontend Framework
-- **Flutter** - Cross-platform UI framework
-- **Dart** - Programming language
+Install the [Flutter SDK](https://docs.flutter.dev/get-started/install), then run:
 
-### State Management
-- **GetX** - State management and navigation
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter build web --release
+```
 
-### Backend & Database
-- **Firebase Auth** - User authentication
-- **Firebase Firestore** - Real-time database
-- **Google Sheets API** - Content management system
+To run the application locally:
 
-### UI/UX Libraries
-- **YouTube Player Flutter** - Video playback
-- **Material 3** - Design system
-- **Custom animations** - Fade, slide, scale transitions
+```bash
+flutter run
+# or for web
+flutter run -d chrome
+```
 
-### Deployment
-- **Vercel** - Web hosting
-- **Firebase Hosting** - Alternative web deployment
-- **App Store/Play Store** - Mobile distribution
+The web build output is generated in `build/web/`. The existing `package.json` keeps the Vercel workflow available through `npm run build` and `npm run deploy` when Flutter and Vercel CLI are installed in the environment.
 
-### Development Tools
-- **Flutter SDK** - Development environment
-- **VS Code/Android Studio** - IDE support
-- **Git** - Version control
+## Configuration
 
-## Web Deployment
+Firebase platform options are stored in `lib/firebase_options.dart`. The content endpoints are defined in `lib/core/constants.dart`. Configure Firebase Authentication, Firestore security rules, and the Google Apps Script endpoint before using production data. Never commit private service-account credentials or administrative secrets.
 
-This app is deployed on Vercel. The web version is automatically built and deployed when changes are pushed to the main branch.
+## Architecture
 
-### Build & Deploy Locally
+Application entry and global theme configuration live in `lib/main.dart`. Authentication, premium, theme, and connectivity state are managed in `lib/logic/controllers/`. Firebase, content, and engagement integrations live in `lib/data/services/`, while reusable screens and widgets are organized under `lib/ui/`.
 
-1. Install dependencies:
-   ```bash
-   flutter pub get
-   npm install
-   ```
+Content requests use a short-lived in-memory cache and shared in-flight requests to avoid duplicate HTTP calls. Blog analytics use one Firestore stats read per item during list hydration, and user activation-key claims are guarded by a Firestore transaction.
 
-2. Build for web:
-   ```bash
-   npm run build
-   ```
+## License and project status
 
-3. Deploy to Vercel:
-   ```bash
-   npm run deploy
-   ```
-
-### Vercel Configuration
-
-- `vercel.json`: Deployment configuration
-- `package.json`: Build scripts
-- Build output: `build/web/`
-
-## Getting Started
-
-For Flutter development:
-
-1. Install Flutter SDK
-2. Run `flutter pub get`
-3. Run on device/emulator: `flutter run`
-4. Run on web: `flutter run -d chrome`
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This repository is not published to pub.dev. Review the project owner’s intended license and deployment configuration before distributing the application publicly.

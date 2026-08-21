@@ -1,30 +1,46 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:learning_app/main.dart';
+import 'package:learning_app/data/models/blog_model.dart';
+import 'package:learning_app/data/models/course_model.dart';
+import 'package:learning_app/utils/validation_helper.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('content models', () {
+    test('parses spreadsheet numeric values safely', () {
+      final blog = BlogModel.fromJson({
+        'id': 42,
+        'title': ' Flutter Tips ',
+        'content': 'Build better apps',
+        'category': 'Mobile',
+        'view_count': '12',
+        'like_count': 3.9,
+        'image_url': '',
+      });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(blog.id, '42');
+      expect(blog.title, 'Flutter Tips');
+      expect(blog.viewCount, 12);
+      expect(blog.likeCount, 3);
+      expect(blog.imageUrl, isNull);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('extracts YouTube ids and formats durations', () {
+      const video = VideoInfo(
+        youtubeUrl: 'https://youtu.be/abc123?si=test',
+        duration: '125',
+      );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(video.youtubeId, 'abc123');
+      expect(video.displayThumbnailUrl, contains('abc123'));
+      expect(video.durationFormatted, '02:05');
+    });
+  });
+
+  group('validation', () {
+    test('rejects empty required fields and invalid email', () {
+      expect(ValidationHelper.validateRequired('  ', 'Title'), isNotNull);
+      expect(ValidationHelper.validateEmail('not-an-email'), isNotNull);
+      expect(ValidationHelper.validateEmail('learner@example.com'), isNull);
+    });
   });
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/models/activation_key_model.dart';
 
@@ -24,7 +23,9 @@ class ActivationKeyCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isUsed ? Colors.red.withOpacity(0.2) : const Color(0xFF00C2FF).withOpacity(0.2),
+          color: isUsed
+              ? Colors.red.withValues(alpha: 0.2)
+              : const Color(0xFF00C2FF).withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -36,7 +37,9 @@ class ActivationKeyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isUsed ? Colors.red.withOpacity(0.1) : const Color(0xFF00C2FF).withOpacity(0.1),
+                  color: isUsed
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -59,7 +62,9 @@ class ActivationKeyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isUsed ? Colors.red.withOpacity(0.1) : const Color(0xFF00C2FF).withOpacity(0.1),
+                  color: isUsed
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -78,7 +83,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Created: ${_formatDate(activationKey.createdAt!)}',
               style: TextStyle(
-                color: const Color(0xFF3C4852).withOpacity(0.6),
+                color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -88,7 +93,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Used: ${_formatDate(activationKey.usedAt!)}',
               style: TextStyle(
-                color: const Color(0xFF3C4852).withOpacity(0.6),
+                color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -97,7 +102,7 @@ class ActivationKeyCard extends StatelessWidget {
               Text(
                 'User ID: ${activationKey.usedBy}',
                 style: TextStyle(
-                  color: const Color(0xFF3C4852).withOpacity(0.6),
+                  color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                   fontSize: 12,
                 ),
               ),

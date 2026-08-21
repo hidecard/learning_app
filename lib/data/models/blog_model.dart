@@ -7,7 +7,7 @@ class BlogModel {
   final int viewCount;
   final int likeCount;
 
-  BlogModel({
+  const BlogModel({
     required this.id,
     required this.title,
     required this.content,
@@ -18,14 +18,21 @@ class BlogModel {
   });
 
   factory BlogModel.fromJson(Map<String, dynamic> json) {
+    int number(dynamic value) {
+      if (value is num) return value.toInt();
+      return int.tryParse(value?.toString() ?? '') ?? 0;
+    }
+
     return BlogModel(
       id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
+      title: json['title']?.toString().trim() ?? '',
       content: json['content']?.toString() ?? '',
-      category: json['category']?.toString() ?? '',
-      imageUrl: json['image_url']?.toString(),
-      viewCount: json['view_count'] as int? ?? 0,
-      likeCount: json['like_count'] as int? ?? 0,
+      category: json['category']?.toString().trim() ?? 'General',
+      imageUrl: json['image_url']?.toString().trim().isEmpty == true
+          ? null
+          : json['image_url']?.toString(),
+      viewCount: number(json['view_count']),
+      likeCount: number(json['like_count']),
     );
   }
 

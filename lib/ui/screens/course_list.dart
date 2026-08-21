@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
-import 'course_detail.dart';
 
 class CourseList extends StatelessWidget {
   final List<CourseModel> courses;
@@ -20,7 +19,7 @@ class CourseList extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C2FF).withOpacity(0.1),
+                  color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
@@ -41,7 +40,7 @@ class CourseList extends StatelessWidget {
               Text(
                 'Pull down to refresh',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF3C4852).withOpacity(0.7),
+                  color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -55,7 +54,7 @@ class CourseList extends StatelessWidget {
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
@@ -63,7 +62,7 @@ class CourseList extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -83,7 +82,9 @@ class CourseList extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -91,7 +92,9 @@ class CourseList extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -110,16 +113,22 @@ class CourseList extends StatelessWidget {
                       children: [
                         Text(
                           course.title ?? 'Untitled Course',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF3C4852),
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF3C4852),
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF00C2FF).withOpacity(0.1),
+                            color: const Color(
+                              0xFF00C2FF,
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -132,13 +141,15 @@ class CourseList extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                course.videos != null && course.videos!.isNotEmpty
+                                course.videos != null &&
+                                        course.videos!.isNotEmpty
                                     ? '${course.videos!.length} videos'
                                     : 'No videos',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFF00C2FF),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: const Color(0xFF00C2FF),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),

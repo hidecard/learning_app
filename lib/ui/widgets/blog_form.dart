@@ -31,9 +31,15 @@ class _BlogFormState extends State<BlogForm> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.blog?.title ?? '');
-    _contentController = TextEditingController(text: widget.blog?.content ?? '');
-    _categoryController = TextEditingController(text: widget.blog?.category ?? '');
-    _imageUrlController = TextEditingController(text: widget.blog?.imageUrl ?? '');
+    _contentController = TextEditingController(
+      text: widget.blog?.content ?? '',
+    );
+    _categoryController = TextEditingController(
+      text: widget.blog?.category ?? '',
+    );
+    _imageUrlController = TextEditingController(
+      text: widget.blog?.imageUrl ?? '',
+    );
   }
 
   @override
@@ -60,8 +66,8 @@ class _BlogFormState extends State<BlogForm> {
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         category: _categoryController.text.trim(),
-        imageUrl: _imageUrlController.text.trim().isEmpty 
-            ? null 
+        imageUrl: _imageUrlController.text.trim().isEmpty
+            ? null
             : _imageUrlController.text.trim(),
       );
 
@@ -69,7 +75,9 @@ class _BlogFormState extends State<BlogForm> {
       Get.back();
       Get.snackbar(
         'Success',
-        widget.blog == null ? 'Blog created successfully' : 'Blog updated successfully',
+        widget.blog == null
+            ? 'Blog created successfully'
+            : 'Blog updated successfully',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -109,7 +117,7 @@ class _BlogFormState extends State<BlogForm> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -124,13 +132,16 @@ class _BlogFormState extends State<BlogForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
-                        validator: (value) => ValidationHelper.validateRequired(value, 'title'),
+                        validator: (value) =>
+                            ValidationHelper.validateRequired(value, 'title'),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _categoryController,
                         decoration: InputDecoration(
@@ -141,13 +152,18 @@ class _BlogFormState extends State<BlogForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
-                        validator: (value) => ValidationHelper.validateRequired(value, 'category'),
+                        validator: (value) => ValidationHelper.validateRequired(
+                          value,
+                          'category',
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _imageUrlController,
                         decoration: InputDecoration(
@@ -158,13 +174,15 @@ class _BlogFormState extends State<BlogForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
                         validator: ValidationHelper.validateUrl,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       TextFormField(
                         controller: _contentController,
                         decoration: InputDecoration(
@@ -175,19 +193,22 @@ class _BlogFormState extends State<BlogForm> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00C2FF)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF00C2FF),
+                            ),
                           ),
                         ),
                         maxLines: 8,
-                        validator: (value) => ValidationHelper.validateRequired(value, 'content'),
+                        validator: (value) =>
+                            ValidationHelper.validateRequired(value, 'content'),
                       ),
                     ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               Row(
                 children: [
                   Expanded(
@@ -224,7 +245,9 @@ class _BlogFormState extends State<BlogForm> {
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Text('Save'),

@@ -1,23 +1,39 @@
 import 'package:get/get.dart';
-import '../../data/services/firebase_service.dart';
+
 import '../../data/services/activation_service.dart';
+import 'auth_controller.dart';
 
 class PremiumController extends GetxController {
-  final FirebaseService _service = FirebaseService();
   final ActivationService _activationService = ActivationService();
   final RxBool isRedeeming = false.obs;
 
   Future<bool> redeemKey(String keyCode) async {
+    final normalizedKey = keyCode.trim();
+    if (normalizedKey.isEmpty) {
+      Get.snackbar('Activation key required', 'Enter your key to continue.');
+      return false;
+    }
+
     isRedeeming.value = true;
     try {
-      final result = await _activationService.activateKey(keyCode);
-      final success = result['success'] as bool;
+      final result = await _activationService.activateKey(normalizedKey);
+      final success = result['success'] == true;
       if (success) {
-        Get.snackbar('Success', 'Premium activated!');
+        await Get.find<AuthController>().refreshCurrentUser();
+        Get.snackbar(
+          'Premium activated',
+          'Your premium learning content is unlocked.',
+        );
       } else {
-        Get.snackbar('Error', result['message'] ?? 'Invalid or used key');
+        Get.snackbar(
+          'Activation failed',
+          result['message']?.toString() ?? 'Invalid or used key.',
+        );
       }
       return success;
+    } catch (_) {
+      Get.snackbar('Activation failed', 'Please try again in a moment.');
+      return false;
     } finally {
       isRedeeming.value = false;
     }

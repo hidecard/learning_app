@@ -46,7 +46,7 @@ class _BlogDetailState extends State<BlogDetail> {
 
   Future<void> _toggleLike() async {
     if (_isLoadingLike) return;
-    
+
     setState(() {
       _isLoadingLike = true;
     });
@@ -55,7 +55,7 @@ class _BlogDetailState extends State<BlogDetail> {
       await _blogService.toggleLike(_currentBlog.id);
       final updatedBlog = await _blogService.updateBlogLikeCount(_currentBlog);
       final isLiked = await _blogService.isLikedByUser(_currentBlog.id);
-      
+
       setState(() {
         _currentBlog = updatedBlog;
         _isLiked = isLiked;
@@ -115,9 +115,12 @@ class _BlogDetailState extends State<BlogDetail> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Blog image
-            if (_currentBlog.imageUrl != null && _currentBlog.imageUrl!.isNotEmpty)
+            if (_currentBlog.imageUrl != null &&
+                _currentBlog.imageUrl!.isNotEmpty)
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(16),
+                ),
                 child: Image.network(
                   _currentBlog.imageUrl!,
                   height: 250,
@@ -154,8 +157,8 @@ class _BlogDetailState extends State<BlogDetail> {
                       child: Center(
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / 
-                                  loadingProgress.expectedTotalBytes!
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
                               : null,
                         ),
                       ),
@@ -184,7 +187,10 @@ class _BlogDetailState extends State<BlogDetail> {
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(16),
@@ -211,7 +217,10 @@ class _BlogDetailState extends State<BlogDetail> {
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(16),
@@ -269,7 +278,9 @@ class _BlogDetailState extends State<BlogDetail> {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : Icon(
@@ -277,9 +288,14 @@ class _BlogDetailState extends State<BlogDetail> {
                             ),
                       label: Text(_isLiked ? 'Liked' : 'Like'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _isLiked ? Colors.red : Colors.deepPurple,
+                        backgroundColor: _isLiked
+                            ? Colors.red
+                            : Colors.deepPurple,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -291,10 +307,7 @@ class _BlogDetailState extends State<BlogDetail> {
                   Center(
                     child: Text(
                       '${_currentBlog.likeCount} ${_currentBlog.likeCount == 1 ? 'person likes' : 'people like'} this',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ),
                   const SizedBox(height: 32),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../logic/controllers/auth_controller.dart';
-import '../../data/services/activation_service.dart';
 
 class KeyManagementScreen extends StatefulWidget {
   const KeyManagementScreen({super.key});
@@ -13,7 +12,6 @@ class KeyManagementScreen extends StatefulWidget {
 
 class _KeyManagementScreenState extends State<KeyManagementScreen> {
   final AuthController authController = Get.find<AuthController>();
-  final ActivationService _activationService = ActivationService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _keyController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -32,10 +30,11 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
           .collection('activation_keys')
           .orderBy('created_at', descending: true)
           .get();
-      
+
+      if (!mounted) return;
       setState(() {
         _keys = snapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
+          final data = doc.data();
           data['id'] = doc.id;
           return data;
         }).toList();
@@ -59,13 +58,13 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
 
     try {
       final keyCode = _keyController.text.trim().toUpperCase();
-      
+
       // Check if key already exists
       final existingKey = await _firestore
           .collection('activation_keys')
           .where('key_code', isEqualTo: keyCode)
           .get();
-      
+
       if (existingKey.docs.isNotEmpty) {
         Get.snackbar(
           'Error',
@@ -87,7 +86,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
 
       _keyController.clear();
       await _loadKeys();
-      
+
       Get.snackbar(
         'Success',
         'Activation key created successfully',
@@ -113,7 +112,9 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
       context: Get.context!,
       builder: (context) => AlertDialog(
         title: const Text('Delete Key'),
-        content: Text('Are you sure you want to delete activation key $keyCode?'),
+        content: Text(
+          'Are you sure you want to delete activation key $keyCode?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -121,9 +122,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
@@ -134,7 +133,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
       try {
         await _firestore.collection('activation_keys').doc(keyId).delete();
         await _loadKeys();
-        
+
         Get.snackbar(
           'Success',
           'Activation key deleted successfully',
@@ -173,10 +172,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: Color(0xFF00C2FF),
-            ),
+            icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
             onPressed: () => Get.back(),
           ),
         ),
@@ -184,13 +180,9 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.lock,
-                size: 80,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 20),
-              const Text(
+              Icon(Icons.lock, size: 80, color: Colors.grey),
+              SizedBox(height: 20),
+              Text(
                 'Access Restricted',
                 style: TextStyle(
                   fontSize: 24,
@@ -198,13 +190,10 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                   color: Color(0xFF3C4852),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 'Only administrators can access this page',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),
@@ -226,10 +215,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(0xFF00C2FF),
-          ),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
           onPressed: () => Get.back(),
         ),
       ),
@@ -245,7 +231,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -270,12 +256,14 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter activation key (e.g., HIDECARD-123)',
                         hintStyle: TextStyle(
-                          color: const Color(0xFF3C4852).withOpacity(0.5),
+                          color: const Color(0xFF3C4852).withValues(alpha: 0.5),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: const Color(0xFF3C4852).withOpacity(0.2),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.2),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -317,7 +305,9 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : const Text(
@@ -334,7 +324,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Existing Keys Section
             Container(
               padding: const EdgeInsets.all(20),
@@ -343,7 +333,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -365,18 +355,11 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                     const Center(
                       child: Column(
                         children: [
-                          Icon(
-                            Icons.vpn_key,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
+                          Icon(Icons.vpn_key, size: 50, color: Colors.grey),
                           SizedBox(height: 8),
                           Text(
                             'No activation keys found',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                         ],
                       ),
@@ -393,14 +376,18 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: key['is_used'] 
-                                  ? Colors.grey.shade300 
-                                  : const Color(0xFF00C2FF).withOpacity(0.3),
+                              color: key['is_used']
+                                  ? Colors.grey.shade300
+                                  : const Color(
+                                      0xFF00C2FF,
+                                    ).withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(12),
-                            color: key['is_used'] 
-                                ? Colors.grey.shade50 
-                                : const Color(0xFF00C2FF).withOpacity(0.05),
+                            color: key['is_used']
+                                ? Colors.grey.shade50
+                                : const Color(
+                                    0xFF00C2FF,
+                                  ).withValues(alpha: 0.05),
                           ),
                           child: Row(
                             children: [
@@ -425,13 +412,17 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: key['is_used'] 
-                                                ? Colors.orange 
+                                            color: key['is_used']
+                                                ? Colors.orange
                                                 : Colors.green,
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           child: Text(
-                                            key['is_used'] ? 'Used' : 'Available',
+                                            key['is_used']
+                                                ? 'Used'
+                                                : 'Available',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
@@ -480,7 +471,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
 
   String _formatDate(dynamic timestamp) {
     if (timestamp == null) return 'N/A';
-    
+
     try {
       final date = (timestamp as Timestamp).toDate();
       return '${date.day}/${date.month}/${date.year}';

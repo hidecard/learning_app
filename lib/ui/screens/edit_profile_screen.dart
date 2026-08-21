@@ -71,10 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(0xFF00C2FF),
-          ),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
           onPressed: () => Get.back(),
         ),
         actions: [
@@ -86,7 +83,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF00C2FF),
+                      ),
                     ),
                   )
                 : const Text(
@@ -115,7 +114,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -138,12 +137,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter your full name',
                         hintStyle: TextStyle(
-                          color: const Color(0xFF3C4852).withOpacity(0.5),
+                          color: const Color(0xFF3C4852).withValues(alpha: 0.5),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: const Color(0xFF3C4852).withOpacity(0.2),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.2),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -179,7 +180,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -203,18 +204,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       decoration: InputDecoration(
                         hintText: 'Email cannot be changed',
                         hintStyle: TextStyle(
-                          color: const Color(0xFF3C4852).withOpacity(0.5),
+                          color: const Color(0xFF3C4852).withValues(alpha: 0.5),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: const Color(0xFF3C4852).withOpacity(0.2),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.2),
                           ),
                         ),
                         disabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: const Color(0xFF3C4852).withOpacity(0.1),
+                            color: const Color(
+                              0xFF3C4852,
+                            ).withValues(alpha: 0.1),
                           ),
                         ),
                         filled: true,
@@ -226,7 +231,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       'Email address cannot be changed',
                       style: TextStyle(
                         fontSize: 12,
-                        color: const Color(0xFF3C4852).withOpacity(0.6),
+                        color: const Color(0xFF3C4852).withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -242,7 +247,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -253,16 +258,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: authController.currentUser.value?.isPremium == true
-                            ? Colors.green.withOpacity(0.1)
-                            : const Color(0xFF00C2FF).withOpacity(0.1),
+                        color:
+                            authController.currentUser.value?.isPremium == true
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : const Color(0xFF00C2FF).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         authController.currentUser.value?.isPremium == true
                             ? Icons.verified
                             : Icons.lock,
-                        color: authController.currentUser.value?.isPremium == true
+                        color:
+                            authController.currentUser.value?.isPremium == true
                             ? Colors.green
                             : const Color(0xFF00C2FF),
                         size: 24,
@@ -289,7 +296,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 : 'Upgrade to unlock premium features',
                             style: TextStyle(
                               fontSize: 14,
-                              color: const Color(0xFF3C4852).withOpacity(0.7),
+                              color: const Color(
+                                0xFF3C4852,
+                              ).withValues(alpha: 0.7),
                             ),
                           ),
                         ],
