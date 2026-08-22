@@ -1,259 +1,245 @@
+const DEFAULT_SHEET_ID = '1JJCDMHWMKtToFl9cRoJ-OIgMop4tVdOB-l8jbkg1wbs';
+const DEFAULT_ADMIN_EMAIL = 'ak1500@gmail.com';
+
 function doGet(e) {
-  const ss = SpreadsheetApp.openById('1JJCDMHWMKtToFl9cRoJ-OIgMop4tVdOB-l8jbkg1wbs');
-  const operation = e?.parameter?.operation || 'read';
-  const type = e?.parameter?.type || 'blogs';
-  const adminEmail = e?.parameter?.admin || '';
-  
-  // Simple admin check
-  if (operation !== 'read' && adminEmail !== 'ak1500@gmail.com') {
-    return ContentService.createTextOutput(JSON.stringify({ error: 'Unauthorized' }))
-      .setMimeType(ContentService.MimeType.JSON);
+  return handleRequest_(e && e.parameter ? e.parameter : {});
+}
+
+function doPost(e) {
+  let params = {};
+  try {
+    params = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+  } catch (error) {
+    return jsonResponse_({ success: false, error: 'Invalid JSON request body.' });
+  }
+  return handleRequest_(params);
+}
+
+function handleRequest_(params) {
+  const sheetId = PropertiesService.getScriptProperties().getProperty('SHEET_ID') || DEFAULT_SHEET_ID;
+  const ss = SpreadsheetApp.openById(sheetId);
+  const operation = String(params.operation || 'read').toLowerCase();
+  const type = String(params.type || 'blogs').toLowerCase();
+  const adminEmail = String(params.admin || '').trim().toLowerCase();
+  const configuredAdminEmail = (PropertiesService.getScriptProperties()
+    .getProperty('ADMIN_EMAIL') || DEFAULT_ADMIN_EMAIL).trim().toLowerCase();
+  const isAdminRead = type === 'courses_raw';
+
+  if (operation !== 'read' || isAdminRead) {
+    if (adminEmail !== configuredAdminEmail) {
+      return jsonResponse_({ success: false, error: 'Unauthorized.' });
+    }
   }
 
   try {
     switch (operation) {
       case 'read':
-        return readData(ss, type);
+        return readData_(ss, type);
       case 'create':
-        return createData(ss, type, e);
+        return createData_(ss, type, params);
       case 'update':
-        return updateData(ss, type, e);
+        return updateData_(ss, type, params);
       case 'delete':
-        return deleteData(ss, type, e);
+        return deleteData_(ss, type, params);
       default:
-        return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid operation' }))
-          .setMimeType(ContentService.MimeType.JSON);
+        return jsonResponse_({ success: false, error: 'Invalid operation.' });
     }
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return jsonResponse_({
+      success: false,
+      error: error && error.message ? error.message : 'Unexpected server error.',
+    });
   }
 }
 
-function readData(ss, type) {
-  let data = [];
+function jsonResponse_(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
+function required_(params, fields) {
+  for (let i = 0; i < fields.length; i += 1) {
+    const value = String(params[fields[i]] || '').trim();
+    if (!value) throw new Error(fields[i] + ' is required.');
+  }
+}
+
+function validImageUrl_(value) {
+  if (!value) return true;
+  return /^https?:\/\/\S+$/i.test(value);
+}
+
+function validYouTubeUrl_(value) {
+  return /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[^\s&?#]+/i.test(value);
+}
+
+function readData_(ss, type) {
   if (type === 'blogs') {
-    const sheet = ss.getSheetByName('blogs') || ss.insertSheet('blogs');
-    data = sheet.getDataRange().getValues().slice(1).map(row => ({
-      id: row[0],
-      title: row[1],
-      content: row[2],
-      category: row[3],
-      image_url: row[4] || ''
+    const sheet = ss.getSheetByName('blogs');
+    if (!sheet) return jsonResponse_([]);
+    return jsonResponse_(sheet.getDataRange().getValues().slice(1).map(function(row) {
+      return {
+        id: row[0],
+        title: row[1] || '',
+        content: row[2] || '',
+        category: row[3] || 'General',
+        image_url: row[4] || '',
+      };
     }));
-  } else if (type === 'courses') {
-    const sheet = ss.getSheetByName('courses') || ss.insertSheet('courses');
-    const rows = sheet.getDataRange().getValues().slice(1);
-    
+  }
+
+  if (type === 'courses' || type === 'courses_raw') {
+    const sheet = ss.getSheetByName('courses');
+    if (!sheet) return jsonResponse_([]);
+    const rows = sheet.getDataRange().getValues();
+
+    if (type === 'courses_raw') {
+      return jsonResponse_(rows.slice(1).map(function(row, index) {
+        return {
+          row: index + 2,
+          course_name: row[0] || '',
+          video_title: row[1] || '',
+          youtube_url: row[2] || '',
+          category: row[3] || '',
+        };
+      }));
+    }
+
     const coursesMap = new Map();
-    
-    rows.forEach(row => {
-      const courseName = row[0];
-      const videoTitle = row[1];
-      const youtubeUrl = row[2];
-      const category = row[3];
-      
+    rows.slice(1).forEach(function(row) {
+      const courseName = String(row[0] || '').trim();
+      const videoTitle = String(row[1] || '').trim();
+      const youtubeUrl = String(row[2] || '').trim();
+      const category = String(row[3] || '').trim();
       if (!courseName) return;
-      
+
       if (!coursesMap.has(courseName)) {
         coursesMap.set(courseName, {
           id: courseName.toLowerCase().replace(/\s+/g, '_'),
           title: courseName,
-          videos: []
+          videos: [],
         });
       }
-      
       if (youtubeUrl) {
         coursesMap.get(courseName).videos.push({
-          video_title: videoTitle || '',
+          video_title: videoTitle,
           youtube_url: youtubeUrl,
-          category: category || ''
+          category: category,
         });
       }
     });
-    
-    data = Array.from(coursesMap.values());
-  } else if (type === 'courses_raw') {
-    // Return raw data with row numbers for admin operations
-    const sheet = ss.getSheetByName('courses') || ss.insertSheet('courses');
-    const rows = sheet.getDataRange().getValues();
-    
-    data = rows.slice(1).map((row, index) => ({
-      row: index + 2, // +2 because slice(1) removes header and index is 0-based
-      course_name: row[0] || '',
-      video_title: row[1] || '',
-      youtube_url: row[2] || '',
-      category: row[3] || ''
-    }));
+    return jsonResponse_(Array.from(coursesMap.values()));
   }
 
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+  return jsonResponse_({ success: false, error: 'Unknown content type.' });
 }
 
-function createData(ss, type, e) {
+function createData_(ss, type, params) {
   if (type === 'blogs') {
+    required_(params, ['title', 'content', 'category']);
+    const imageUrl = String(params.image_url || '').trim();
+    if (!validImageUrl_(imageUrl)) throw new Error('image_url must be a valid HTTP(S) URL.');
     const sheet = ss.getSheetByName('blogs') || ss.insertSheet('blogs');
-    const id = e?.parameter?.id || Date.now().toString();
-    const title = e?.parameter?.title || '';
-    const content = e?.parameter?.content || '';
-    const category = e?.parameter?.category || '';
-    const imageUrl = e?.parameter?.image_url || '';
-    
-    sheet.appendRow([id, title, content, category, imageUrl]);
-    
-    return ContentService.createTextOutput(JSON.stringify({ 
-      success: true, 
-      message: 'Blog created successfully',
-      id: id
-    })).setMimeType(ContentService.MimeType.JSON);
-  } else if (type === 'courses') {
+    const id = String(params.id || Date.now());
+    sheet.appendRow([
+      id,
+      String(params.title).trim(),
+      String(params.content).trim(),
+      String(params.category).trim(),
+      imageUrl,
+    ]);
+    return jsonResponse_({ success: true, message: 'Blog created successfully.', id: id });
+  }
+
+  if (type === 'courses') {
+    required_(params, ['course_name', 'video_title', 'youtube_url', 'category']);
+    const youtubeUrl = String(params.youtube_url).trim();
+    if (!validYouTubeUrl_(youtubeUrl)) throw new Error('youtube_url must be a valid YouTube URL.');
     const sheet = ss.getSheetByName('courses') || ss.insertSheet('courses');
-    const courseName = e?.parameter?.course_name || '';
-    const videoTitle = e?.parameter?.video_title || '';
-    const youtubeUrl = e?.parameter?.youtube_url || '';
-    const category = e?.parameter?.category || '';
-    
-    sheet.appendRow([courseName, videoTitle, youtubeUrl, category]);
-    
-    return ContentService.createTextOutput(JSON.stringify({ 
-      success: true, 
-      message: 'Course video created successfully'
-    })).setMimeType(ContentService.MimeType.JSON);
+    sheet.appendRow([
+      String(params.course_name).trim(),
+      String(params.video_title).trim(),
+      youtubeUrl,
+      String(params.category).trim(),
+    ]);
+    return jsonResponse_({ success: true, message: 'Course video created successfully.' });
   }
+
+  return jsonResponse_({ success: false, error: 'Unknown content type.' });
 }
 
-function updateData(ss, type, e) {
+function updateData_(ss, type, params) {
   if (type === 'blogs') {
+    required_(params, ['id']);
     const sheet = ss.getSheetByName('blogs');
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Blogs sheet not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const id = e?.parameter?.id;
-    const title = e?.parameter?.title;
-    const content = e?.parameter?.content;
-    const category = e?.parameter?.category;
-    const imageUrl = e?.parameter?.image_url;
-    
+    if (!sheet) return jsonResponse_({ success: false, error: 'Blogs sheet not found.' });
     const data = sheet.getDataRange().getValues();
-    let updated = false;
-    
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
-        if (title !== undefined) data[i][1] = title;
-        if (content !== undefined) data[i][2] = content;
-        if (category !== undefined) data[i][3] = category;
-        if (imageUrl !== undefined) data[i][4] = imageUrl;
-        updated = true;
-        break;
+    const id = String(params.id);
+    for (let i = 1; i < data.length; i += 1) {
+      if (String(data[i][0]) === id) {
+        if (params.title !== undefined) data[i][1] = String(params.title).trim();
+        if (params.content !== undefined) data[i][2] = String(params.content).trim();
+        if (params.category !== undefined) data[i][3] = String(params.category).trim();
+        if (params.image_url !== undefined) {
+          const imageUrl = String(params.image_url).trim();
+          if (!validImageUrl_(imageUrl)) throw new Error('image_url must be a valid HTTP(S) URL.');
+          data[i][4] = imageUrl;
+        }
+        sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+        return jsonResponse_({ success: true, message: 'Blog updated successfully.' });
       }
     }
-    
-    if (updated) {
-      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
-      return ContentService.createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: 'Blog updated successfully'
-      })).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Blog not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-  } else if (type === 'courses') {
-    const sheet = ss.getSheetByName('courses');
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Courses sheet not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const row = parseInt(e?.parameter?.row);
-    const courseName = e?.parameter?.course_name;
-    const videoTitle = e?.parameter?.video_title;
-    const youtubeUrl = e?.parameter?.youtube_url;
-    const category = e?.parameter?.category;
-    
-    if (!row || row < 2) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid row number' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (row <= data.length) {
-      if (courseName !== undefined) data[row - 1][0] = courseName;
-      if (videoTitle !== undefined) data[row - 1][1] = videoTitle;
-      if (youtubeUrl !== undefined) data[row - 1][2] = youtubeUrl;
-      if (category !== undefined) data[row - 1][3] = category;
-      
-      sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
-      return ContentService.createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: 'Course video updated successfully'
-      })).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Row not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
+    return jsonResponse_({ success: false, error: 'Blog not found.' });
   }
+
+  if (type === 'courses') {
+    const row = Number.parseInt(params.row, 10);
+    if (!Number.isInteger(row) || row < 2) return jsonResponse_({ success: false, error: 'Invalid row number.' });
+    const sheet = ss.getSheetByName('courses');
+    if (!sheet) return jsonResponse_({ success: false, error: 'Courses sheet not found.' });
+    if (row > sheet.getLastRow()) return jsonResponse_({ success: false, error: 'Row not found.' });
+    if (params.youtube_url !== undefined && !validYouTubeUrl_(String(params.youtube_url).trim())) {
+      throw new Error('youtube_url must be a valid YouTube URL.');
+    }
+    const values = [[
+      params.course_name === undefined ? sheet.getRange(row, 1).getValue() : String(params.course_name).trim(),
+      params.video_title === undefined ? sheet.getRange(row, 2).getValue() : String(params.video_title).trim(),
+      params.youtube_url === undefined ? sheet.getRange(row, 3).getValue() : String(params.youtube_url).trim(),
+      params.category === undefined ? sheet.getRange(row, 4).getValue() : String(params.category).trim(),
+    ]];
+    sheet.getRange(row, 1, 1, 4).setValues(values);
+    return jsonResponse_({ success: true, message: 'Course video updated successfully.' });
+  }
+
+  return jsonResponse_({ success: false, error: 'Unknown content type.' });
 }
 
-function deleteData(ss, type, e) {
+function deleteData_(ss, type, params) {
   if (type === 'blogs') {
+    required_(params, ['id']);
     const sheet = ss.getSheetByName('blogs');
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Blogs sheet not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const id = e?.parameter?.id;
+    if (!sheet) return jsonResponse_({ success: false, error: 'Blogs sheet not found.' });
     const data = sheet.getDataRange().getValues();
-    let deleted = false;
-    
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
+    const id = String(params.id);
+    for (let i = 1; i < data.length; i += 1) {
+      if (String(data[i][0]) === id) {
         sheet.deleteRow(i + 1);
-        deleted = true;
-        break;
+        return jsonResponse_({ success: true, message: 'Blog deleted successfully.' });
       }
     }
-    
-    if (deleted) {
-      return ContentService.createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: 'Blog deleted successfully'
-      })).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Blog not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-  } else if (type === 'courses') {
-    const sheet = ss.getSheetByName('courses');
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Courses sheet not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const row = parseInt(e?.parameter?.row);
-    
-    if (!row || row < 2) {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Invalid row number' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (row <= data.length) {
-      sheet.deleteRow(row);
-      return ContentService.createTextOutput(JSON.stringify({ 
-        success: true, 
-        message: 'Course video deleted successfully'
-      })).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      return ContentService.createTextOutput(JSON.stringify({ error: 'Row not found' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
+    return jsonResponse_({ success: false, error: 'Blog not found.' });
   }
+
+  if (type === 'courses') {
+    const row = Number.parseInt(params.row, 10);
+    const sheet = ss.getSheetByName('courses');
+    if (!sheet) return jsonResponse_({ success: false, error: 'Courses sheet not found.' });
+    if (!Number.isInteger(row) || row < 2 || row > sheet.getLastRow()) {
+      return jsonResponse_({ success: false, error: 'Row not found.' });
+    }
+    sheet.deleteRow(row);
+    return jsonResponse_({ success: true, message: 'Course video deleted successfully.' });
+  }
+
+  return jsonResponse_({ success: false, error: 'Unknown content type.' });
 }

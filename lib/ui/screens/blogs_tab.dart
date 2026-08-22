@@ -34,10 +34,11 @@ class _BlogsTabState extends State<BlogsTab> {
   @override
   void initState() {
     super.initState();
-    _filteredBlogs = widget.blogs;
+    _filteredBlogs = List.of(widget.blogs);
     _searchController.addListener(_onSearchChanged);
     _extractCategoriesFromAPI();
     _initializeLikedStatus();
+    _loadLikedStatus();
   }
 
   @override
@@ -48,10 +49,24 @@ class _BlogsTabState extends State<BlogsTab> {
   }
 
   void _initializeLikedStatus() {
-    for (var blog in widget.blogs) {
-      _likedStatus[blog.id] = false;
-      _loadingStates[blog.id] = false;
-    }
+    _likedStatus
+      ..clear()
+      ..addEntries(widget.blogs.map((blog) => MapEntry(blog.id, false)));
+    _loadingStates
+      ..clear()
+      ..addEntries(widget.blogs.map((blog) => MapEntry(blog.id, false)));
+  }
+
+  Future<void> _loadLikedStatus() async {
+    final likedIds = await _blogService.getLikedBlogIds(
+      widget.blogs.map((blog) => blog.id),
+    );
+    if (!mounted) return;
+    setState(() {
+      for (final blog in widget.blogs) {
+        _likedStatus[blog.id] = likedIds.contains(blog.id);
+      }
+    });
   }
 
   void _extractCategoriesFromAPI() {
@@ -185,6 +200,7 @@ class _BlogsTabState extends State<BlogsTab> {
       _initializeLikedStatus();
       _extractCategoriesFromAPI();
       _applyCategoryFilter();
+      _loadLikedStatus();
     }
   }
 
@@ -193,7 +209,10 @@ class _BlogsTabState extends State<BlogsTab> {
     setState(() => _loadingStates[blog.id] = true);
 
     try {
-      await _blogService.toggleLike(blog.id);
+      final toggled = await _blogService.toggleLike(blog.id);
+      if (!toggled) {
+        throw StateError('Like could not be updated');
+      }
       final results = await Future.wait([
         _blogService.getStats(blog.id),
         _blogService.isLikedByUser(blog.id),
@@ -213,7 +232,9 @@ class _BlogsTabState extends State<BlogsTab> {
             .toList(growable: false);
       });
     } catch (_) {
-      if (mounted) setState(() => _loadingStates[blog.id] = false);
+      if (!mounted) return;
+      setState(() => _loadingStates[blog.id] = false);
+      Get.snackbar('Like not saved', 'Please sign in and try again.');
     }
   }
 

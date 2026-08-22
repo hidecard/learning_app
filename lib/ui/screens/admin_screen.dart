@@ -35,10 +35,7 @@ class _AdminScreenState extends State<AdminScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _checkAdminAccess();
-    _loadKeys();
-    _loadBlogs();
-    _loadCourses();
+    _initializeDashboard();
   }
 
   @override
@@ -48,58 +45,64 @@ class _AdminScreenState extends State<AdminScreen>
     super.dispose();
   }
 
-  Future<void> _checkAdminAccess() async {
+  Future<void> _initializeDashboard() async {
+    if (!await _checkAdminAccess() || !mounted) return;
+    await Future.wait([_loadKeys(), _loadBlogs(), _loadCourses()]);
+  }
+
+  Future<bool> _checkAdminAccess() async {
     final isAdmin = await AdminAuthService.checkAdminAccess();
-    if (!isAdmin) {
-      Get.snackbar(
-        'Access Denied',
-        AdminAuthService.unauthorizedMessage,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-      Get.back();
-    }
+    if (isAdmin || !mounted) return isAdmin;
+
+    Get.snackbar(
+      'Access Denied',
+      AdminAuthService.unauthorizedMessage,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+    );
+    Get.back();
+    return false;
   }
 
   Future<void> _loadKeys() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) setState(() => isLoading = true);
 
     try {
-      final available = await _activationService.getAvailableKeys();
-      final used = await _activationService.getUsedKeys();
-
+      final results = await Future.wait([
+        _activationService.getAvailableKeys(),
+        _activationService.getUsedKeys(),
+      ]);
+      if (!mounted) return;
       setState(() {
-        availableKeys = available;
-        usedKeys = used;
+        availableKeys = results[0];
+        usedKeys = results[1];
         isLoading = false;
       });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      Get.snackbar('Error', 'Failed to load keys: $e');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      Get.snackbar(
+        'Error',
+        'Failed to load activation keys. Please try again.',
+      );
     }
   }
 
   Future<void> _loadBlogs() async {
-    setState(() {
-      isBlogsLoading = true;
-    });
+    if (mounted) setState(() => isBlogsLoading = true);
 
     try {
       final blogsData = await SheetsService.fetchBlogs();
+      if (!mounted) return;
       setState(() {
         blogs = blogsData;
         isBlogsLoading = false;
       });
-    } catch (e) {
-      setState(() {
-        isBlogsLoading = false;
-      });
-      Get.snackbar('Error', 'Failed to load blogs: $e');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => isBlogsLoading = false);
+      Get.snackbar('Error', 'Failed to load blogs. Please try again.');
     }
   }
 
@@ -111,11 +114,14 @@ class _AdminScreenState extends State<AdminScreen>
 
     try {
       await _activationService.createKey(_keyController.text.trim());
+      if (!mounted) return;
       _keyController.clear();
-      _loadKeys();
+      await _loadKeys();
       Get.snackbar('Success', 'Key created successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to create key: $e');
+    } catch (_) {
+      if (mounted) {
+        Get.snackbar('Error', 'Failed to create key. Please try again.');
+      }
     }
   }
 
@@ -173,21 +179,19 @@ class _AdminScreenState extends State<AdminScreen>
   }
 
   Future<void> _loadCourses() async {
-    setState(() {
-      isCoursesLoading = true;
-    });
+    if (mounted) setState(() => isCoursesLoading = true);
 
     try {
       final coursesData = await SheetsService.fetchCoursesRaw();
+      if (!mounted) return;
       setState(() {
         courses = coursesData;
         isCoursesLoading = false;
       });
-    } catch (e) {
-      setState(() {
-        isCoursesLoading = false;
-      });
-      Get.snackbar('Error', 'Failed to load courses: $e');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => isCoursesLoading = false);
+      Get.snackbar('Error', 'Failed to load courses. Please try again.');
     }
   }
 

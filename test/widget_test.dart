@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:learning_app/data/models/blog_model.dart';
 import 'package:learning_app/data/models/course_model.dart';
+import 'package:learning_app/data/models/user_model.dart';
 import 'package:learning_app/utils/validation_helper.dart';
 
 void main() {
@@ -33,6 +34,23 @@ void main() {
       expect(video.youtubeId, 'abc123');
       expect(video.displayThumbnailUrl, contains('abc123'));
       expect(video.durationFormatted, '02:05');
+    });
+  });
+
+  group('user profiles', () {
+    test('supports legacy fields and clears activation keys', () {
+      final user = UserModel.fromJson({
+        'uid': 'user-1',
+        'email': 'learner@example.com',
+        'name': ' Learner ',
+        'is_premium': 'true',
+        'activation_key': 'ABC-123',
+      });
+
+      expect(user.id, 'user-1');
+      expect(user.isPremium, isTrue);
+      expect(user.activationKey, 'ABC-123');
+      expect(user.copyWith(clearActivationKey: true).activationKey, isNull);
     });
   });
 

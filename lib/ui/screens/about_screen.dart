@@ -80,7 +80,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Version 1.0.0',
+                    'Version 1.2.0',
                     style: TextStyle(
                       fontSize: 16,
                       color: const Color(0xFF3C4852).withValues(alpha: 0.7),
@@ -268,14 +268,17 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildLegalItem(
+                    context,
                     'Privacy Policy',
                     'Learn how we protect your data and privacy.',
                   ),
                   _buildLegalItem(
+                    context,
                     'Terms of Service',
                     'Read our terms and conditions.',
                   ),
                   _buildLegalItem(
+                    context,
                     'License Agreement',
                     'View our software license agreement.',
                   ),
@@ -436,17 +439,13 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLegalItem(String title, String description) {
+  Widget _buildLegalItem(
+    BuildContext context,
+    String title,
+    String description,
+  ) {
     return InkWell(
-      onTap: () {
-        // TODO: Navigate to legal documents
-        Get.snackbar(
-          'Coming Soon',
-          '$title will be available soon',
-          backgroundColor: const Color(0xFF00C2FF),
-          colorText: Colors.white,
-        );
-      },
+      onTap: () => _showLegalDocument(context, title, description),
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.only(bottom: 16),
@@ -493,6 +492,56 @@ class AboutScreen extends StatelessWidget {
               color: const Color(0xFF3C4852).withValues(alpha: 0.6),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLegalDocument(
+    BuildContext context,
+    String title,
+    String description,
+  ) {
+    final body = switch (title) {
+      'Privacy Policy' =>
+        'Nexus Tech Learning uses your account details to provide authentication, profile features, premium access, and learning progress. Content engagement such as blog views and likes is stored to improve the experience. We do not sell personal information. You can request account data changes or deletion through the project owner.',
+      'Terms of Service' =>
+        'Use this application for lawful learning and personal development. Course and article content may be protected by their respective owners. Do not share activation keys, attempt to bypass premium access, or misuse the service. Features may change as the platform is improved.',
+      _ =>
+        'This application is distributed as a private project. Third-party packages remain governed by their respective open-source licenses. Review the repository documentation for the current dependency and project notices.',
+    };
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(sheetContext).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: Theme.of(sheetContext).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              Text(body, style: Theme.of(sheetContext).textTheme.bodyLarge),
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(sheetContext),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

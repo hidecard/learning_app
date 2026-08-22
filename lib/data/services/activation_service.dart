@@ -1,31 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../models/activation_key_model.dart';
 import 'firebase_service.dart';
 
 class ActivationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseService _firebaseService = FirebaseService();
 
   Future<Map<String, dynamic>> activateKey(String key) async {
     try {
-      // Validate the key using Firebase service
-      final result = await _firebaseService.validateActivationKey(key);
-
-      if (result['success']) {
-        // Update user profile with activation key
-        final userId = _auth.currentUser?.uid;
-        if (userId != null) {
-          await _firestore.collection('profiles').doc(userId).update({
-            'is_premium': true,
-            'activation_key': key,
-            'activated_at': FieldValue.serverTimestamp(),
-          });
-        }
-      }
-
-      return result;
+      return await _firebaseService.activateUserWithKey(key);
     } catch (_) {
       return {
         'success': false,
@@ -34,52 +17,55 @@ class ActivationService {
     }
   }
 
-  Future<void> removeActivationKey() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId != null) {
-        await _firebaseService.removeUserActivationKey(userId);
-      }
-    } catch (_) {}
-  }
-
   Future<List<ActivationKeyModel>> getAvailableKeys() async {
-    try {
-      final snapshot = await _firestore
-          .collection('activation_keys')
-          .where('is_used', isEqualTo: false)
-          .get();
+    final snapshot = await _firestore
+        .collection('activation_keys')
+        .where('is_used', isEqualTo: false)
+        .get();
 
-      return snapshot.docs
-          .map((doc) => ActivationKeyModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return snapshot.docs
+        .map((doc) => ActivationKeyModel.fromFirestore(doc))
+        .toList(growable: false);
   }
 
   Future<List<ActivationKeyModel>> getUsedKeys() async {
-    try {
-      final snapshot = await _firestore
-          .collection('activation_keys')
-          .where('is_used', isEqualTo: true)
-          .get();
+    final snapshot = await _firestore
+        .collection('activation_keys')
+        .where('is_used', isEqualTo: true)
+        .get();
 
-      return snapshot.docs
-          .map((doc) => ActivationKeyModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return snapshot.docs
+        .map((doc) => ActivationKeyModel.fromFirestore(doc))
+        .toList(growable: false);
   }
 
   Future<void> createKey(String keyCode) async {
-    try {
-      await _firestore.collection('activation_keys').add({
-        'key_code': keyCode,
+    final normalizedKey = keyCode.trim().toUpperCase();
+    if (normalizedKey.isEmpty) throw ArgumentError('Key cannot be empty.');
+
+    final existing = await _firestore
+        .collection('activation_keys')
+        .where('key_code', isEqualTo: normalizedKey)
+        .limit(1)
+        .get();
+    if (existing.docs.isNotEmpty) {
+      throw StateError('This activation key already exists.');
+    }
+
+    final keyRef = _firestore
+        .collection('activation_keys')
+        .doc('key_$normalizedKey');
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(keyRef);
+      if (snapshot.exists) {
+        throw StateError('This activation key already exists.');
+      }
+
+      transaction.set(keyRef, {
+        'key_code': normalizedKey,
         'is_used': false,
         'created_at': FieldValue.serverTimestamp(),
       });
-    } catch (_) {}
+    });
   }
 }

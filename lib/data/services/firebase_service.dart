@@ -44,8 +44,8 @@ class FirebaseService {
         .set(userModel.toJson(), SetOptions(merge: true));
   }
 
-  Future<Map<String, dynamic>> validateActivationKey(String keyCode) async {
-    final normalizedKey = keyCode.trim();
+  Future<Map<String, dynamic>> activateUserWithKey(String keyCode) async {
+    final normalizedKey = keyCode.trim().toUpperCase();
     if (normalizedKey.isEmpty) {
       return {'success': false, 'message': 'Enter an activation key.'};
     }
@@ -59,10 +59,8 @@ class FirebaseService {
       final query = await _firestore
           .collection('activation_keys')
           .where('key_code', isEqualTo: normalizedKey)
-          .where('is_used', isEqualTo: false)
           .limit(1)
           .get();
-
       if (query.docs.isEmpty) {
         return {
           'success': false,
@@ -71,10 +69,12 @@ class FirebaseService {
       }
 
       final keyRef = query.docs.first.reference;
+      final profileRef = _firestore.collection('profiles').doc(userId);
       final claimed = await _firestore.runTransaction<bool>((
         transaction,
       ) async {
         final keySnapshot = await transaction.get(keyRef);
+        final profileSnapshot = await transaction.get(profileRef);
         final data = keySnapshot.data();
         if (!keySnapshot.exists || data?['is_used'] == true) return false;
 
@@ -83,14 +83,18 @@ class FirebaseService {
           'used_by': userId,
           'used_at': FieldValue.serverTimestamp(),
         });
+        transaction.set(profileRef, {
+          'id': userId,
+          'is_premium': true,
+          'activation_key': normalizedKey,
+          'activated_at': FieldValue.serverTimestamp(),
+          if (!profileSnapshot.exists) 'email': _auth.currentUser?.email ?? '',
+        }, SetOptions(merge: true));
         return true;
       });
 
       return claimed
-          ? {
-              'success': true,
-              'message': 'Activation key validated successfully',
-            }
+          ? {'success': true, 'message': 'Premium activated successfully.'}
           : {
               'success': false,
               'message': 'That key was just used. Try another key.',
@@ -98,10 +102,16 @@ class FirebaseService {
     } catch (_) {
       return {
         'success': false,
-        'message': 'Could not validate the key. Please try again.',
+        'message': 'Could not activate the key. Please try again.',
       };
     }
   }
+
+  @Deprecated(
+    'Use activateUserWithKey to update the key and profile atomically.',
+  )
+  Future<Map<String, dynamic>> validateActivationKey(String keyCode) =>
+      activateUserWithKey(keyCode);
 
   Future<void> removeUserActivationKey(String userId) async {
     await _firestore.collection('profiles').doc(userId).set({

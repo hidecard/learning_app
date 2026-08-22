@@ -52,9 +52,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
   Future<void> _createKey() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final keyCode = _keyController.text.trim().toUpperCase();
@@ -76,7 +74,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
       }
 
       // Create new key
-      await _firestore.collection('activation_keys').add({
+      await _firestore.collection('activation_keys').doc('key_$keyCode').set({
         'key_code': keyCode,
         'is_used': false,
         'used_by': null,
@@ -87,29 +85,35 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
       _keyController.clear();
       await _loadKeys();
 
-      Get.snackbar(
-        'Success',
-        'Activation key created successfully',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to create key: $e',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      if (mounted) {
+        Get.snackbar(
+          'Success',
+          'Activation key created successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        Get.snackbar(
+          'Error',
+          'Failed to create key. Please try again.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _deleteKey(String keyId, String keyCode) async {
+  Future<void> _deleteKey(
+    BuildContext context,
+    String keyId,
+    String keyCode,
+  ) async {
     final confirmed = await showDialog<bool>(
-      context: Get.context!,
+      context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Key'),
         content: Text(
@@ -134,19 +138,23 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
         await _firestore.collection('activation_keys').doc(keyId).delete();
         await _loadKeys();
 
-        Get.snackbar(
-          'Success',
-          'Activation key deleted successfully',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } catch (e) {
-        Get.snackbar(
-          'Error',
-          'Failed to delete key: $e',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        if (mounted) {
+          Get.snackbar(
+            'Success',
+            'Activation key deleted successfully',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        }
+      } catch (_) {
+        if (mounted) {
+          Get.snackbar(
+            'Error',
+            'Failed to delete key. Please try again.',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
       }
     }
   }
@@ -451,6 +459,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                                   color: Colors.red,
                                 ),
                                 onPressed: () => _deleteKey(
+                                  context,
                                   key['id'],
                                   key['key_code'] ?? '',
                                 ),

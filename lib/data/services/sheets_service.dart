@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../../core/constants.dart';
@@ -24,6 +23,26 @@ class SheetsService {
 
   static bool _isFresh(DateTime? cachedAt) =>
       cachedAt != null && DateTime.now().difference(cachedAt) < _cacheLifetime;
+
+  static Future<http.Response> _get(Uri uri) =>
+      http.get(uri).timeout(const Duration(seconds: 12));
+
+  static Map<String, dynamic> _decodeResult(String body) {
+    final decoded = json.decode(body);
+    return decoded is Map
+        ? Map<String, dynamic>.from(decoded)
+        : {'success': false, 'error': 'Invalid server response.'};
+  }
+
+  static void _invalidateBlogs() {
+    _blogsCache = null;
+    _blogsCachedAt = null;
+  }
+
+  static void _invalidateCourses() {
+    _coursesCache = null;
+    _coursesCachedAt = null;
+  }
 
   static Future<List<BlogModel>> fetchBlogs({bool forceRefresh = false}) async {
     if (!forceRefresh && _isFresh(_blogsCachedAt) && _blogsCache != null) {
@@ -124,18 +143,16 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateBlogs();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to create blog'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error creating blog: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -160,18 +177,16 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateBlogs();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to update blog'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error updating blog: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -192,18 +207,16 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateBlogs();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to delete blog'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting blog: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -233,18 +246,16 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateCourses();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to create course video'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error creating course video: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -278,18 +289,16 @@ class SheetsService {
         sheetsApiBase,
       ).replace(queryParameters: queryParams);
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateCourses();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to update course video'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error updating course video: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -310,18 +319,16 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = _decodeResult(response.body);
+        if (data['success'] == true) _invalidateCourses();
         return data;
       } else {
         return {'success': false, 'error': 'Failed to delete course video'};
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error deleting course video: $e');
-      }
       return {'success': false, 'error': e.toString()};
     }
   }
@@ -342,7 +349,7 @@ class SheetsService {
         },
       );
 
-      final response = await http.get(uri);
+      final response = await _get(uri);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -351,9 +358,6 @@ class SheetsService {
         return [];
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching raw courses: $e');
-      }
       return [];
     }
   }

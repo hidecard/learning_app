@@ -38,9 +38,9 @@ class BlogService {
     }
   }
 
-  Future<void> toggleLike(String blogId) async {
+  Future<bool> toggleLike(String blogId) async {
     final user = _auth.currentUser;
-    if (user == null || blogId.isEmpty) return;
+    if (user == null || blogId.isEmpty) return false;
 
     try {
       final blogRef = _firestore.collection('blogs').doc(blogId);
@@ -76,8 +76,29 @@ class BlogService {
           });
         }
       });
+      return true;
     } catch (_) {
       // The card retains its previous state when an analytics update fails.
+      return false;
+    }
+  }
+
+  Future<Set<String>> getLikedBlogIds(Iterable<String> blogIds) async {
+    final user = _auth.currentUser;
+    final requestedIds = blogIds.where((id) => id.isNotEmpty).toSet();
+    if (user == null || requestedIds.isEmpty) return <String>{};
+
+    try {
+      final snapshot = await _firestore
+          .collection('blog_likes')
+          .where('user_id', isEqualTo: user.uid)
+          .get();
+      return snapshot.docs
+          .map((doc) => (doc.data()['blog_id'] as String?) ?? '')
+          .where(requestedIds.contains)
+          .toSet();
+    } catch (_) {
+      return <String>{};
     }
   }
 

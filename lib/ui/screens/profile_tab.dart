@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../logic/controllers/auth_controller.dart';
+import '../../logic/controllers/theme_controller.dart';
 import 'edit_profile_screen.dart';
 import 'about_screen.dart';
 import 'activation_key_screen.dart';
@@ -14,7 +15,7 @@ class ProfileTab extends StatelessWidget {
     final authController = Get.find<AuthController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Obx(() {
         final currentUser = authController.currentUser.value;
         if (currentUser == null) {
@@ -28,7 +29,7 @@ class ProfileTab extends StatelessWidget {
         return SingleChildScrollView(
           child: Column(
             children: [
-              _buildProfileHeader(currentUser),
+              _buildProfileHeader(context, currentUser),
               const SizedBox(height: 20),
               _buildMenuItems(context, currentUser),
               const SizedBox(height: 20),
@@ -39,7 +40,7 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(UserModel currentUser) {
+  Widget _buildProfileHeader(BuildContext context, UserModel currentUser) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -177,6 +178,11 @@ class ProfileTab extends StatelessWidget {
           'color': const Color(0xFF00C2FF),
         },
       {'icon': Icons.info, 'title': 'About', 'color': const Color(0xFF007BFF)},
+      {
+        'icon': Icons.dark_mode,
+        'title': 'Dark mode',
+        'color': const Color(0xFF007BFF),
+      },
       {'icon': Icons.logout, 'title': 'Logout', 'color': Colors.red},
     ];
 
@@ -184,7 +190,7 @@ class ProfileTab extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -236,6 +242,9 @@ class ProfileTab extends StatelessWidget {
           case 'About':
             Get.to(() => const AboutScreen());
             break;
+          case 'Dark mode':
+            Get.find<ThemeController>().toggleTheme();
+            break;
           case 'Logout':
             _showLogoutDialog(context, authController);
             break;
@@ -260,10 +269,10 @@ class ProfileTab extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF3C4852),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -283,11 +292,19 @@ class ProfileTab extends StatelessWidget {
                   size: 16,
                 ),
               ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: const Color(0xFF3C4852).withValues(alpha: 0.6),
-            ),
+            if (title == 'Dark mode')
+              Obx(
+                () => Switch(
+                  value: Get.find<ThemeController>().isDarkMode.value,
+                  onChanged: (_) => Get.find<ThemeController>().toggleTheme(),
+                ),
+              )
+            else
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
           ],
         ),
       ),

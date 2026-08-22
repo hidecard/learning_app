@@ -1,11 +1,11 @@
 {
-    "name": "learning_app",
-    "short_name": "learning_app",
+    "name": "Nexus Tech Learning",
+    "short_name": "Nexus Learning",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F9FC",
+    "theme_color": "#087EA4",
+    "description": "Video courses, technical articles, and premium learning content from Nexus Tech.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -14,15 +14,24 @@ class UserModel {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    final email = (json['email'] as String? ?? '').trim();
+    final email = json['email']?.toString().trim() ?? '';
+    final rawName = json['name']?.toString().trim() ?? '';
+    final rawPremium = json['is_premium'];
+    final isPremium = rawPremium is bool
+        ? rawPremium
+        : rawPremium?.toString().toLowerCase() == 'true';
+    final rawActivationKey = json['activation_key']?.toString().trim();
+
     return UserModel(
-      id: json['id'] as String? ?? '',
+      id: (json['id'] ?? json['uid'])?.toString() ?? '',
       email: email,
-      name: (json['name'] as String?)?.trim().isNotEmpty == true
-          ? (json['name'] as String).trim()
+      name: rawName.isNotEmpty
+          ? rawName
           : (email.isEmpty ? 'User' : email.split('@').first),
-      isPremium: json['is_premium'] as bool? ?? false,
-      activationKey: json['activation_key'] as String?,
+      isPremium: isPremium,
+      activationKey: rawActivationKey?.isEmpty == true
+          ? null
+          : rawActivationKey,
     );
   }
 

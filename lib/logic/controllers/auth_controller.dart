@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,12 +12,20 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isInitialized = false.obs;
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  StreamSubscription<User?>? _authSubscription;
 
   @override
   void onInit() {
     super.onInit();
-    FirebaseAuth.instance.authStateChanges().listen(_handleAuthStateChange);
-    _checkUser();
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen(
+      _handleAuthStateChange,
+    );
+  }
+
+  @override
+  void onClose() {
+    _authSubscription?.cancel();
+    super.onClose();
   }
 
   Future<void> _handleAuthStateChange(User? user) async {

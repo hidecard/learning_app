@@ -37,9 +37,8 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
         _keyController.text.trim(),
       );
 
-      if (result['success']) {
-        // Update user's premium status
-        await authController.updatePremiumStatus(true);
+      if (result['success'] == true) {
+        await authController.refreshCurrentUser();
 
         Get.snackbar(
           'Success!',
@@ -59,23 +58,21 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           colorText: Colors.white,
         );
       }
-    } catch (e) {
+    } catch (_) {
       Get.snackbar(
-        'Error',
-        'Failed to validate activation key: $e',
+        'Activation failed',
+        'Could not activate the key. Please try again.',
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _removeCurrentKey() async {
+  Future<void> _removeCurrentKey(BuildContext context) async {
     final confirmed = await showDialog<bool>(
-      context: Get.context!,
+      context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove Activation Key'),
         content: const Text(
@@ -98,8 +95,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
 
     if (confirmed == true) {
       try {
-        await _activationService.removeActivationKey();
-        await authController.updatePremiumStatus(false);
+        await authController.removeActivationKey();
 
         Get.snackbar(
           'Key Removed',
@@ -108,13 +104,12 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           colorText: Colors.white,
         );
 
-        setState(() {
-          _showCurrentKey = false;
-        });
-      } catch (e) {
+        if (!mounted) return;
+        setState(() => _showCurrentKey = false);
+      } catch (_) {
         Get.snackbar(
           'Error',
-          'Failed to remove activation key: $e',
+          'Failed to remove activation key. Please try again.',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -326,7 +321,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        onPressed: _removeCurrentKey,
+                        onPressed: () => _removeCurrentKey(context),
                         icon: const Icon(
                           Icons.delete_outline,
                           color: Colors.red,

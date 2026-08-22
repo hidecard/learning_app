@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data/models/blog_model.dart';
-import '../../../data/services/blog_service.dart';
+import '../../data/models/blog_model.dart';
+import '../../data/services/blog_service.dart';
 
 class BlogDetail extends StatefulWidget {
   final BlogModel blog;
@@ -30,6 +30,7 @@ class _BlogDetailState extends State<BlogDetail> {
   Future<void> _updateViewCount() async {
     if (!_isViewCountUpdated) {
       final updatedBlog = await _blogService.updateBlogViewCount(_currentBlog);
+      if (!mounted) return;
       setState(() {
         _currentBlog = updatedBlog;
         _isViewCountUpdated = true;
@@ -39,9 +40,8 @@ class _BlogDetailState extends State<BlogDetail> {
 
   Future<void> _checkLikeStatus() async {
     final isLiked = await _blogService.isLikedByUser(_currentBlog.id);
-    setState(() {
-      _isLiked = isLiked;
-    });
+    if (!mounted) return;
+    setState(() => _isLiked = isLiked);
   }
 
   Future<void> _toggleLike() async {
@@ -52,19 +52,23 @@ class _BlogDetailState extends State<BlogDetail> {
     });
 
     try {
-      await _blogService.toggleLike(_currentBlog.id);
+      final toggled = await _blogService.toggleLike(_currentBlog.id);
+      if (!toggled) throw StateError('Like could not be updated');
       final updatedBlog = await _blogService.updateBlogLikeCount(_currentBlog);
       final isLiked = await _blogService.isLikedByUser(_currentBlog.id);
 
+      if (!mounted) return;
       setState(() {
         _currentBlog = updatedBlog;
         _isLiked = isLiked;
         _isLoadingLike = false;
       });
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
         _isLoadingLike = false;
       });
+      Get.snackbar('Like not saved', 'Please sign in and try again.');
     }
   }
 
@@ -73,8 +77,8 @@ class _BlogDetailState extends State<BlogDetail> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Blog Detail'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
           // Like button
           IconButton(
