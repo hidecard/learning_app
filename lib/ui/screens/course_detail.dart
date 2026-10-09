@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/course_model.dart';
 import '../../logic/controllers/auth_controller.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 import 'video_player_screen.dart';
 
 class CourseDetail extends StatelessWidget {
@@ -14,6 +15,7 @@ class CourseDetail extends StatelessWidget {
     final videos = course.videos ?? const <VideoInfo>[];
     final isPremium =
         Get.find<AuthController>().currentUser.value?.isPremium == true;
+    final learning = Get.find<LearningStateController>();
     final colors = Theme.of(context).colorScheme;
     final freeCount = videos.length < 10 ? videos.length : 10;
 
@@ -21,6 +23,11 @@ class CourseDetail extends StatelessWidget {
       appBar: AppBar(
         title: Text(course.title ?? 'Course'),
         actions: [
+          Obx(() => IconButton(
+            tooltip: learning.isCourseSaved(course) ? 'Remove saved course' : 'Save course',
+            onPressed: () => learning.toggleCourseSaved(course),
+            icon: Icon(learning.isCourseSaved(course) ? Icons.bookmark : Icons.bookmark_border),
+          )),
           IconButton(
             onPressed: () => Get.toNamed('/premium'),
             icon: const Icon(Icons.workspace_premium_outlined),
@@ -48,6 +55,22 @@ class CourseDetail extends StatelessWidget {
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
+                Obx(() {
+                  final progress = learning.progressFor(course);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 14),
+                      Row(children: [
+                        Expanded(child: LinearProgressIndicator(value: progress, minHeight: 7)),
+                        const SizedBox(width: 10),
+                        Text('${(progress * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w800)),
+                      ]),
+                      const SizedBox(height: 6),
+                      Text('${learning.completedCount(course)} of ${videos.length} lessons completed', style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12)),
+                    ],
+                  );
+                }),
                 const SizedBox(height: 6),
                 Text(
                   '${videos.length} lessons · Start with the first lesson and learn at your pace.',
@@ -67,6 +90,7 @@ class CourseDetail extends StatelessWidget {
                       entry.value,
                       isPremium,
                       course.title,
+                      course,
                     ),
                   ),
               ]),
@@ -171,9 +195,11 @@ class CourseDetail extends StatelessWidget {
     VideoInfo video,
     bool isPremium,
     String? courseTitle,
+    CourseModel course,
   ) {
     final locked = index >= 10 && !isPremium;
     final colors = Theme.of(context).colorScheme;
+    final completed = Get.find<LearningStateController>().isLessonCompleted(course, index);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Card(
@@ -182,8 +208,12 @@ class CourseDetail extends StatelessWidget {
           onTap: () => locked
               ? Get.toNamed('/premium')
               : Get.to(
-                  () =>
-                      VideoPlayerScreen(video: video, courseTitle: courseTitle),
+                  () => VideoPlayerScreen(
+                    video: video,
+                    courseTitle: courseTitle,
+                    course: course,
+                    lessonIndex: index,
+                  ),
                 ),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -194,15 +224,23 @@ class CourseDetail extends StatelessWidget {
                   height: 58,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: locked
-                        ? colors.surfaceContainerHighest
-                        : colors.primaryContainer,
+                    color: completed
+                        ? colors.tertiaryContainer
+                        : locked
+                            ? colors.surfaceContainerHighest
+                            : colors.primaryContainer,
                   ),
                   child: Icon(
-                    locked
-                        ? Icons.lock_outline_rounded
-                        : Icons.play_arrow_rounded,
-                    color: locked ? colors.onSurfaceVariant : colors.primary,
+                    completed
+                        ? Icons.check_circle_rounded
+                        : locked
+                            ? Icons.lock_outline_rounded
+                            : Icons.play_arrow_rounded,
+                    color: completed
+                        ? colors.tertiary
+                        : locked
+                            ? colors.onSurfaceVariant
+                            : colors.primary,
                     size: 28,
                   ),
                 ),

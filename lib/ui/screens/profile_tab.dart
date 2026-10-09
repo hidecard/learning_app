@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../data/models/user_model.dart';
 import '../../logic/controllers/auth_controller.dart';
 import '../../logic/controllers/theme_controller.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 import 'about_screen.dart';
 import 'activation_key_screen.dart';
 import 'edit_profile_screen.dart';
@@ -34,6 +35,15 @@ class ProfileTab extends StatelessWidget {
             _themeRow(context),
             _row(context, Icons.info_outline_rounded, 'About CodeNest', 'Privacy, terms and app information', () => Get.to(() => const AboutScreen())),
           ]),
+          const SizedBox(height: 20),
+          _label(context, 'YOUR LIBRARY'),
+          Obx(() {
+            final learning = Get.find<LearningStateController>();
+            return _group(context, [
+              _row(context, Icons.bookmark_outline_rounded, 'Saved courses', '${learning.savedCourses.length} saved courses', () => Get.snackbar('Saved courses', 'Open a course from your saved library when it appears in the course list.')),
+              _row(context, Icons.article_outlined, 'Saved articles', '${learning.savedBlogs.length} saved articles', () => Get.snackbar('Saved articles', 'Open an article from your saved library when it appears in the article list.')),
+            ]);
+          }),
           const SizedBox(height: 20),
           _label(context, 'SESSION'),
           _group(context, [_row(context, Icons.logout_rounded, 'Sign out', 'You can sign back in anytime', () => _confirmLogout(context, auth), danger: true)]),

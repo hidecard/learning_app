@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoInfo video;
   final String? courseTitle;
+  final CourseModel? course;
+  final int? lessonIndex;
 
-  const VideoPlayerScreen({super.key, required this.video, this.courseTitle});
+  const VideoPlayerScreen({super.key, required this.video, this.courseTitle, this.course, this.lessonIndex});
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
@@ -89,6 +92,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           handleColor: Color(0xFF273031),
         ),
         onEnded: (metadata) {
+          if (widget.course != null && widget.lessonIndex != null) {
+            Get.find<LearningStateController>().completeLesson(widget.course!, widget.lessonIndex!);
+          }
           _showVideoCompletedDialog();
         },
       ),
@@ -306,6 +312,26 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                       ),
 
+                      if (widget.course != null && widget.lessonIndex != null)
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: isTablet ? 32 : 20),
+                          child: Row(children: [
+                            Expanded(child: OutlinedButton.icon(
+                              onPressed: widget.lessonIndex! > 0 ? () => _openLesson(widget.lessonIndex! - 1) : null,
+                              icon: const Icon(Icons.arrow_back_rounded),
+                              label: const Text('Previous'),
+                            )),
+                            const SizedBox(width: 12),
+                            Expanded(child: FilledButton.icon(
+                              onPressed: widget.lessonIndex! + 1 < (widget.course!.videos?.length ?? 0)
+                                  ? () => _openLesson(widget.lessonIndex! + 1)
+                                  : null,
+                              icon: const Icon(Icons.arrow_forward_rounded),
+                              label: const Text('Next lesson'),
+                            )),
+                          ]),
+                        ),
+
                       SizedBox(height: isTablet ? 24 : 20),
                     ],
                   ),
@@ -370,8 +396,23 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _downloadVideo() {
-    // Implement download functionality
-    Get.snackbar('Download', 'Download functionality coming soon!');
+    Get.snackbar('Offline downloads', 'Download support will be available after offline storage is configured.');
+  }
+
+  void _openLesson(int index) {
+    final course = widget.course;
+    if (course == null || index < 0 || index >= (course.videos?.length ?? 0)) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VideoPlayerScreen(
+          video: course.videos![index],
+          courseTitle: widget.courseTitle,
+          course: course,
+          lessonIndex: index,
+        ),
+      ),
+    );
   }
 
   void _showVideoCompletedDialog() {

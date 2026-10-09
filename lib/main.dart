@@ -6,6 +6,7 @@ import 'data/services/connectivity_service.dart';
 import 'firebase_options.dart';
 import 'logic/controllers/auth_controller.dart';
 import 'logic/controllers/premium_controller.dart';
+import 'logic/controllers/learning_state_controller.dart';
 import 'logic/controllers/theme_controller.dart';
 import 'ui/screens/admin_screen.dart';
 import 'ui/screens/auth_screen.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
 
   Get.put(AuthController(), permanent: true);
   Get.put(PremiumController(), permanent: true);
+  Get.put(LearningStateController(), permanent: true);
   Get.put(ThemeController(), permanent: true);
   Get.put(ConnectivityService(), permanent: true);
 

@@ -23,12 +23,12 @@
 
 ## Next product improvements
 
-- [ ] Persist lesson watch progress and show Continue Learning on Home
-- [ ] Add completed lesson state and course progress percentage
-- [ ] Add saved/bookmarked courses and articles
+- [x] Persist lesson watch progress and show Continue Learning on Home
+- [x] Add completed lesson state and course progress percentage
+- [x] Add saved/bookmarked courses and articles
 - [ ] Add global search results for courses, lessons and articles
-- [ ] Add reading progress and estimated reading time to articles
-- [ ] Add next/previous lesson navigation in the video player
+- [x] Add estimated reading time to articles
+- [x] Add next/previous lesson navigation in the video player
 - [ ] Add offline lesson download state and offline library
 - [ ] Add streaks, daily learning goals and achievement badges
 - [ ] Add responsive tablet/desktop two-column course detail layout

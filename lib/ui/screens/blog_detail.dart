@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/blog_model.dart';
 import '../../data/services/blog_service.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 
 class BlogDetail extends StatefulWidget {
   final BlogModel blog;
@@ -59,6 +60,8 @@ class _BlogDetailState extends State<BlogDetail> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final learning = Get.find<LearningStateController>();
+    final readingMinutes = (_blog.content.trim().split(RegExp(r'\s+')).length / 200).ceil().clamp(1, 999);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Article'),
@@ -79,6 +82,11 @@ class _BlogDetailState extends State<BlogDetail> {
                     color: _liked ? colors.error : null,
                   ),
           ),
+          Obx(() => IconButton(
+            tooltip: learning.isBlogSaved(_blog) ? 'Remove saved article' : 'Save article',
+            onPressed: () => learning.toggleBlogSaved(_blog),
+            icon: Icon(learning.isBlogSaved(_blog) ? Icons.bookmark : Icons.bookmark_border),
+          )),
           IconButton(
             onPressed: () => Get.snackbar(
               'Share',
@@ -123,6 +131,7 @@ class _BlogDetailState extends State<BlogDetail> {
                         Icons.favorite_border_rounded,
                         '${_blog.likeCount} likes',
                       ),
+                      _meta(context, Icons.schedule_outlined, '$readingMinutes min read'),
                     ],
                   ),
                   const SizedBox(height: 18),

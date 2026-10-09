@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 
 import '../../data/models/blog_model.dart';
 import '../../data/models/course_model.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 import '../widgets/content_shimmer.dart';
 import 'main_navigation.dart';
+import 'video_player_screen.dart';
 
 class HomeTab extends StatefulWidget {
   final List<BlogModel> blogs;
@@ -84,6 +86,7 @@ class _HomeTabState extends State<HomeTab> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildStats(context),
+                  Obx(() => _buildContinueLearning(context)),
                   const SizedBox(height: 28),
                   _sectionHeader(context, 'Featured courses', 'View all', 1),
                   const SizedBox(height: 14),
@@ -163,6 +166,54 @@ class _HomeTabState extends State<HomeTab> {
       const SizedBox(width: 12),
       _stat(context, Icons.play_circle_outline, '${widget.courses.fold<int>(0, (sum, c) => sum + (c.videos?.length ?? 0))}', 'Lessons'),
     ]);
+  }
+
+  Widget _buildContinueLearning(BuildContext context) {
+    final learning = Get.find<LearningStateController>();
+    CourseModel? selected;
+    for (final course in widget.courses) {
+      if ((course.videos?.isNotEmpty ?? false) && learning.progressFor(course) < 1) {
+        selected = course;
+        break;
+      }
+    }
+    if (selected == null) return const SizedBox.shrink();
+    final course = selected;
+    final index = learning.resumeIndex(course).clamp(0, course.videos!.length - 1).toInt();
+    final progress = learning.progressFor(course);
+    return Card(
+      margin: const EdgeInsets.only(top: 18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Get.to(() => VideoPlayerScreen(
+          video: course.videos![index],
+          courseTitle: course.title,
+          course: course,
+          lessonIndex: index,
+        )),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
+              child: Icon(Icons.play_arrow_rounded, color: Theme.of(context).colorScheme.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Continue learning', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
+              const SizedBox(height: 4),
+              Text(course.title ?? 'Your course', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 7),
+              LinearProgressIndicator(value: progress, minHeight: 5),
+            ])),
+            const SizedBox(width: 10),
+            Text('${(progress * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w800)),
+          ]),
+        ),
+      ),
+    );
   }
 
   Widget _stat(BuildContext context, IconData icon, String value, String label) {
