@@ -32,7 +32,7 @@ class CourseList extends StatelessWidget {
               Text(
                 'No courses available',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -40,7 +40,7 @@ class CourseList extends StatelessWidget {
               Text(
                 'Pull down to refresh',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF0B0F10).withValues(alpha: 0.7),
+                  color: Color(0xFF0B0F10).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -116,7 +116,7 @@ class CourseList extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF0B0F10),
+                                color: Color(0xFF0B0F10),
                               ),
                         ),
                         const SizedBox(height: 8),
@@ -126,7 +126,7 @@ class CourseList extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(
+                            color: Color(
                               0xFFFFFFFF,
                             ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),

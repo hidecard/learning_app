@@ -167,14 +167,14 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
   Widget build(BuildContext context) {
     if (!_isAdmin()) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: Color(0xFFF5F7FA),
         appBar: AppBar(
           title: const Text(
             'Access Denied',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF0B0F10),
+              color: Color(0xFF0B0F10),
             ),
           ),
           backgroundColor: Colors.white,
@@ -195,7 +195,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                 ),
               ),
               SizedBox(height: 8),
@@ -210,14 +210,14 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text(
           'Key Management',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0B0F10),
+            color: Color(0xFF0B0F10),
           ),
         ),
         backgroundColor: Colors.white,
@@ -255,7 +255,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0B0F10),
+                        color: Color(0xFF0B0F10),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -264,12 +264,12 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter activation key (e.g., HIDECARD-123)',
                         hintStyle: TextStyle(
-                          color: const Color(0xFF0B0F10).withValues(alpha: 0.5),
+                          color: Color(0xFF0B0F10).withValues(alpha: 0.5),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: const Color(
+                            color: Color(
                               0xFF0B0F10,
                             ).withValues(alpha: 0.2),
                           ),
@@ -282,7 +282,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                           ),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF5F7FA),
+                        fillColor: Color(0xFFF5F7FA),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -355,7 +355,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF0B0F10),
+                      color: Color(0xFF0B0F10),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -386,14 +386,14 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                             border: Border.all(
                               color: key['is_used']
                                   ? Colors.grey.shade300
-                                  : const Color(
+                                  : Color(
                                       0xFFFFFFFF,
                                     ).withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(12),
                             color: key['is_used']
                                 ? Colors.grey.shade50
-                                : const Color(
+                                : Color(
                                     0xFFFFFFFF,
                                   ).withValues(alpha: 0.05),
                           ),
@@ -408,7 +408,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF0B0F10),
+                                        color: Color(0xFF0B0F10),
                                       ),
                                     ),
                                     const SizedBox(height: 4),

@@ -114,7 +114,7 @@ class _CourseVideoFormState extends State<CourseVideoForm> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                 ),
               ),
               const SizedBox(height: 24),

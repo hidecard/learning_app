@@ -89,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen>
             end: Alignment.bottomCenter,
             colors: [
               Colors.white,
-              const Color(0xFF273031),
-              const Color(0xFF0B0F10),
+              Color(0xFF273031),
+              Color(0xFF0B0F10),
               Colors.white,
             ],
           ),
@@ -126,8 +126,8 @@ class _HomeScreenState extends State<HomeScreen>
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.white,
-                        const Color(0xFF273031),
-                        const Color(0xFF0B0F10),
+                        Color(0xFF273031),
+                        Color(0xFF0B0F10),
                         Colors.transparent,
                       ],
                     ),
@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen>
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                     labelColor: Colors.white,
-                    unselectedLabelColor: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+                    unselectedLabelColor: Color(0xFF0B0F10).withValues(alpha: 0.6),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(4),
                     tabs: [
@@ -294,8 +294,8 @@ class _HomeScreenState extends State<HomeScreen>
           gradient: LinearGradient(
             colors: [
               Colors.white,
-              const Color(0xFF273031),
-              const Color(0xFF0B0F10),
+              Color(0xFF273031),
+              Color(0xFF0B0F10),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

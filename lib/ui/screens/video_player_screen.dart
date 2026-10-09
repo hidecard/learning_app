@@ -86,7 +86,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         progressIndicatorColor: Colors.white,
         progressColors: const ProgressBarColors(
           playedColor: Colors.white,
-          handleColor: const Color(0xFF273031),
+          handleColor: Color(0xFF273031),
         ),
         onEnded: (metadata) {
           _showVideoCompletedDialog();
@@ -205,7 +205,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 // Video Info Panel
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A1A),
+                    color: Color(0xFF1A1A1A),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -261,7 +261,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   gradient: const LinearGradient(
                                     colors: [
                                       Colors.white,
-                                      const Color(0xFF273031),
+                                      Color(0xFF273031),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
@@ -391,7 +391,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Color(0xFF1A1A1A),
         title: const Text(
           'Video Completed',
           style: TextStyle(color: Colors.white),

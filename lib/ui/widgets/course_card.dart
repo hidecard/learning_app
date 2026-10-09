@@ -51,7 +51,7 @@ class CourseVideoCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0B0F10),
+                          color: Color(0xFF0B0F10),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -62,7 +62,7 @@ class CourseVideoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF0B0F10).withValues(alpha: 0.8),
+                          color: Color(0xFF0B0F10).withValues(alpha: 0.8),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -71,7 +71,7 @@ class CourseVideoCard extends StatelessWidget {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: const Color(0xFF0B0F10)),
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF0B0F10)),
                   onSelected: (value) {
                     switch (value) {
                       case 'edit':

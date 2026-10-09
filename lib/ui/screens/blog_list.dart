@@ -98,7 +98,7 @@ class _BlogListState extends State<BlogList> {
               Text(
                 'No blogs available',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -106,7 +106,7 @@ class _BlogListState extends State<BlogList> {
               Text(
                 'Pull down to refresh',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF0B0F10).withValues(alpha: 0.7),
+                  color: Color(0xFF0B0F10).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -170,10 +170,10 @@ class _BlogListState extends State<BlogList> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(
+                                  Color(
                                     0xFFFFFFFF,
                                   ).withValues(alpha: 0.1),
-                                  const Color(
+                                  Color(
                                     0xFFFFFFFF,
                                   ).withValues(alpha: 0.05),
                                 ],
@@ -182,7 +182,7 @@ class _BlogListState extends State<BlogList> {
                             child: Icon(
                               Icons.image_not_supported,
                               size: 50,
-                              color: const Color(
+                              color: Color(
                                 0xFFFFFFFF,
                               ).withValues(alpha: 0.5),
                             ),
@@ -224,7 +224,7 @@ class _BlogListState extends State<BlogList> {
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF0B0F10),
+                                      color: Color(0xFF0B0F10),
                                     ),
                               ),
                             ),
@@ -235,7 +235,7 @@ class _BlogListState extends State<BlogList> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(
+                                color: Color(
                                   0xFFFFFFFF,
                                 ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
@@ -259,7 +259,7 @@ class _BlogListState extends State<BlogList> {
                               : blog.content,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                color: const Color(
+                                color: Color(
                                   0xFF0B0F10,
                                 ).withValues(alpha: 0.7),
                                 height: 1.5,
@@ -281,7 +281,7 @@ class _BlogListState extends State<BlogList> {
                                   child: Icon(
                                     Icons.visibility,
                                     size: 16,
-                                    color: const Color(
+                                    color: Color(
                                       0xFF0B0F10,
                                     ).withValues(alpha: 0.6),
                                   ),
@@ -291,7 +291,7 @@ class _BlogListState extends State<BlogList> {
                                   '${blog.viewCount} view${blog.viewCount == 1 ? '' : 's'}',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
-                                        color: const Color(
+                                        color: Color(
                                           0xFF0B0F10,
                                         ).withValues(alpha: 0.6),
                                       ),
@@ -332,7 +332,7 @@ class _BlogListState extends State<BlogList> {
                                                 size: 16,
                                                 color: isLiked
                                                     ? Colors.red
-                                                    : const Color(
+                                                    : Color(
                                                         0xFF0B0F10,
                                                       ).withValues(alpha: 0.6),
                                               ),
@@ -345,7 +345,7 @@ class _BlogListState extends State<BlogList> {
                                               ?.copyWith(
                                                 color: isLiked
                                                     ? Colors.red
-                                                    : const Color(
+                                                    : Color(
                                                         0xFF0B0F10,
                                                       ).withValues(alpha: 0.6),
                                               ),
@@ -362,7 +362,7 @@ class _BlogListState extends State<BlogList> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(
+                                color: Color(
                                   0xFFFFFFFF,
                                 ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),

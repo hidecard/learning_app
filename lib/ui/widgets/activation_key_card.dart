@@ -54,7 +54,7 @@ class ActivationKeyCard extends StatelessWidget {
                   activationKey.keyCode ?? 'Unknown',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0B0F10),
+                    color: Color(0xFF0B0F10),
                     fontSize: 16,
                   ),
                 ),
@@ -83,7 +83,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Created: ${_formatDate(activationKey.createdAt!)}',
               style: TextStyle(
-                color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+                color: Color(0xFF0B0F10).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -93,7 +93,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Used: ${_formatDate(activationKey.usedAt!)}',
               style: TextStyle(
-                color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+                color: Color(0xFF0B0F10).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -102,7 +102,7 @@ class ActivationKeyCard extends StatelessWidget {
               Text(
                 'User ID: ${activationKey.usedBy}',
                 style: TextStyle(
-                  color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+                  color: Color(0xFF0B0F10).withValues(alpha: 0.6),
                   fontSize: 12,
                 ),
               ),

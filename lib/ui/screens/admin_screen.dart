@@ -266,14 +266,14 @@ class _AdminScreenState extends State<AdminScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text(
           'Admin Panel',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0B0F10),
+            color: Color(0xFF0B0F10),
           ),
         ),
         backgroundColor: Colors.white,
@@ -282,7 +282,7 @@ class _AdminScreenState extends State<AdminScreen>
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
-          unselectedLabelColor: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+          unselectedLabelColor: Color(0xFF0B0F10).withValues(alpha: 0.6),
           indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'Blogs'),
@@ -311,7 +311,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                 ),
               ),
               const Spacer(),
@@ -405,7 +405,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                 ),
               ),
               const Spacer(),
@@ -520,7 +520,7 @@ class _AdminScreenState extends State<AdminScreen>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0B0F10),
+                          color: Color(0xFF0B0F10),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -529,7 +529,7 @@ class _AdminScreenState extends State<AdminScreen>
                         decoration: InputDecoration(
                           hintText: 'Enter key code (e.g., ABC-123)',
                           hintStyle: TextStyle(
-                            color: const Color(
+                            color: Color(
                               0xFF0B0F10,
                             ).withValues(alpha: 0.6),
                           ),
@@ -615,7 +615,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0B0F10),
+                  color: Color(0xFF0B0F10),
                 ),
               ),
               Container(
@@ -645,14 +645,14 @@ class _AdminScreenState extends State<AdminScreen>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F7FA),
+                color: Color(0xFFF5F7FA),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
                 child: Text(
                   'No ${isUsedSection ? 'used' : 'available'} keys',
                   style: TextStyle(
-                    color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+                    color: Color(0xFF0B0F10).withValues(alpha: 0.6),
                   ),
                 ),
               ),

@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.black, const Color(0xFF202829), colors.surface],
+              colors: [Colors.black, Color(0xFF202829), colors.surface],
               stops: const [0, 0.55, 1],
           ),
         ),

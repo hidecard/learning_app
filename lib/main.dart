@@ -45,14 +45,14 @@ class MyApp extends StatelessWidget {
         ).copyWith(
           primary: brightness == Brightness.dark ? Colors.white : _ink,
           onPrimary: brightness == Brightness.dark ? _ink : Colors.white,
-          secondary: brightness == Brightness.dark ? _liquid : const Color(0xFF667070),
+          secondary: brightness == Brightness.dark ? _liquid : Color(0xFF667070),
           onSecondary: brightness == Brightness.dark ? _ink : Colors.white,
           surfaceContainer: brightness == Brightness.dark
-              ? const Color(0xFF1A2122)
-              : const Color(0xFFE9EDED),
+              ? Color(0xFF1A2122)
+              : Color(0xFFE9EDED),
           surfaceContainerHighest: brightness == Brightness.dark
-              ? const Color(0xFF273031)
-              : const Color(0xFFDDE3E3),
+              ? Color(0xFF273031)
+              : Color(0xFFDDE3E3),
         );
 
     return ThemeData(
