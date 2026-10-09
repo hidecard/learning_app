@@ -42,6 +42,7 @@ class ProfileTab extends StatelessWidget {
             return _group(context, [
               _row(context, Icons.bookmark_outline_rounded, 'Saved courses', '${learning.savedCourses.length} saved courses', () => Get.snackbar('Saved courses', 'Open a course from your saved library when it appears in the course list.')),
               _row(context, Icons.article_outlined, 'Saved articles', '${learning.savedBlogs.length} saved articles', () => Get.snackbar('Saved articles', 'Open an article from your saved library when it appears in the article list.')),
+              _row(context, Icons.download_done_rounded, 'Offline lessons', '${learning.downloadedLessons.length} lessons saved on this device', () => Get.snackbar('Offline lessons', 'Open a saved lesson from its course page to continue learning.')),
             ]);
           }),
           const SizedBox(height: 20),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
+import '../../logic/controllers/auth_controller.dart';
 import '../../logic/controllers/learning_state_controller.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -301,12 +302,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                             SizedBox(width: isTablet ? 16 : 12),
                             Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.download_outlined,
-                                label: 'Download',
-                                onTap: _downloadVideo,
-                                isTablet: isTablet,
-                              ),
+                              child: Obx(() {
+                                final downloaded = widget.course != null && widget.lessonIndex != null
+                                    ? Get.find<LearningStateController>().isLessonDownloaded(widget.course!, widget.lessonIndex!)
+                                    : false;
+                                return _buildActionButton(
+                                  icon: downloaded ? Icons.download_done_rounded : Icons.download_outlined,
+                                  label: downloaded ? 'Downloaded' : 'Download',
+                                  onTap: _downloadVideo,
+                                  isTablet: isTablet,
+                                );
+                              }),
                             ),
                           ],
                         ),
@@ -396,7 +402,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _downloadVideo() {
-    Get.snackbar('Offline downloads', 'Download support will be available after offline storage is configured.');
+    final isPremium = Get.find<AuthController>().currentUser.value?.isPremium == true;
+    final course = widget.course;
+    final index = widget.lessonIndex;
+    if (!isPremium) {
+      Get.snackbar('Premium feature', 'Activate Premium to save lessons for offline access.');
+      Get.toNamed('/premium');
+      return;
+    }
+    if (course == null || index == null) {
+      Get.snackbar('Offline save unavailable', 'This lesson is missing course information.');
+      return;
+    }
+    final learning = Get.find<LearningStateController>();
+    final downloaded = learning.isLessonDownloaded(course, index);
+    learning.toggleLessonDownload(course, index);
+    Get.snackbar(
+      downloaded ? 'Removed from offline library' : 'Saved for offline access',
+      downloaded
+          ? 'This lesson was removed from your device library.'
+          : 'Premium offline access is ready for this lesson.',
+    );
   }
 
   void _openLesson(int index) {

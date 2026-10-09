@@ -29,7 +29,7 @@
 - [ ] Add global search results for courses, lessons and articles
 - [x] Add estimated reading time to articles
 - [x] Add next/previous lesson navigation in the video player
-- [ ] Add offline lesson download state and offline library
+- [x] Add premium-only offline lesson download state and offline library count
 - [ ] Add streaks, daily learning goals and achievement badges
 - [ ] Add responsive tablet/desktop two-column course detail layout
 - [ ] Add accessibility audit for text contrast, semantics and text scaling

@@ -8,6 +8,7 @@ class LearningStateController extends GetxController {
   final completedLessons = <String>{}.obs;
   final savedCourses = <String>{}.obs;
   final savedBlogs = <String>{}.obs;
+  final downloadedLessons = <String>{}.obs;
   final resumeIndexes = <String, int>{}.obs;
   final isReady = false.obs;
   SharedPreferences? _prefs;
@@ -44,6 +45,9 @@ class LearningStateController extends GetxController {
   bool isCourseSaved(CourseModel course) => savedCourses.contains(courseKey(course));
   bool isBlogSaved(BlogModel blog) => savedBlogs.contains(blog.id);
 
+  bool isLessonDownloaded(CourseModel course, int index) =>
+      downloadedLessons.contains(lessonKey(course, index));
+
   int resumeIndex(CourseModel course) => resumeIndexes[courseKey(course)] ?? 0;
 
   Future<void> setResume(CourseModel course, int index) async {
@@ -69,11 +73,22 @@ class LearningStateController extends GetxController {
     await _persist();
   }
 
+  Future<void> toggleLessonDownload(CourseModel course, int index) async {
+    final key = lessonKey(course, index);
+    downloadedLessons.contains(key)
+        ? downloadedLessons.remove(key)
+        : downloadedLessons.add(key);
+    await _persist();
+  }
+
   Future<void> _load() async {
     _prefs = await SharedPreferences.getInstance();
     completedLessons.assignAll(_prefs?.getStringList('completed_lessons') ?? const []);
     savedCourses.assignAll(_prefs?.getStringList('saved_courses') ?? const []);
     savedBlogs.assignAll(_prefs?.getStringList('saved_blogs') ?? const []);
+    downloadedLessons.assignAll(
+      _prefs?.getStringList('downloaded_lessons') ?? const [],
+    );
     final rawResume = _prefs?.getStringList('resume_indexes') ?? const [];
     for (final entry in rawResume) {
       final split = entry.split('::');
@@ -91,6 +106,7 @@ class LearningStateController extends GetxController {
       prefs.setStringList('completed_lessons', completedLessons.toList()),
       prefs.setStringList('saved_courses', savedCourses.toList()),
       prefs.setStringList('saved_blogs', savedBlogs.toList()),
+      prefs.setStringList('downloaded_lessons', downloadedLessons.toList()),
       prefs.setStringList(
         'resume_indexes',
         resumeIndexes.entries.map((entry) => '${entry.key}::${entry.value}').toList(),
