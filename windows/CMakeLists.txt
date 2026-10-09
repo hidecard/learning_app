@@ -1,5 +1,8 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+# Firebase's bundled Windows SDK still declares a pre-3.5 policy baseline.
+# Keep the project buildable with CMake 4 while that dependency is present.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(nexus_tech_learning LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
