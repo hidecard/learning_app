@@ -15,6 +15,7 @@ import 'ui/screens/main_navigation.dart';
 import 'ui/screens/premium_screen.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/widgets/connectivity_wrapper.dart';
+import 'ui/widgets/glass_surface.dart';
 
 const _brandBlue = Color(0xFF087EA4);
 
@@ -54,13 +55,13 @@ class MyApp extends StatelessWidget {
       colorScheme: colorScheme,
       useMaterial3: true,
       brightness: brightness,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: Colors.transparent,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.45)
-            : Colors.white,
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.42)
+            : Colors.white.withValues(alpha: .62),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -82,9 +83,16 @@ class MyApp extends StatelessWidget {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: brightness == Brightness.dark
-            ? colorScheme.surfaceContainer
-            : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ? colorScheme.surfaceContainer.withValues(alpha: .68)
+            : Colors.white.withValues(alpha: .68),
+        surfaceTintColor: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: brightness == Brightness.dark ? .12 : .62),
+          ),
+        ),
       ),
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant.withValues(alpha: .7),
@@ -94,12 +102,24 @@ class MyApp extends StatelessWidget {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
+      ),
+      dialogTheme: DialogThemeData(
+        elevation: 0,
+        backgroundColor: brightness == Brightness.dark
+            ? colorScheme.surface.withValues(alpha: .82)
+            : Colors.white.withValues(alpha: .86),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
-        backgroundColor: colorScheme.surface,
+        backgroundColor: brightness == Brightness.dark
+            ? colorScheme.surface.withValues(alpha: .72)
+            : Colors.white.withValues(alpha: .72),
+        surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.primaryContainer,
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
@@ -133,7 +153,9 @@ class MyApp extends StatelessWidget {
       darkTheme: _theme(Brightness.dark),
       themeMode: themeController.themeMode,
       builder: (context, child) =>
-          ConnectivityWrapper(child: child ?? const SizedBox.shrink()),
+          GlassBackdrop(
+            child: ConnectivityWrapper(child: child ?? const SizedBox.shrink()),
+          ),
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const SplashScreen()),
