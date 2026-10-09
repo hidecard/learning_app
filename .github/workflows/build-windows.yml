@@ -27,7 +27,27 @@ jobs:
         run: |
           choco install cmake --version=3.31.6 --installargs 'ADD_CMAKE_TO_PATH=System' -y --force
           echo 'C:\Program Files\CMake\bin' >> $env:GITHUB_PATH
-      - run: flutter build windows --release
+      - name: Build Windows release with Firebase CMake compatibility patch
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          flutter build windows --release
+          $firstExit = $LASTEXITCODE
+          if ($firstExit -ne 0) {
+            $firebaseCmake = Get-ChildItem -Path 'build/windows' -Recurse -Filter 'CMakeLists.txt' |
+              Where-Object { $_.FullName -like '*firebase_cpp_sdk_windows*' } |
+              Select-Object -First 1
+            if ($null -eq $firebaseCmake) {
+              Write-Error 'Firebase Windows SDK CMakeLists.txt was not extracted.'
+              exit $firstExit
+            }
+            Write-Host "Patching $($firebaseCmake.FullName) for CMake 4 compatibility"
+            $content = Get-Content $firebaseCmake.FullName -Raw
+            $content = $content -replace 'cmake_minimum_required\(VERSION\s+[0-9.]+\)', 'cmake_minimum_required(VERSION 3.5)'
+            Set-Content -Path $firebaseCmake.FullName -Value $content -NoNewline
+            flutter build windows --release
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Archive Windows release
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath nexus-tech-learning-windows-${{ github.sha }}.zip
