@@ -34,20 +34,28 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   ThemeData _theme(Brightness brightness) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: _brandBlue,
-      brightness: brightness,
-      surface: brightness == Brightness.dark
-          ? const Color(0xFF111820)
-          : const Color(0xFFF7F9FC),
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: _brandBlue,
+          brightness: brightness,
+          surface: brightness == Brightness.dark
+              ? const Color(0xFF0F1720)
+              : const Color(0xFFF7F9FC),
+        ).copyWith(
+          primary: brightness == Brightness.dark
+              ? const Color(0xFF55C8E8)
+              : const Color(0xFF087EA4),
+          secondary: brightness == Brightness.dark
+              ? const Color(0xFF86A8FF)
+              : const Color(0xFF3867D6),
+        );
 
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: colorScheme.surface,
-      visualDensity: VisualDensity.standard,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: brightness == Brightness.dark
@@ -77,6 +85,11 @@ class MyApp extends StatelessWidget {
             ? colorScheme.surfaceContainer
             : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      dividerTheme: DividerThemeData(
+        color: colorScheme.outlineVariant.withValues(alpha: .7),
+        space: 1,
+        thickness: 1,
       ),
       appBarTheme: AppBarTheme(
         centerTitle: false,

@@ -1,0 +1,33 @@
+name: Build Flutter Web
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build web --release
+      - name: Archive web release
+        run: tar -czf nexus-tech-learning-web-${GITHUB_SHA::7}.tar.gz -C build web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexus-tech-learning-web
+          path: nexus-tech-learning-web-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30

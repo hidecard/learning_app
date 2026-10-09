@@ -7,7 +7,6 @@ class CoursesTab extends StatefulWidget {
   final bool isLoading;
   final String? errorMessage;
   final VoidCallback onRefresh;
-
   const CoursesTab({
     super.key,
     required this.courses,
@@ -15,579 +14,262 @@ class CoursesTab extends StatefulWidget {
     required this.errorMessage,
     required this.onRefresh,
   });
-
   @override
   State<CoursesTab> createState() => _CoursesTabState();
 }
 
 class _CoursesTabState extends State<CoursesTab> {
-  final TextEditingController _searchController = TextEditingController();
-  List<CourseModel> _filteredCourses = [];
-  String _selectedCategory = 'All';
-  bool _isSearching = false;
+  final _search = TextEditingController();
+  String _category = 'All';
   List<String> _categories = ['All'];
+  List<CourseModel> _filtered = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredCourses = widget.courses;
-    _searchController.addListener(_onSearchChanged);
-    _extractCategoriesFromAPI();
+    _search.addListener(_apply);
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant CoursesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.courses != widget.courses) _sync();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
+    _search.dispose();
     super.dispose();
   }
 
-  void _extractCategoriesFromAPI() {
-    final Set<String> categorySet = {'All'};
-
+  void _sync() {
+    final values = <String>{'All'};
     for (final course in widget.courses) {
-      if (course.videos != null) {
-        for (final video in course.videos!) {
-          if (video.category != null && video.category!.isNotEmpty) {
-            categorySet.add(video.category!);
-          }
-        }
+      for (final video in course.videos ?? const <VideoInfo>[]) {
+        if (video.category?.isNotEmpty == true) values.add(video.category!);
       }
     }
-
-    setState(() {
-      _categories = categorySet.toList();
-      _categories.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    });
+    _categories = values.toList()..sort();
+    _apply();
   }
 
-  void _onSearchChanged() {
-    final query = _searchController.text.toLowerCase();
-
-    setState(() {
-      if (query.isEmpty) {
-        _isSearching = false;
-        _applyCategoryFilter();
-      } else {
-        _isSearching = true;
-        _filteredCourses = widget.courses.where((course) {
-          final title = course.title?.toLowerCase() ?? '';
-          return title.contains(query);
-        }).toList();
-      }
-    });
-  }
-
-  void _applyCategoryFilter() {
-    if (_selectedCategory == 'All') {
-      _filteredCourses = _isSearching
-          ? widget.courses.where((course) {
-              final title = course.title?.toLowerCase() ?? '';
-              return title.contains(_searchController.text.toLowerCase());
-            }).toList()
-          : widget.courses;
-    } else {
-      _filteredCourses = widget.courses.where((course) {
-        final title = course.title?.toLowerCase() ?? '';
-        final matchesSearch = _isSearching
-            ? title.contains(_searchController.text.toLowerCase())
-            : true;
-
-        // Check if course has videos with the selected category
-        final hasCategory =
-            course.videos?.any(
-              (video) =>
-                  video.category != null &&
-                  video.category!.toLowerCase() ==
-                      _selectedCategory.toLowerCase(),
-            ) ??
-            false;
-
-        return matchesSearch && hasCategory;
-      }).toList();
-    }
-  }
-
-  void _showCategoryFilter(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: const Text(
-                'Select Category',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF3C4852),
-                ),
-              ),
-            ),
-            const Divider(),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  final category = _categories[index];
-                  final isSelected = category == _selectedCategory;
-
-                  return ListTile(
-                    title: Text(
-                      category,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: isSelected
-                            ? const Color(0xFF00C2FF)
-                            : const Color(0xFF3C4852),
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? const Icon(Icons.check, color: Color(0xFF00C2FF))
-                        : null,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _onCategoryChanged(category);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _onCategoryChanged(String category) {
-    setState(() {
-      _selectedCategory = category;
-      _applyCategoryFilter();
-    });
+  void _apply() {
+    final query = _search.text.trim().toLowerCase();
+    final results = widget.courses.where((course) {
+      final textMatch = (course.title ?? '').toLowerCase().contains(query);
+      final categoryMatch =
+          _category == 'All' ||
+          (course.videos ?? const <VideoInfo>[]).any(
+            (video) => video.category?.toLowerCase() == _category.toLowerCase(),
+          );
+      return textMatch && categoryMatch;
+    }).toList();
+    if (mounted) setState(() => _filtered = results);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text(
-          'Courses',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF3C4852),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
+        title: const Text('Courses'),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.filter_list, color: Color(0xFF00C2FF)),
-              onPressed: () {
-                _showCategoryFilter(context);
-              },
-            ),
+          IconButton(
+            onPressed: widget.onRefresh,
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search courses...',
-                hintStyle: const TextStyle(
-                  color: Color(0xFF3C4852),
-                  fontSize: 16,
-                ),
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF00C2FF)),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, color: Color(0xFF00C2FF)),
-                        onPressed: () {
-                          _searchController.clear();
-                        },
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-              style: const TextStyle(color: Color(0xFF3C4852), fontSize: 16),
-            ),
-          ),
-
-          // Category Filter
-          Container(
-            height: 50,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final isSelected = category == _selectedCategory;
-
-                return GestureDetector(
-                  onTap: () => _onCategoryChanged(category),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: isSelected
-                          ? LinearGradient(
-                              colors: [
-                                const Color(0xFF00C2FF),
-                                const Color(0xFF007BFF),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            )
-                          : null,
-                      color: isSelected ? null : const Color(0xFFF5F7FA),
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                        color: isSelected
-                            ? Colors.transparent
-                            : const Color(0xFFE0E0E0),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF00C2FF),
-                          ),
-                        ),
-                        if (isSelected) ...[
-                          const SizedBox(width: 8),
-                          const Text(
-                            '✓',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            category,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF3C4852),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Course List
-          Expanded(
-            child: widget.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF00C2FF),
-                      ),
-                    ),
-                  )
-                : widget.errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.error_outline,
-                            size: 48,
-                            color: Colors.red,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          widget.errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: widget.onRefresh,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00C2FF),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
-                : _filteredCourses.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF00C2FF,
-                            ).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(
-                            Icons.school_outlined,
-                            size: 64,
-                            color: Color(0xFF00C2FF),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          _isSearching
-                              ? 'No courses found'
-                              : 'No courses available',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF3C4852),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Try adjusting your search or filters',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF3C4852).withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      widget.onRefresh();
-                    },
-                    color: const Color(0xFF00C2FF),
-                    child: _buildCoursesList(),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoursesList() {
-    if (_filteredCourses.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: RefreshIndicator(
+        onRefresh: () async => widget.onRefresh(),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.school_outlined,
-                size: 64,
-                color: Color(0xFF00C2FF),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'No courses found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF3C4852),
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
-              'Pull down to refresh',
+              'Explore and learn',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Find a focused course and start your next lesson.',
               style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF3C4852).withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+            const SizedBox(height: 18),
+            TextField(
+              controller: _search,
+              decoration: InputDecoration(
+                hintText: 'Search courses',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _search.text.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: _search.clear,
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _categories.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => ChoiceChip(
+                  label: Text(_categories[index]),
+                  selected: _categories[index] == _category,
+                  onSelected: (_) {
+                    setState(() => _category = _categories[index]);
+                    _apply();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            if (widget.isLoading)
+              const SizedBox(
+                height: 220,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (widget.errorMessage != null)
+              _error(context)
+            else if (_filtered.isEmpty)
+              _empty(context)
+            else
+              ..._filtered.map((course) => _card(context, course)),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
+  Widget _card(BuildContext context, CourseModel course) {
+    final colors = Theme.of(context).colorScheme;
+    final count = course.videos?.length ?? 0;
+    final categories = (course.videos ?? const <VideoInfo>[])
+        .map((video) => video.category)
+        .whereType<String>()
+        .toSet()
+        .take(2)
+        .join(' · ');
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: _filteredCourses.length,
-        itemBuilder: (context, index) {
-          final course = _filteredCourses[index];
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => Get.toNamed('/course-detail', arguments: course),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 82,
+                  height: 82,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colors.primaryContainer,
+                        colors.secondaryContainer,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.school_rounded,
+                    color: colors.primary,
+                    size: 35,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        course.title?.isNotEmpty == true
+                            ? course.title!
+                            : 'Untitled course',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        '$count lessons${categories.isEmpty ? '' : ' · $categories'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colors.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'View course →',
+                        style: TextStyle(
+                          color: colors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: colors.onSurfaceVariant,
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _buildCourseCard(course),
-            ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildCourseCard(CourseModel course) {
-    return GestureDetector(
-      onTap: () => Get.toNamed('/course-detail', arguments: course),
+  Widget _empty(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 80),
+    child: Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            height: 120,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF00C2FF), Color(0xFF007BFF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.school, color: Colors.white, size: 50),
+          Icon(
+            Icons.school_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.outline,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
-            course.title ?? 'Untitled Course',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF3C4852),
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            _search.text.isEmpty
+                ? 'No courses available'
+                : 'No courses match your search',
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.play_circle, color: Color(0xFF00C2FF), size: 16),
-              const SizedBox(width: 4),
-              Text(
-                '${course.videos?.length ?? 0} videos',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF00C2FF),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Color(0xFF00C2FF),
-                      size: 10,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'View',
-                      style: const TextStyle(
-                        color: Color(0xFF00C2FF),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 6),
+          Text(
+            'Try another keyword or category.',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+  Widget _error(BuildContext context) => Card(
+    child: ListTile(
+      leading: const Icon(Icons.cloud_off_rounded),
+      title: Text(widget.errorMessage!),
+      trailing: TextButton(
+        onPressed: widget.onRefresh,
+        child: const Text('Retry'),
+      ),
+    ),
+  );
 }

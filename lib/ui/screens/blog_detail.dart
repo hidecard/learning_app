@@ -1,116 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../data/models/blog_model.dart';
 import '../../data/services/blog_service.dart';
 
 class BlogDetail extends StatefulWidget {
   final BlogModel blog;
-
   const BlogDetail({super.key, required this.blog});
-
   @override
   State<BlogDetail> createState() => _BlogDetailState();
 }
 
 class _BlogDetailState extends State<BlogDetail> {
-  final BlogService _blogService = BlogService();
-  late BlogModel _currentBlog;
-  bool _isViewCountUpdated = false;
-  bool _isLiked = false;
-  bool _isLoadingLike = false;
+  final _service = BlogService();
+  late BlogModel _blog;
+  bool _liked = false;
+  bool _busy = false;
 
   @override
   void initState() {
     super.initState();
-    _currentBlog = widget.blog;
-    _updateViewCount();
-    _checkLikeStatus();
+    _blog = widget.blog;
+    _hydrate();
   }
 
-  Future<void> _updateViewCount() async {
-    if (!_isViewCountUpdated) {
-      final updatedBlog = await _blogService.updateBlogViewCount(_currentBlog);
-      if (!mounted) return;
-      setState(() {
-        _currentBlog = updatedBlog;
-        _isViewCountUpdated = true;
-      });
-    }
-  }
-
-  Future<void> _checkLikeStatus() async {
-    final isLiked = await _blogService.isLikedByUser(_currentBlog.id);
+  Future<void> _hydrate() async {
+    final viewed = await _service.updateBlogViewCount(_blog);
+    final liked = await _service.isLikedByUser(_blog.id);
     if (!mounted) return;
-    setState(() => _isLiked = isLiked);
+    setState(() {
+      _blog = viewed;
+      _liked = liked;
+    });
   }
 
   Future<void> _toggleLike() async {
-    if (_isLoadingLike) return;
-
-    setState(() {
-      _isLoadingLike = true;
-    });
-
+    if (_busy) return;
+    setState(() => _busy = true);
     try {
-      final toggled = await _blogService.toggleLike(_currentBlog.id);
-      if (!toggled) throw StateError('Like could not be updated');
-      final updatedBlog = await _blogService.updateBlogLikeCount(_currentBlog);
-      final isLiked = await _blogService.isLikedByUser(_currentBlog.id);
-
-      if (!mounted) return;
-      setState(() {
-        _currentBlog = updatedBlog;
-        _isLiked = isLiked;
-        _isLoadingLike = false;
-      });
+      if (!await _service.toggleLike(_blog.id)) throw StateError('like failed');
+      final stats = await _service.getStats(_blog.id);
+      final liked = await _service.isLikedByUser(_blog.id);
+      if (mounted) {
+        setState(() {
+          _blog = _blog.copyWith(
+            viewCount: stats.viewCount,
+            likeCount: stats.likeCount,
+          );
+          _liked = liked;
+        });
+      }
     } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isLoadingLike = false;
-      });
       Get.snackbar('Like not saved', 'Please sign in and try again.');
     }
+    if (mounted) setState(() => _busy = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blog Detail'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        title: const Text('Article'),
         actions: [
-          // Like button
           IconButton(
-            onPressed: _isLoadingLike ? null : _toggleLike,
-            icon: _isLoadingLike
+            onPressed: _toggleLike,
+            tooltip: 'Like article',
+            icon: _busy
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Icon(
-                    _isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: _isLiked ? Colors.red : Colors.white,
+                    _liked
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: _liked ? colors.error : null,
                   ),
           ),
-          // View count display
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.visibility, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '${_currentBlog.viewCount}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
+          IconButton(
+            onPressed: () => Get.snackbar(
+              'Share',
+              'Share link copied when sharing is available.',
             ),
+            icon: const Icon(Icons.share_outlined),
           ),
         ],
       ),
@@ -118,221 +92,68 @@ class _BlogDetailState extends State<BlogDetail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Blog image
-            if (_currentBlog.imageUrl != null &&
-                _currentBlog.imageUrl!.isNotEmpty)
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(16),
-                ),
-                child: Image.network(
-                  _currentBlog.imageUrl!,
-                  height: 250,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 250,
-                      width: double.infinity,
-                      color: Colors.grey[300],
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.image_not_supported,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Image not available',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      height: 250,
-                      width: double.infinity,
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            // Blog content
+            if (_blog.imageUrl?.isNotEmpty == true)
+              Image.network(
+                _blog.imageUrl!,
+                height: 230,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _imageFallback(context),
+              )
+            else
+              _imageFallback(context),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category chip, view count, and like count
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      Chip(
-                        label: Text(
-                          _currentBlog.category,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        backgroundColor: Colors.deepPurple,
+                      _meta(context, Icons.sell_outlined, _blog.category),
+                      _meta(
+                        context,
+                        Icons.visibility_outlined,
+                        '${_blog.viewCount} views',
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.visibility,
-                              size: 16,
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_currentBlog.viewCount} view${_currentBlog.viewCount == 1 ? '' : 's'}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _isLiked ? Icons.favorite : Icons.favorite_border,
-                              size: 16,
-                              color: _isLiked ? Colors.red : Colors.grey[600],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_currentBlog.likeCount} like${_currentBlog.likeCount == 1 ? '' : 's'}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                      _meta(
+                        context,
+                        Icons.favorite_border_rounded,
+                        '${_blog.likeCount} likes',
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Title
+                  const SizedBox(height: 18),
                   Text(
-                    _currentBlog.title,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      height: 1.3,
+                    _blog.title,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.15,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Content
+                  const SizedBox(height: 18),
+                  Divider(color: colors.outlineVariant),
+                  const SizedBox(height: 18),
                   Text(
-                    _currentBlog.content,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      height: 1.6,
-                      color: Colors.black87,
-                    ),
+                    _blog.content,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(height: 1.75),
                   ),
-                  const SizedBox(height: 24),
-                  // Like button
-                  Center(
-                    child: ElevatedButton.icon(
-                      onPressed: _isLoadingLike ? null : _toggleLike,
-                      icon: _isLoadingLike
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
-                              ),
-                            )
-                          : Icon(
-                              _isLiked ? Icons.favorite : Icons.favorite_border,
-                            ),
-                      label: Text(_isLiked ? 'Liked' : 'Like'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isLiked
-                            ? Colors.red
-                            : Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _toggleLike,
+                      icon: Icon(
+                        _liked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                       ),
+                      label: Text(_liked ? 'Liked' : 'Like this article'),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Like count display
-                  Center(
-                    child: Text(
-                      '${_currentBlog.likeCount} ${_currentBlog.likeCount == 1 ? 'person likes' : 'people like'} this',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back to Blogs'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -342,4 +163,33 @@ class _BlogDetailState extends State<BlogDetail> {
       ),
     );
   }
+
+  Widget _imageFallback(BuildContext context) => Container(
+    height: 190,
+    width: double.infinity,
+    color: Theme.of(context).colorScheme.primaryContainer,
+    child: Icon(
+      Icons.article_outlined,
+      size: 58,
+      color: Theme.of(context).colorScheme.primary,
+    ),
+  );
+  Widget _meta(BuildContext context, IconData icon, String text) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 5),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        ),
+      ],
+    ),
+  );
 }

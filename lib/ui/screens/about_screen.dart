@@ -7,349 +7,153 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: const Text(
-          'About',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF3C4852),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // App Logo and Name
-            Container(
-              padding: const EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+      appBar: AppBar(title: const Text('About Nexus Tech')),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 74,
+                    height: 74,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF00C2FF), Color(0xFF007BFF)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      gradient: LinearGradient(
+                        colors: [colors.primary, colors.secondary],
                       ),
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(22),
                     ),
                     child: const Icon(
-                      Icons.school,
-                      size: 50,
+                      Icons.auto_awesome_rounded,
                       color: Colors.white,
+                      size: 38,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Nexus Tech',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF3C4852),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nexus Tech Learning',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     'Version 1.2.0',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Unlock Your Potential',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.6),
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // App Description
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'About Nexus Tech',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
-                    ),
+                    style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Nexus Tech is your premier learning platform designed to help you unlock your potential. '
-                    'With our comprehensive courses, expert-led blogs, and interactive learning materials, '
-                    'you\'ll have everything you need to advance your skills and achieve your goals.',
+                    'Learn practical skills through focused courses, thoughtful articles and premium learning content.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-                      height: 1.5,
+                      color: colors.onSurfaceVariant,
+                      height: 1.45,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 18),
+          _section(context, 'What you can do', [
+            _feature(
+              context,
+              Icons.school_outlined,
+              'Learn by course',
+              'Follow structured video lessons at your own pace.',
+            ),
+            _feature(
+              context,
+              Icons.article_outlined,
+              'Read useful ideas',
+              'Explore articles that connect concepts to real work.',
+            ),
+            _feature(
+              context,
+              Icons.track_changes_rounded,
+              'Keep progressing',
+              'Use the app as a simple home for your learning journey.',
+            ),
+            _feature(
+              context,
+              Icons.workspace_premium_outlined,
+              'Unlock more',
+              'Activate Premium to access lessons beyond the free plan.',
+            ),
+          ]),
+          const SizedBox(height: 18),
+          _section(context, 'Support & legal', [
+            _action(
+              context,
+              Icons.mail_outline_rounded,
+              'Contact support',
+              'support@nexustech.com',
+              () => _open('mailto:support@nexustech.com'),
+            ),
+            _action(
+              context,
+              Icons.language_rounded,
+              'Visit website',
+              'nexustech.com',
+              () => _open('https://www.nexustech.com'),
+            ),
+            _action(
+              context,
+              Icons.privacy_tip_outlined,
+              'Privacy and terms',
+              'Read the in-app product notices',
+              () => _notice(context),
+            ),
+          ]),
+          const SizedBox(height: 22),
+          Center(
+            child: Text(
+              '© 2024 Nexus Tech · Made for learners',
+              style: TextStyle(color: colors.outline, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Features
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Key Features',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildFeatureItem(
-                    Icons.school,
-                    'Expert Courses',
-                    'Learn from industry experts with our comprehensive course catalog.',
-                  ),
-                  _buildFeatureItem(
-                    Icons.article,
-                    'Insightful Blogs',
-                    'Stay updated with the latest trends and insights from our blog posts.',
-                  ),
-                  _buildFeatureItem(
-                    Icons.verified,
-                    'Premium Content',
-                    'Unlock exclusive content with our premium membership.',
-                  ),
-                  _buildFeatureItem(
-                    Icons.track_changes,
-                    'Progress Tracking',
-                    'Monitor your learning progress and achievements.',
-                  ),
-                ],
-              ),
+  Widget _section(BuildContext context, String title, List<Widget> children) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 20),
-
-            // Contact Information
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Contact Us',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactItem(
-                    Icons.email,
-                    'Email',
-                    'support@nexustech.com',
-                    'mailto:support@nexustech.com',
-                  ),
-                  _buildContactItem(
-                    Icons.language,
-                    'Website',
-                    'www.nexustech.com',
-                    'https://www.nexustech.com',
-                  ),
-                  _buildContactItem(
-                    Icons.location_on,
-                    'Address',
-                    '123 Learning Street, Education City, EC 12345',
-                    null,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Legal Information
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Legal',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildLegalItem(
-                    context,
-                    'Privacy Policy',
-                    'Learn how we protect your data and privacy.',
-                  ),
-                  _buildLegalItem(
-                    context,
-                    'Terms of Service',
-                    'Read our terms and conditions.',
-                  ),
-                  _buildLegalItem(
-                    context,
-                    'License Agreement',
-                    'View our software license agreement.',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Copyright
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '© 2024 Nexus Tech',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'All rights reserved.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Made with ❤️ for learners worldwide',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFF00C2FF),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 8),
+            ...children,
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title, String description) {
+  Widget _feature(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String text,
+  ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 9),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: const Color(0xFF00C2FF), size: 20),
-          ),
+          Icon(icon, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -357,18 +161,14 @@ class AboutScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF3C4852),
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
-                  description,
+                  text,
                   style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 12,
-                    color: const Color(0xFF3C4852).withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -379,185 +179,38 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactItem(
+  Widget _action(
+    BuildContext context,
     IconData icon,
     String title,
-    String value,
-    String? url,
+    String subtitle,
+    VoidCallback onTap,
   ) {
-    return InkWell(
-      onTap: url != null ? () => _launchURL(url) : null,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: const Color(0xFF00C2FF), size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF3C4852),
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: url != null
-                          ? const Color(0xFF00C2FF)
-                          : const Color(0xFF3C4852),
-                      fontWeight: FontWeight.w600,
-                      decoration: url != null ? TextDecoration.underline : null,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (url != null)
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: const Color(0xFF00C2FF),
-              ),
-          ],
-        ),
-      ),
+    return ListTile(
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      trailing: const Icon(Icons.chevron_right_rounded),
     );
   }
 
-  Widget _buildLegalItem(
-    BuildContext context,
-    String title,
-    String description,
-  ) {
-    return InkWell(
-      onTap: () => _showLegalDocument(context, title, description),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.description,
-                color: Color(0xFF00C2FF),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
-                    ),
-                  ),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: const Color(0xFF3C4852).withValues(alpha: 0.6),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLegalDocument(
-    BuildContext context,
-    String title,
-    String description,
-  ) {
-    final body = switch (title) {
-      'Privacy Policy' =>
-        'Nexus Tech Learning uses your account details to provide authentication, profile features, premium access, and learning progress. Content engagement such as blog views and likes is stored to improve the experience. We do not sell personal information. You can request account data changes or deletion through the project owner.',
-      'Terms of Service' =>
-        'Use this application for lawful learning and personal development. Course and article content may be protected by their respective owners. Do not share activation keys, attempt to bypass premium access, or misuse the service. Features may change as the platform is improved.',
-      _ =>
-        'This application is distributed as a private project. Third-party packages remain governed by their respective open-source licenses. Review the repository documentation for the current dependency and project notices.',
-    };
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(sheetContext).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: Theme.of(sheetContext).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 20),
-              Text(body, style: Theme.of(sheetContext).textTheme.bodyLarge),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(sheetContext),
-                  child: const Text('Close'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _launchURL(String url) async {
+  Future<void> _open(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      Get.snackbar(
-        'Error',
-        'Could not launch $url',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
+
+  void _notice(BuildContext context) => showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Product notices'),
+      content: const Text(
+        'Privacy Policy, Terms of Service and License Agreement summaries are available in this app. They are product notices and not a substitute for legal review.',
+      ),
+      actions: [TextButton(onPressed: Get.back, child: const Text('Close'))],
+    ),
+  );
 }
