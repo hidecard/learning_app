@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
+import '../../data/services/learning_progress_service.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoInfo video;
   final String? courseTitle;
+  final List<VideoInfo> playlist;
+  final int videoIndex;
 
-  const VideoPlayerScreen({super.key, required this.video, this.courseTitle});
+  const VideoPlayerScreen({
+    super.key,
+    required this.video,
+    this.courseTitle,
+    this.playlist = const <VideoInfo>[],
+    this.videoIndex = 0,
+  });
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
@@ -16,6 +25,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   YoutubePlayerController? _controller;
   bool _hasReportedError = false;
+  final _progress = LearningProgressService();
 
   @override
   void initState() {
@@ -40,6 +50,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         forceHD: false,
       ),
     )..addListener(_listener);
+    _progress.markStarted(widget.courseTitle, widget.video);
   }
 
   void _listener() {
@@ -89,7 +100,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           handleColor: Color(0xFF007BFF),
         ),
         onEnded: (metadata) {
-          _showVideoCompletedDialog();
+          _completeAndContinue();
         },
       ),
       builder: (context, player) => Scaffold(
@@ -318,6 +329,39 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                       ),
 
+                      if (widget.playlist.length > 1) ...[
+                        SizedBox(height: isTablet ? 16 : 12),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 32 : 20,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: widget.videoIndex > 0
+                                      ? () => _openLesson(widget.videoIndex - 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_left_rounded),
+                                  label: const Text('Previous'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      widget.videoIndex + 1 <
+                                          widget.playlist.length
+                                      ? () => _openLesson(widget.videoIndex + 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_right_rounded),
+                                  label: const Text('Next lesson'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       SizedBox(height: isTablet ? 24 : 20),
                     ],
                   ),
@@ -386,6 +430,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     Get.snackbar('Download', 'Download functionality coming soon!');
   }
 
+  Future<void> _completeAndContinue() async {
+    await _progress.markCompleted(widget.courseTitle, widget.video);
+    if (mounted) _showVideoCompletedDialog();
+  }
+
+  void _openLesson(int index) {
+    if (index < 0 || index >= widget.playlist.length) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => VideoPlayerScreen(
+          video: widget.playlist[index],
+          courseTitle: widget.courseTitle,
+          playlist: widget.playlist,
+          videoIndex: index,
+        ),
+      ),
+    );
+  }
+
   void _showVideoCompletedDialog() {
     showDialog(
       context: context,
@@ -409,15 +472,24 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
+            onPressed: widget.videoIndex + 1 < widget.playlist.length
+                ? () {
+                    Navigator.pop(context);
+                    _openLesson(widget.videoIndex + 1);
+                  }
+                : () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00C2FF),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Next Video'),
+            child: Text(
+              widget.videoIndex + 1 < widget.playlist.length
+                  ? 'Next Video'
+                  : 'Done',
+            ),
           ),
         ],
       ),

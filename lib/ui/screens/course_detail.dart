@@ -67,6 +67,7 @@ class CourseDetail extends StatelessWidget {
                       entry.value,
                       isPremium,
                       course.title,
+                      videos,
                     ),
                   ),
               ]),
@@ -176,6 +177,7 @@ class CourseDetail extends StatelessWidget {
     VideoInfo video,
     bool isPremium,
     String? courseTitle,
+    List<VideoInfo> playlist,
   ) {
     final locked = index >= 10 && !isPremium;
     final colors = Theme.of(context).colorScheme;
@@ -187,8 +189,12 @@ class CourseDetail extends StatelessWidget {
           onTap: () => locked
               ? Get.toNamed('/premium')
               : Get.to(
-                  () =>
-                      VideoPlayerScreen(video: video, courseTitle: courseTitle),
+                  () => VideoPlayerScreen(
+                    video: video,
+                    courseTitle: courseTitle,
+                    playlist: playlist,
+                    videoIndex: index,
+                  ),
                 ),
           child: Padding(
             padding: const EdgeInsets.all(12),

@@ -11,18 +11,20 @@
 - [x] Improve global Material 3 light/dark theme tokens and component consistency
 - [x] Audit Blog detail and Activation key pages for dark-mode text visibility
 - [x] Replace hardcoded light surfaces in refreshed secondary pages with ColorScheme surfaces
+- [x] Persist last lesson and completed lesson state locally
+- [x] Add Continue Learning card to the Home dashboard
+- [x] Add playlist-aware previous/next lesson navigation in the video player
 - [x] Add separate Android APK workflow
 - [x] Add separate Flutter Web workflow
 - [x] Add separate Windows EXE workflow
 
 ## Next product improvements
 
-- [ ] Persist lesson watch progress and show Continue Learning on Home
+- [ ] Add percentage-based lesson watch progress to course cards and detail
 - [ ] Add completed lesson state and course progress percentage
 - [ ] Add saved/bookmarked courses and articles
 - [ ] Add global search results for courses, lessons and articles
 - [ ] Add reading progress and estimated reading time to articles
-- [ ] Add next/previous lesson navigation in the video player
 - [ ] Add offline lesson download state and offline library
 - [ ] Add streaks, daily learning goals and achievement badges
 - [ ] Add responsive tablet/desktop two-column course detail layout

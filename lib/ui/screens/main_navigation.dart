@@ -135,31 +135,118 @@ class _MainNavigationState extends State<MainNavigation> {
           const ProfileTab(),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: onTabTapped,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: _FloatingBottomNav(
+        currentIndex: _currentIndex,
+        onSelected: onTabTapped,
+      ),
+    );
+  }
+}
+
+class _FloatingBottomNav extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onSelected;
+
+  const _FloatingBottomNav({
+    required this.currentIndex,
+    required this.onSelected,
+  });
+
+  static const _items = [
+    (Icons.home_outlined, Icons.home_rounded, 'Home'),
+    (Icons.school_outlined, Icons.school_rounded, 'Courses'),
+    (Icons.article_outlined, Icons.article_rounded, 'Blogs'),
+    (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: .55),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: 'Courses',
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow.withValues(alpha: .12),
+              blurRadius: 22,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(7),
+          child: Row(
+            children: [
+              for (var index = 0; index < _items.length; index++)
+                Expanded(child: _item(context, index)),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.article_outlined),
-            selectedIcon: Icon(Icons.article),
-            label: 'Blogs',
+        ),
+      ),
+    );
+  }
+
+  Widget _item(BuildContext context, int index) {
+    final colors = Theme.of(context).colorScheme;
+    final selected = currentIndex == index;
+    final item = _items[index];
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: item.$3,
+      child: Tooltip(
+        message: item.$3,
+        child: InkWell(
+          onTap: () => onSelected(index),
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            height: 54,
+            padding: EdgeInsets.symmetric(horizontal: selected ? 13 : 8),
+            decoration: BoxDecoration(
+              color: selected ? colors.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  selected ? item.$2 : item.$1,
+                  color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+                  size: 22,
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  child: selected
+                      ? Row(
+                          children: [
+                            const SizedBox(width: 7),
+                            Text(
+                              item.$3,
+                              style: TextStyle(
+                                color: colors.onPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
