@@ -1,0 +1,34 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter config --enable-windows-desktop
+      - run: flutter build windows --release
+      - name: Archive Windows release
+        shell: pwsh
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath nexus-tech-learning-windows-${{ github.sha }}.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexus-tech-learning-windows-exe
+          path: nexus-tech-learning-windows-*.zip
+          if-no-files-found: error
+          retention-days: 30

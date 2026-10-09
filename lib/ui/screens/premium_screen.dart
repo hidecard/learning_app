@@ -1,336 +1,231 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../logic/controllers/premium_controller.dart';
-import '../../logic/controllers/auth_controller.dart';
 
-class PremiumScreen extends StatelessWidget {
+import '../../logic/controllers/auth_controller.dart';
+import '../../logic/controllers/premium_controller.dart';
+
+class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
+  @override
+  State<PremiumScreen> createState() => _PremiumScreenState();
+}
+
+class _PremiumScreenState extends State<PremiumScreen> {
+  final _keyController = TextEditingController();
+  final _premium = Get.find<PremiumController>();
+  final _auth = Get.find<AuthController>();
+  @override
+  void dispose() {
+    _keyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final premiumController = Get.find<PremiumController>();
-    final authController = Get.find<AuthController>();
-    final keyController = TextEditingController();
-
+    final colors = Theme.of(context).colorScheme;
+    final active = _auth.currentUser.value?.isPremium == true;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF00C2FF),
-              const Color(0xFF007BFF),
-              const Color(0xFF1A4BCC),
-              Colors.white,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF00C2FF),
-                        const Color(0xFF007BFF),
-                        const Color(0xFF1A4BCC),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+      appBar: AppBar(title: const Text('Premium access')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [colors.primary, colors.secondary],
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: Colors.white,
+                    size: 38,
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Go further with Premium',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w800,
                     ),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
-                  child: const Icon(
-                    Icons.diamond,
-                    size: 60,
-                    color: Colors.white,
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Unlock every lesson and make steady progress without limits.',
+                    style: TextStyle(color: Colors.white70, height: 1.4),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Premium',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF3C4852),
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 18),
+                  _benefit(
+                    Icons.lock_open_rounded,
+                    'All course lessons unlocked',
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Unlock all features',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 40),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Premium Benefits',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: const Color(0xFF3C4852),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildBenefitItem(
-                        Icons.play_circle,
-                        'Unlimited Videos',
-                        'Access all premium courses',
-                      ),
-                      _buildBenefitItem(
-                        Icons.download,
-                        'Download Content',
-                        'Offline viewing available',
-                      ),
-                      _buildBenefitItem(
-                        Icons.hd,
-                        'HD Quality',
-                        'Watch in high definition',
-                      ),
-                      _buildBenefitItem(
-                        Icons.support_agent,
-                        'Priority Support',
-                        'Get help faster',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 40),
-                if (authController.currentUser.value?.isPremium == true)
-                  _buildActiveStatus()
-                else
-                  _buildActivationForm(
-                    premiumController,
-                    keyController,
-                    context,
-                  ),
-              ],
+                  _benefit(Icons.verified_outlined, 'Premium content access'),
+                  _benefit(Icons.bolt_rounded, 'Learn without interruptions'),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(height: 22),
+            Text(
+              'Compare access',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: Column(
+                children: [
+                  _compareRow('First 10 lessons', true, true),
+                  _compareRow('Advanced lessons', false, true),
+                  _compareRow('Premium content', false, true),
+                  _compareRow('Activation key required', true, false),
+                ],
+              ),
+            ),
+            const SizedBox(height: 22),
+            active ? _activeCard(context) : _activationCard(context),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildBenefitItem(IconData icon, String title, String description) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 20, color: const Color(0xFF00C2FF)),
+  Widget _benefit(IconData icon, String text) => Padding(
+    padding: const EdgeInsets.only(top: 10),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 17),
+        const SizedBox(width: 8),
+        Text(text, style: const TextStyle(color: Colors.white, fontSize: 13)),
+      ],
+    ),
+  );
+  Widget _compareRow(String title, bool free, bool premium) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF3C4852),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
+        ),
+        _mark(free, 'Free'),
+        const SizedBox(width: 10),
+        _mark(premium, 'Premium'),
+      ],
+    ),
+  );
+  Widget _mark(bool yes, String label) {
+    final colors = Theme.of(Get.context!).colorScheme;
+    return SizedBox(
+      width: 70,
+      child: Column(
+        children: [
+          Icon(
+            yes ? Icons.check_circle_rounded : Icons.remove_circle_outline,
+            size: 18,
+            color: yes ? colors.primary : colors.outline,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10, color: colors.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActivationForm(
-    PremiumController premiumController,
-    TextEditingController keyController,
-    BuildContext context,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
+  Widget _activationCard(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Enter Activation Key',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFF3C4852),
-              fontWeight: FontWeight.bold,
+            'Activate with your key',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Enter the key provided by Nexus Tech.',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 13,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
-            controller: keyController,
-            decoration: InputDecoration(
-              labelText: 'Activation Key',
-              labelStyle: TextStyle(
-                color: const Color(0xFF00C2FF).withValues(alpha: 0.7),
-              ),
-              prefixIcon: Icon(
-                Icons.vpn_key,
-                color: const Color(0xFF00C2FF).withValues(alpha: 0.7),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF00C2FF)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFF00C2FF),
-                  width: 2,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: const Color(0xFF00C2FF).withValues(alpha: 0.5),
-                ),
-              ),
+            controller: _keyController,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(
+              labelText: 'Activation key',
+              prefixIcon: Icon(Icons.key_outlined),
             ),
-            style: const TextStyle(color: Color(0xFF3C4852)),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           Obx(
-            () => premiumController.isRedeeming.value
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF00C2FF),
-                      ),
-                    ),
-                  )
-                : ElevatedButton(
-                    onPressed: () {
-                      if (keyController.text.isNotEmpty) {
-                        premiumController.redeemKey(keyController.text.trim());
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00C2FF),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Activate Premium',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+            () => SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _premium.isRedeeming.value
+                    ? null
+                    : () => _premium.redeemKey(_keyController.text),
+                child: _premium.isRedeeming.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Activate Premium'),
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActiveStatus() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
+    ),
+  );
+  Widget _activeCard(BuildContext context) => Card(
+    color: Theme.of(context).colorScheme.primaryContainer,
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.verified,
-              color: Color(0xFF00C2FF),
-              size: 40,
-            ),
+          Icon(
+            Icons.verified_rounded,
+            color: Theme.of(context).colorScheme.primary,
+            size: 34,
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'Premium Active',
-            style: TextStyle(
-              color: Color(0xFF00C2FF),
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Enjoy all premium features',
-            style: TextStyle(
-              color: const Color(0xFF3C4852).withValues(alpha: 0.7),
-              fontSize: 14,
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Premium is active',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'You have access to all available learning content.',
+                  style: TextStyle(fontSize: 13),
+                ),
+              ],
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }

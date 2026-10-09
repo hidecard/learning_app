@@ -1,10 +1,9 @@
-name: Flutter build
+name: Flutter quality checks
 
 on:
   workflow_dispatch:
   push:
     branches: [main, 'feat/**']
-    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -24,25 +23,3 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-
-  package:
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.47.7'
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - run: flutter build apk --release
-      - run: flutter build web --release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nexus-tech-learning-${{ github.sha }}
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/web
-          if-no-files-found: error
-          retention-days: 14
