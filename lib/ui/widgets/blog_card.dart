@@ -48,7 +48,7 @@ class BlogCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF3C4852),
+                          color: const Color(0xFF0B0F10),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -60,13 +60,13 @@ class BlogCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           blog.category,
                           style: const TextStyle(
-                            color: Color(0xFF00C2FF),
+                            color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -76,7 +76,7 @@ class BlogCard extends StatelessWidget {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert, color: Color(0xFF3C4852)),
+                  icon: const Icon(Icons.more_vert, color: const Color(0xFF0B0F10)),
                   onSelected: (value) {
                     switch (value) {
                       case 'edit':
@@ -92,7 +92,7 @@ class BlogCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, color: Color(0xFF00C2FF), size: 20),
+                          Icon(Icons.edit, color: Colors.white, size: 20),
                           SizedBox(width: 8),
                           Text('Edit'),
                         ],
@@ -118,7 +118,7 @@ class BlogCard extends StatelessWidget {
               blog.content,
               style: TextStyle(
                 fontSize: 14,
-                color: const Color(0xFF3C4852).withValues(alpha: 0.7),
+                color: const Color(0xFF0B0F10).withValues(alpha: 0.7),
                 height: 1.4,
               ),
               maxLines: 3,

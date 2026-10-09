@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../logic/controllers/auth_controller.dart';
 
@@ -59,12 +58,12 @@ class _SplashScreenState extends State<SplashScreen>
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [colors.primary, colors.secondary, colors.surface],
-            stops: const [0, 0.55, 1],
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.black, const Color(0xFF202829), colors.surface],
+              stops: const [0, 0.55, 1],
           ),
         ),
         child: Center(
@@ -79,30 +78,17 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 160,
-                    height: 160,
-                    child: Lottie.asset(
-                      'assets/animation/Loadingsplashscreen.json',
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Image.asset(
+                      'assets/icon/codenest_logo.png',
+                      width: 300,
+                      height: 200,
                       fit: BoxFit.contain,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Nexus Tech',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: colors.onPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Learn something useful every day.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colors.onPrimary.withValues(alpha: 0.88),
-                    ),
-                  ),
+                  const SizedBox(height: 12),
+                  Text('Learn. Build. Grow.', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70, letterSpacing: 1.2)),
                   const SizedBox(height: 32),
                   SizedBox(
                     width: 30,

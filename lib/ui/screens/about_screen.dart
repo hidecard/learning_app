@@ -9,7 +9,7 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('About Nexus Tech')),
+      appBar: AppBar(title: const Text('About CodeNest')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
@@ -35,7 +35,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Nexus Tech Learning',
+                    'CodeNest',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -112,7 +112,7 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 22),
           Center(
             child: Text(
-              '© 2024 Nexus Tech · Made for learners',
+              '© 2024 CodeNest · Made for learners',
               style: TextStyle(color: colors.outline, fontSize: 12),
             ),
           ),

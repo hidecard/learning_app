@@ -85,20 +85,20 @@ class _BlogListState extends State<BlogList> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
                   Icons.article_outlined,
                   size: 64,
-                  color: const Color(0xFF00C2FF),
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 'No blogs available',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -106,7 +106,7 @@ class _BlogListState extends State<BlogList> {
               Text(
                 'Pull down to refresh',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF3C4852).withValues(alpha: 0.7),
+                  color: const Color(0xFF0B0F10).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -120,7 +120,7 @@ class _BlogListState extends State<BlogList> {
         await _checkLikedStatusForBlogs();
         widget.onRefresh?.call();
       },
-      color: const Color(0xFF00C2FF),
+      color: Colors.white,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: widget.blogs.length,
@@ -171,10 +171,10 @@ class _BlogListState extends State<BlogList> {
                                 end: Alignment.bottomRight,
                                 colors: [
                                   const Color(
-                                    0xFF00C2FF,
+                                    0xFFFFFFFF,
                                   ).withValues(alpha: 0.1),
                                   const Color(
-                                    0xFF00C2FF,
+                                    0xFFFFFFFF,
                                   ).withValues(alpha: 0.05),
                                 ],
                               ),
@@ -183,7 +183,7 @@ class _BlogListState extends State<BlogList> {
                               Icons.image_not_supported,
                               size: 50,
                               color: const Color(
-                                0xFF00C2FF,
+                                0xFFFFFFFF,
                               ).withValues(alpha: 0.5),
                             ),
                           );
@@ -202,7 +202,7 @@ class _BlogListState extends State<BlogList> {
                                           loadingProgress.expectedTotalBytes!
                                     : null,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  const Color(0xFF00C2FF),
+                                  Colors.white,
                                 ),
                               ),
                             ),
@@ -224,7 +224,7 @@ class _BlogListState extends State<BlogList> {
                                 style: Theme.of(context).textTheme.titleLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF3C4852),
+                                      color: const Color(0xFF0B0F10),
                                     ),
                               ),
                             ),
@@ -236,7 +236,7 @@ class _BlogListState extends State<BlogList> {
                               ),
                               decoration: BoxDecoration(
                                 color: const Color(
-                                  0xFF00C2FF,
+                                  0xFFFFFFFF,
                                 ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -244,7 +244,7 @@ class _BlogListState extends State<BlogList> {
                                 blog.category,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: const Color(0xFF00C2FF),
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
@@ -260,7 +260,7 @@ class _BlogListState extends State<BlogList> {
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: const Color(
-                                  0xFF3C4852,
+                                  0xFF0B0F10,
                                 ).withValues(alpha: 0.7),
                                 height: 1.5,
                               ),
@@ -282,7 +282,7 @@ class _BlogListState extends State<BlogList> {
                                     Icons.visibility,
                                     size: 16,
                                     color: const Color(
-                                      0xFF3C4852,
+                                      0xFF0B0F10,
                                     ).withValues(alpha: 0.6),
                                   ),
                                 ),
@@ -292,7 +292,7 @@ class _BlogListState extends State<BlogList> {
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: const Color(
-                                          0xFF3C4852,
+                                          0xFF0B0F10,
                                         ).withValues(alpha: 0.6),
                                       ),
                                 ),
@@ -321,7 +321,7 @@ class _BlogListState extends State<BlogList> {
                                                       AlwaysStoppedAnimation<
                                                         Color
                                                       >(
-                                                        const Color(0xFF00C2FF),
+                                                        Colors.white,
                                                       ),
                                                 ),
                                               )
@@ -333,7 +333,7 @@ class _BlogListState extends State<BlogList> {
                                                 color: isLiked
                                                     ? Colors.red
                                                     : const Color(
-                                                        0xFF3C4852,
+                                                        0xFF0B0F10,
                                                       ).withValues(alpha: 0.6),
                                               ),
                                         const SizedBox(width: 6),
@@ -346,7 +346,7 @@ class _BlogListState extends State<BlogList> {
                                                 color: isLiked
                                                     ? Colors.red
                                                     : const Color(
-                                                        0xFF3C4852,
+                                                        0xFF0B0F10,
                                                       ).withValues(alpha: 0.6),
                                               ),
                                         ),
@@ -363,7 +363,7 @@ class _BlogListState extends State<BlogList> {
                               ),
                               decoration: BoxDecoration(
                                 color: const Color(
-                                  0xFF00C2FF,
+                                  0xFFFFFFFF,
                                 ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -374,7 +374,7 @@ class _BlogListState extends State<BlogList> {
                                     'Read more',
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
-                                          color: const Color(0xFF00C2FF),
+                                          color: Colors.white,
                                           fontWeight: FontWeight.w600,
                                         ),
                                   ),
@@ -382,7 +382,7 @@ class _BlogListState extends State<BlogList> {
                                   Icon(
                                     Icons.arrow_forward,
                                     size: 14,
-                                    color: const Color(0xFF00C2FF),
+                                    color: Colors.white,
                                   ),
                                 ],
                               ),

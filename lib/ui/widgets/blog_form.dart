@@ -113,7 +113,7 @@ class _BlogFormState extends State<BlogForm> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                 ),
               ),
               const SizedBox(height: 24),
@@ -133,7 +133,7 @@ class _BlogFormState extends State<BlogForm> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -153,7 +153,7 @@ class _BlogFormState extends State<BlogForm> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -175,7 +175,7 @@ class _BlogFormState extends State<BlogForm> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -194,7 +194,7 @@ class _BlogFormState extends State<BlogForm> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -219,11 +219,11 @@ class _BlogFormState extends State<BlogForm> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        side: const BorderSide(color: Color(0xFF00C2FF)),
+                        side: const BorderSide(color: Colors.white),
                       ),
                       child: const Text(
                         'Cancel',
-                        style: TextStyle(color: Color(0xFF00C2FF)),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -232,7 +232,7 @@ class _BlogFormState extends State<BlogForm> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _saveBlog,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00C2FF),
+                        backgroundColor: Colors.white,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

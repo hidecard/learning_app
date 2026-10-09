@@ -19,20 +19,20 @@ class CourseList extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
                   Icons.school_outlined,
                   size: 64,
-                  color: const Color(0xFF00C2FF),
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 'No courses available',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -40,7 +40,7 @@ class CourseList extends StatelessWidget {
               Text(
                 'Pull down to refresh',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF3C4852).withValues(alpha: 0.7),
+                  color: const Color(0xFF0B0F10).withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -116,7 +116,7 @@ class CourseList extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF3C4852),
+                                color: const Color(0xFF0B0F10),
                               ),
                         ),
                         const SizedBox(height: 8),
@@ -127,7 +127,7 @@ class CourseList extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: const Color(
-                              0xFF00C2FF,
+                              0xFFFFFFFF,
                             ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -137,7 +137,7 @@ class CourseList extends StatelessWidget {
                               Icon(
                                 Icons.video_library,
                                 size: 14,
-                                color: const Color(0xFF00C2FF),
+                                color: Colors.white,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -147,7 +147,7 @@ class CourseList extends StatelessWidget {
                                     : 'No videos',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: const Color(0xFF00C2FF),
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
@@ -166,7 +166,7 @@ class CourseList extends StatelessWidget {
                     child: Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: const Color(0xFF00C2FF),
+                      color: Colors.white,
                     ),
                   ),
                 ],

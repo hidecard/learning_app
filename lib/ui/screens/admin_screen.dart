@@ -273,7 +273,7 @@ class _AdminScreenState extends State<AdminScreen>
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF3C4852),
+            color: const Color(0xFF0B0F10),
           ),
         ),
         backgroundColor: Colors.white,
@@ -281,9 +281,9 @@ class _AdminScreenState extends State<AdminScreen>
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF00C2FF),
-          unselectedLabelColor: const Color(0xFF3C4852).withValues(alpha: 0.6),
-          indicatorColor: const Color(0xFF00C2FF),
+          labelColor: Colors.white,
+          unselectedLabelColor: const Color(0xFF0B0F10).withValues(alpha: 0.6),
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: 'Blogs'),
             Tab(text: 'Courses'),
@@ -311,7 +311,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                 ),
               ),
               const Spacer(),
@@ -320,7 +320,7 @@ class _AdminScreenState extends State<AdminScreen>
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Add Blog'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00C2FF),
+                  backgroundColor: Colors.white,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -335,7 +335,7 @@ class _AdminScreenState extends State<AdminScreen>
               ? const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFF00C2FF),
+                      Colors.white,
                     ),
                   ),
                 )
@@ -365,7 +365,7 @@ class _AdminScreenState extends State<AdminScreen>
                         icon: const Icon(Icons.add),
                         label: const Text('Create Blog'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00C2FF),
+                          backgroundColor: Colors.white,
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -405,7 +405,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                 ),
               ),
               const Spacer(),
@@ -414,7 +414,7 @@ class _AdminScreenState extends State<AdminScreen>
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Add Video'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00C2FF),
+                  backgroundColor: Colors.white,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -429,7 +429,7 @@ class _AdminScreenState extends State<AdminScreen>
               ? const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFF00C2FF),
+                      Colors.white,
                     ),
                   ),
                 )
@@ -459,7 +459,7 @@ class _AdminScreenState extends State<AdminScreen>
                         icon: const Icon(Icons.add),
                         label: const Text('Add Video'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00C2FF),
+                          backgroundColor: Colors.white,
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -490,7 +490,7 @@ class _AdminScreenState extends State<AdminScreen>
     return isLoading
         ? const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           )
         : SingleChildScrollView(
@@ -520,7 +520,7 @@ class _AdminScreenState extends State<AdminScreen>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF3C4852),
+                          color: const Color(0xFF0B0F10),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -530,19 +530,19 @@ class _AdminScreenState extends State<AdminScreen>
                           hintText: 'Enter key code (e.g., ABC-123)',
                           hintStyle: TextStyle(
                             color: const Color(
-                              0xFF3C4852,
+                              0xFF0B0F10,
                             ).withValues(alpha: 0.6),
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Color(0xFF00C2FF),
+                              color: Colors.white,
                               width: 2,
                             ),
                           ),
@@ -554,7 +554,7 @@ class _AdminScreenState extends State<AdminScreen>
                         child: ElevatedButton(
                           onPressed: _createKey,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00C2FF),
+                            backgroundColor: Colors.white,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -615,7 +615,7 @@ class _AdminScreenState extends State<AdminScreen>
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                 ),
               ),
               Container(
@@ -626,13 +626,13 @@ class _AdminScreenState extends State<AdminScreen>
                 decoration: BoxDecoration(
                   color: isUsedSection
                       ? Colors.red.withValues(alpha: 0.1)
-                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${keys.length}',
                   style: TextStyle(
-                    color: isUsedSection ? Colors.red : const Color(0xFF00C2FF),
+                    color: isUsedSection ? Colors.red : Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -652,7 +652,7 @@ class _AdminScreenState extends State<AdminScreen>
                 child: Text(
                   'No ${isUsedSection ? 'used' : 'available'} keys',
                   style: TextStyle(
-                    color: const Color(0xFF3C4852).withValues(alpha: 0.6),
+                    color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
                   ),
                 ),
               ),

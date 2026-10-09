@@ -174,13 +174,13 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF3C4852),
+              color: const Color(0xFF0B0F10),
             ),
           ),
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Get.back(),
           ),
         ),
@@ -195,7 +195,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF3C4852),
+                  color: const Color(0xFF0B0F10),
                 ),
               ),
               SizedBox(height: 8),
@@ -217,13 +217,13 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF3C4852),
+            color: const Color(0xFF0B0F10),
           ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF00C2FF)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Get.back(),
         ),
       ),
@@ -255,7 +255,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3C4852),
+                        color: const Color(0xFF0B0F10),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -264,20 +264,20 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       decoration: InputDecoration(
                         hintText: 'Enter activation key (e.g., HIDECARD-123)',
                         hintStyle: TextStyle(
-                          color: const Color(0xFF3C4852).withValues(alpha: 0.5),
+                          color: const Color(0xFF0B0F10).withValues(alpha: 0.5),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: const Color(
-                              0xFF3C4852,
+                              0xFF0B0F10,
                             ).withValues(alpha: 0.2),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFF00C2FF),
+                            color: Colors.white,
                             width: 2,
                           ),
                         ),
@@ -301,7 +301,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _createKey,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00C2FF),
+                          backgroundColor: Colors.white,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -355,7 +355,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF3C4852),
+                      color: const Color(0xFF0B0F10),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -387,14 +387,14 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                               color: key['is_used']
                                   ? Colors.grey.shade300
                                   : const Color(
-                                      0xFF00C2FF,
+                                      0xFFFFFFFF,
                                     ).withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(12),
                             color: key['is_used']
                                 ? Colors.grey.shade50
                                 : const Color(
-                                    0xFF00C2FF,
+                                    0xFFFFFFFF,
                                   ).withValues(alpha: 0.05),
                           ),
                           child: Row(
@@ -408,7 +408,7 @@ class _KeyManagementScreenState extends State<KeyManagementScreen> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
-                                        color: Color(0xFF3C4852),
+                                        color: const Color(0xFF0B0F10),
                                       ),
                                     ),
                                     const SizedBox(height: 4),

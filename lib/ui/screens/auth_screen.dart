@@ -29,9 +29,9 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(body: SafeArea(child: Center(child: SingleChildScrollView(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28), child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 460), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 58, height: 58, decoration: BoxDecoration(color: colors.primaryContainer, borderRadius: BorderRadius.circular(18)), child: Icon(Icons.auto_awesome_rounded, color: colors.primary, size: 30)),
+      ClipRRect(borderRadius: BorderRadius.circular(18), child: Image.asset('assets/icon/codenest_logo.png', width: 250, height: 135, fit: BoxFit.contain)),
       const SizedBox(height: 28),
-      Text(_login ? 'Welcome back' : 'Start learning today', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+      Text(_login ? 'Welcome back' : 'Start learning today', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, color: colors.onSurface)),
       const SizedBox(height: 8),
       Text(_login ? 'Sign in to continue your learning journey.' : 'Create an account and learn at your own pace.', style: TextStyle(color: colors.onSurfaceVariant, fontSize: 15)),
       const SizedBox(height: 30),
@@ -43,9 +43,9 @@ class _AuthScreenState extends State<AuthScreen> {
         Obx(() => SizedBox(width: double.infinity, child: FilledButton(onPressed: _auth.isLoading.value ? null : _submit, child: _auth.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Text(_login ? 'Sign in' : 'Create account')))),
       ])))),
       const SizedBox(height: 22),
-      Center(child: Wrap(alignment: WrapAlignment.center, children: [Text(_login ? 'New to Nexus Tech? ' : 'Already have an account? ', style: TextStyle(color: colors.onSurfaceVariant)), GestureDetector(onTap: () => setState(() => _login = !_login), child: Text(_login ? 'Create account' : 'Sign in', style: TextStyle(color: colors.primary, fontWeight: FontWeight.w800)))])),
+      Center(child: Wrap(alignment: WrapAlignment.center, children: [Text(_login ? 'New to CodeNest? ' : 'Already have an account? ', style: TextStyle(color: colors.onSurfaceVariant)), GestureDetector(onTap: () => setState(() => _login = !_login), child: Text(_login ? 'Create account' : 'Sign in', style: TextStyle(color: colors.primary, fontWeight: FontWeight.w800)))])),
       const SizedBox(height: 28),
-      Center(child: Text('Learn practical skills. Ship better work.', style: TextStyle(color: colors.outline, fontSize: 12))),
+      Center(child: Text('Learn. Build. Grow.', style: TextStyle(color: colors.outline, fontSize: 12, letterSpacing: 1.1))),
     ]))))));
   }
 }

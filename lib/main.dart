@@ -17,7 +17,9 @@ import 'ui/screens/splash_screen.dart';
 import 'ui/widgets/connectivity_wrapper.dart';
 import 'ui/widgets/glass_surface.dart';
 
-const _brandBlue = Color(0xFF087EA4);
+const _ink = Color(0xFF0B0F10);
+const _paper = Color(0xFFF7F8F8);
+const _liquid = Color(0xFFC9D2D2);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,18 +39,20 @@ class MyApp extends StatelessWidget {
   ThemeData _theme(Brightness brightness) {
     final colorScheme =
         ColorScheme.fromSeed(
-          seedColor: _brandBlue,
+          seedColor: _liquid,
           brightness: brightness,
-          surface: brightness == Brightness.dark
-              ? const Color(0xFF0F1720)
-              : const Color(0xFFF7F9FC),
+          surface: brightness == Brightness.dark ? _ink : _paper,
         ).copyWith(
-          primary: brightness == Brightness.dark
-              ? const Color(0xFF55C8E8)
-              : const Color(0xFF087EA4),
-          secondary: brightness == Brightness.dark
-              ? const Color(0xFF86A8FF)
-              : const Color(0xFF3867D6),
+          primary: brightness == Brightness.dark ? Colors.white : _ink,
+          onPrimary: brightness == Brightness.dark ? _ink : Colors.white,
+          secondary: brightness == Brightness.dark ? _liquid : const Color(0xFF667070),
+          onSecondary: brightness == Brightness.dark ? _ink : Colors.white,
+          surfaceContainer: brightness == Brightness.dark
+              ? const Color(0xFF1A2122)
+              : const Color(0xFFE9EDED),
+          surfaceContainerHighest: brightness == Brightness.dark
+              ? const Color(0xFF273031)
+              : const Color(0xFFDDE3E3),
         );
 
     return ThemeData(
@@ -60,7 +64,7 @@ class MyApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.42)
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.58)
             : Colors.white.withValues(alpha: .62),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -148,7 +152,7 @@ class MyApp extends StatelessWidget {
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Nexus Tech Learning',
+      title: 'CodeNest',
       theme: _theme(Brightness.light),
       darkTheme: _theme(Brightness.dark),
       themeMode: themeController.themeMode,

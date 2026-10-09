@@ -83,10 +83,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       player: YoutubePlayer(
         controller: controller,
         showVideoProgressIndicator: true,
-        progressIndicatorColor: const Color(0xFF00C2FF),
+        progressIndicatorColor: Colors.white,
         progressColors: const ProgressBarColors(
-          playedColor: Color(0xFF00C2FF),
-          handleColor: Color(0xFF007BFF),
+          playedColor: Colors.white,
+          handleColor: const Color(0xFF273031),
         ),
         onEnded: (metadata) {
           _showVideoCompletedDialog();
@@ -260,8 +260,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF00C2FF),
-                                      Color(0xFF007BFF),
+                                      Colors.white,
+                                      const Color(0xFF273031),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
@@ -405,7 +405,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Replay',
-              style: TextStyle(color: Color(0xFF00C2FF)),
+              style: TextStyle(color: Colors.white),
             ),
           ),
           ElevatedButton(
@@ -414,7 +414,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00C2FF),
+              backgroundColor: Colors.white,
               foregroundColor: Colors.white,
             ),
             child: const Text('Next Video'),

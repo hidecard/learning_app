@@ -32,7 +32,7 @@ class ProfileTab extends StatelessWidget {
           _label(context, 'PREFERENCES'),
           _group(context, [
             _themeRow(context),
-            _row(context, Icons.info_outline_rounded, 'About Nexus Tech', 'Privacy, terms and app information', () => Get.to(() => const AboutScreen())),
+            _row(context, Icons.info_outline_rounded, 'About CodeNest', 'Privacy, terms and app information', () => Get.to(() => const AboutScreen())),
           ]),
           const SizedBox(height: 20),
           _label(context, 'SESSION'),

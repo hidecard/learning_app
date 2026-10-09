@@ -18,6 +18,8 @@
 - [x] Improve data loading feedback with a top progress indicator and animated shimmer skeleton cards
 - [x] Fix Premium/Activation page exit handling with safe Navigator back and main-route fallback
 - [x] Add iOS-inspired liquid glass blur surfaces to Premium, Profile groups and bottom navigation
+- [x] Apply CodeNest logo across splash/auth branding and configure it as the launcher icon source
+- [x] Replace legacy blue/purple accents with the black, white and neutral liquid-glass palette
 
 ## Next product improvements
 

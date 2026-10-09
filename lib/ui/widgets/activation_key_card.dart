@@ -25,7 +25,7 @@ class ActivationKeyCard extends StatelessWidget {
         border: Border.all(
           color: isUsed
               ? Colors.red.withValues(alpha: 0.2)
-              : const Color(0xFF00C2FF).withValues(alpha: 0.2),
+              : Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -39,12 +39,12 @@ class ActivationKeyCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isUsed
                       ? Colors.red.withValues(alpha: 0.1)
-                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   isUsed ? Icons.lock : Icons.vpn_key,
-                  color: isUsed ? Colors.red : const Color(0xFF00C2FF),
+                  color: isUsed ? Colors.red : Colors.white,
                   size: 20,
                 ),
               ),
@@ -54,7 +54,7 @@ class ActivationKeyCard extends StatelessWidget {
                   activationKey.keyCode ?? 'Unknown',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF3C4852),
+                    color: const Color(0xFF0B0F10),
                     fontSize: 16,
                   ),
                 ),
@@ -64,13 +64,13 @@ class ActivationKeyCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isUsed
                       ? Colors.red.withValues(alpha: 0.1)
-                      : const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   isUsed ? 'Used' : 'Available',
                   style: TextStyle(
-                    color: isUsed ? Colors.red : const Color(0xFF00C2FF),
+                    color: isUsed ? Colors.red : Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -83,7 +83,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Created: ${_formatDate(activationKey.createdAt!)}',
               style: TextStyle(
-                color: const Color(0xFF3C4852).withValues(alpha: 0.6),
+                color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -93,7 +93,7 @@ class ActivationKeyCard extends StatelessWidget {
             Text(
               'Used: ${_formatDate(activationKey.usedAt!)}',
               style: TextStyle(
-                color: const Color(0xFF3C4852).withValues(alpha: 0.6),
+                color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -102,7 +102,7 @@ class ActivationKeyCard extends StatelessWidget {
               Text(
                 'User ID: ${activationKey.usedBy}',
                 style: TextStyle(
-                  color: const Color(0xFF3C4852).withValues(alpha: 0.6),
+                  color: const Color(0xFF0B0F10).withValues(alpha: 0.6),
                   fontSize: 12,
                 ),
               ),

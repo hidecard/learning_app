@@ -88,9 +88,9 @@ class _HomeScreenState extends State<HomeScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF00C2FF),
-              const Color(0xFF007BFF),
-              const Color(0xFF1A4BCC),
+              Colors.white,
+              const Color(0xFF273031),
+              const Color(0xFF0B0F10),
               Colors.white,
             ],
           ),
@@ -109,11 +109,11 @@ class _HomeScreenState extends State<HomeScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Nexus Tech',
+                      'CodeNest',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF3C4852),
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -125,9 +125,9 @@ class _HomeScreenState extends State<HomeScreen>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Color(0xFF00C2FF),
-                        Color(0xFF007BFF),
-                        Color(0xFF1A4BCC),
+                        Colors.white,
+                        const Color(0xFF273031),
+                        const Color(0xFF0B0F10),
                         Colors.transparent,
                       ],
                     ),
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen>
                 Container(
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen>
                       authController.currentUser.value?.isPremium == true
                           ? Icons.verified
                           : Icons.key,
-                      color: const Color(0xFF00C2FF),
+                      color: Colors.white,
                     ),
                     onPressed: () => Get.toNamed('/premium'),
                   ),
@@ -154,11 +154,11 @@ class _HomeScreenState extends State<HomeScreen>
                 Container(
                   margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00C2FF).withValues(alpha: 0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.logout, color: const Color(0xFF00C2FF)),
+                    icon: Icon(Icons.logout, color: Colors.white),
                     onPressed: () => authController.signOut(),
                   ),
                 ),
@@ -181,13 +181,11 @@ class _HomeScreenState extends State<HomeScreen>
                   child: TabBar(
                     controller: _tabController,
                     indicator: const BoxDecoration(
-                      color: Color(0xFF00C2FF),
+                      color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                     labelColor: Colors.white,
-                    unselectedLabelColor: const Color(
-                      0xFF3C4852,
-                    ).withValues(alpha: 0.6),
+                    unselectedLabelColor: const Color(0xFF0B0F10).withValues(alpha: 0.6),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(4),
                     tabs: [
@@ -214,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen>
                           children: [
                             CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                const Color(0xFF00C2FF),
+                                Colors.white,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -267,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ElevatedButton(
                               onPressed: _loadData,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF00C2FF),
+                                backgroundColor: Colors.white,
                                 foregroundColor: Colors.white,
                               ),
                               child: const Text('Retry'),
@@ -295,9 +293,9 @@ class _HomeScreenState extends State<HomeScreen>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color(0xFF00C2FF),
-              const Color(0xFF007BFF),
-              const Color(0xFF1A4BCC),
+              Colors.white,
+              const Color(0xFF273031),
+              const Color(0xFF0B0F10),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -305,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00C2FF).withValues(alpha: 0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),

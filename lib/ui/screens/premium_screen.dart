@@ -151,7 +151,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         Text('Activate with your key', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
-        Text('Enter the key provided by Nexus Tech.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
+        Text('Enter the key provided by CodeNest.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
         const SizedBox(height: 16),
         TextField(controller: _keyController, textCapitalization: TextCapitalization.characters, decoration: const InputDecoration(labelText: 'Activation key', prefixIcon: Icon(Icons.key_outlined))),
         const SizedBox(height: 14),
