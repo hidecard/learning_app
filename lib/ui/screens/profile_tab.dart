@@ -1,333 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../data/models/user_model.dart';
 import '../../logic/controllers/auth_controller.dart';
 import '../../logic/controllers/theme_controller.dart';
-import 'edit_profile_screen.dart';
 import 'about_screen.dart';
 import 'activation_key_screen.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
-
+    final auth = Get.find<AuthController>();
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(title: const Text('Profile'), actions: [IconButton(onPressed: auth.signOut, icon: const Icon(Icons.logout_rounded))]),
       body: Obx(() {
-        final currentUser = authController.currentUser.value;
-        if (currentUser == null) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00C2FF)),
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildProfileHeader(context, currentUser),
-              const SizedBox(height: 20),
-              _buildMenuItems(context, currentUser),
-              const SizedBox(height: 20),
-            ],
-          ),
-        );
+        final user = auth.currentUser.value;
+        if (user == null) return const Center(child: CircularProgressIndicator());
+        return ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 32), children: [
+          _profileCard(context, user),
+          const SizedBox(height: 24),
+          _label(context, 'ACCOUNT'),
+          _group(context, [
+            _row(context, Icons.person_outline_rounded, 'Edit profile', 'Update your name and details', () => Get.to(() => const EditProfileScreen())),
+            _row(context, Icons.key_rounded, 'Activation key', user.isPremium ? 'Premium access is active' : 'Unlock all lessons', () => Get.to(() => const ActivationKeyScreen()), badge: user.isPremium ? 'Active' : null),
+          ]),
+          const SizedBox(height: 20),
+          _label(context, 'PREFERENCES'),
+          _group(context, [
+            _themeRow(context),
+            _row(context, Icons.info_outline_rounded, 'About Nexus Tech', 'Privacy, terms and app information', () => Get.to(() => const AboutScreen())),
+          ]),
+          const SizedBox(height: 20),
+          _label(context, 'SESSION'),
+          _group(context, [_row(context, Icons.logout_rounded, 'Sign out', 'You can sign back in anytime', () => _confirmLogout(context, auth), danger: true)]),
+        ]);
       }),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, UserModel currentUser) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [const Color(0xFF00C2FF), const Color(0xFF007BFF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(0),
-          bottom: Radius.circular(30),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              // Profile Avatar with modern styling
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 3,
-                  ),
-                ),
-                child: const Icon(Icons.person, size: 50, color: Colors.white),
-              ),
-              const SizedBox(height: 15),
-              // User Name with better typography
-              Text(
-                currentUser.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              // Email with subtle styling
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Text(
-                  currentUser.email,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Premium Status with enhanced styling
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: currentUser.isPremium
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: currentUser.isPremium
-                      ? [
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      currentUser.isPremium ? Icons.verified : Icons.lock,
-                      size: 18,
-                      color: currentUser.isPremium
-                          ? const Color(0xFF00C2FF)
-                          : Colors.white,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      currentUser.isPremium ? 'Premium Member' : 'Free Plan',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: currentUser.isPremium
-                            ? const Color(0xFF00C2FF)
-                            : Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+  Widget _profileCard(BuildContext context, UserModel user) {
+    final colors = Theme.of(context).colorScheme;
+    final initials = user.name.trim().isEmpty ? '?' : user.name.trim()[0].toUpperCase();
+    return Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: LinearGradient(colors: [colors.primary, colors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(24)), child: Row(children: [
+      CircleAvatar(radius: 31, backgroundColor: Colors.white.withValues(alpha: .18), child: Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 24))),
+      const SizedBox(width: 15),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 19)), const SizedBox(height: 4), Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 12)), const SizedBox(height: 10), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .16), borderRadius: BorderRadius.circular(20)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(user.isPremium ? Icons.workspace_premium_rounded : Icons.school_outlined, size: 14, color: Colors.white), const SizedBox(width: 5), Text(user.isPremium ? 'Premium learner' : 'Free learner', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))]))]))
+    ]));
   }
 
-  Widget _buildMenuItems(BuildContext context, UserModel currentUser) {
-    final isAdmin = currentUser.email == 'ak1500@gmail.com';
-    final menuItems = [
-      {
-        'icon': Icons.person,
-        'title': 'Edit Profile',
-        'color': const Color(0xFF00C2FF),
-      },
-      {
-        'icon': Icons.vpn_key,
-        'title': 'Activation Key',
-        'color': const Color(0xFF007BFF),
-      },
-      if (isAdmin)
-        {
-          'icon': Icons.admin_panel_settings,
-          'title': 'Admin Panel',
-          'color': const Color(0xFF00C2FF),
-        },
-      {'icon': Icons.info, 'title': 'About', 'color': const Color(0xFF007BFF)},
-      {
-        'icon': Icons.dark_mode,
-        'title': 'Dark mode',
-        'color': const Color(0xFF007BFF),
-      },
-      {'icon': Icons.logout, 'title': 'Logout', 'color': Colors.red},
-    ];
+  Widget _label(BuildContext context, String text) => Padding(padding: const EdgeInsets.only(left: 4, bottom: 8), child: Text(text, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1)));
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: menuItems.map((item) {
-            final isLast = menuItems.last == item;
-            return _buildMenuItem(
-              context,
-              item['icon'] as IconData,
-              item['title'] as String,
-              item['color'] as Color,
-              isLast,
-              currentUser,
-            );
-          }).toList(),
-        ),
-      ),
-    );
+  Widget _group(BuildContext context, List<Widget> children) => Card(clipBehavior: Clip.antiAlias, child: Column(children: [for (var i = 0; i < children.length; i++) ...[children[i], if (i != children.length - 1) const Divider(height: 1, indent: 64)]]));
+
+  Widget _row(BuildContext context, IconData icon, String title, String subtitle, VoidCallback onTap, {String? badge, bool danger = false}) {
+    final colors = Theme.of(context).colorScheme;
+    final color = danger ? colors.error : colors.primary;
+    return ListTile(onTap: onTap, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), leading: Container(width: 38, height: 38, decoration: BoxDecoration(color: color.withValues(alpha: .11), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)), title: Text(title, style: TextStyle(fontWeight: FontWeight.w700, color: danger ? color : null)), subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)), trailing: badge != null ? Chip(label: Text(badge), visualDensity: VisualDensity.compact, backgroundColor: colors.secondaryContainer) : const Icon(Icons.chevron_right_rounded));
   }
 
-  Widget _buildMenuItem(
-    BuildContext context,
-    IconData icon,
-    String title,
-    Color color,
-    bool isLast,
-    UserModel currentUser,
-  ) {
-    final authController = Get.find<AuthController>();
+  Widget _themeRow(BuildContext context) => Obx(() { final theme = Get.find<ThemeController>(); return ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), leading: Container(width: 38, height: 38, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: .11), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.dark_mode_outlined)), title: const Text('Dark mode', style: TextStyle(fontWeight: FontWeight.w700)), subtitle: const Text('Adjust the app appearance', style: TextStyle(fontSize: 12)), trailing: Switch(value: theme.isDarkMode.value, onChanged: (_) => theme.toggleTheme())); });
 
-    return InkWell(
-      onTap: () {
-        switch (title) {
-          case 'Edit Profile':
-            Get.to(() => const EditProfileScreen());
-            break;
-          case 'Activation Key':
-            Get.to(() => const ActivationKeyScreen());
-            break;
-          case 'Admin Panel':
-            Get.toNamed('/admin');
-            break;
-          case 'About':
-            Get.to(() => const AboutScreen());
-            break;
-          case 'Dark mode':
-            Get.find<ThemeController>().toggleTheme();
-            break;
-          case 'Logout':
-            _showLogoutDialog(context, authController);
-            break;
-        }
-      },
-      borderRadius: isLast
-          ? const BorderRadius.vertical(bottom: Radius.circular(20))
-          : null,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-            // Show activation key status if user has one
-            if (title == 'Activation Key' &&
-                currentUser.activationKey != null &&
-                currentUser.activationKey!.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 16,
-                ),
-              ),
-            if (title == 'Dark mode')
-              Obx(
-                () => Switch(
-                  value: Get.find<ThemeController>().isDarkMode.value,
-                  onChanged: (_) => Get.find<ThemeController>().toggleTheme(),
-                ),
-              )
-            else
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, AuthController authController) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              authController.signOut();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
+  void _confirmLogout(BuildContext context, AuthController auth) => showDialog(context: context, builder: (_) => AlertDialog(title: const Text('Sign out?'), content: const Text('Your learning content will stay safe on this device.'), actions: [TextButton(onPressed: Get.back, child: const Text('Cancel')), FilledButton(onPressed: () { Get.back(); auth.signOut(); }, child: const Text('Sign out'))]));
 }
