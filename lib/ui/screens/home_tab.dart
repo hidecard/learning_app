@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/blog_model.dart';
 import '../../data/models/course_model.dart';
+import '../widgets/content_shimmer.dart';
 import 'main_navigation.dart';
 
 class HomeTab extends StatefulWidget {
@@ -183,7 +184,34 @@ class _HomeTabState extends State<HomeTab> {
   ]);
 
   Widget _buildCourses(BuildContext context) {
-    if (widget.isLoading) return const SizedBox(height: 160, child: Center(child: CircularProgressIndicator()));
+    if (widget.isLoading) {
+      return SizedBox(
+        height: 178,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 2,
+          separatorBuilder: (context, index) => const SizedBox(width: 12),
+          itemBuilder: (context, index) => Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: 198,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ContentShimmer(height: 64),
+                    Spacer(),
+                    ContentShimmer(height: 14, width: 150),
+                    SizedBox(height: 9),
+                    ContentShimmer(height: 11, width: 86),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     if (_courses.isEmpty) return _empty(context, Icons.school_outlined, 'No courses found yet');
     return SizedBox(height: 178, child: ListView.separated(
       scrollDirection: Axis.horizontal,
@@ -207,7 +235,37 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Widget _buildBlogs(BuildContext context) {
-    if (widget.isLoading) return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+    if (widget.isLoading) {
+      return Column(
+        children: List.generate(
+          2,
+          (index) => Card(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: const [
+                  ContentShimmer(height: 58, width: 58),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ContentShimmer(height: 10, width: 78),
+                        SizedBox(height: 9),
+                        ContentShimmer(height: 13),
+                        SizedBox(height: 7),
+                        ContentShimmer(height: 10, width: 110),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     if (_blogs.isEmpty) return _empty(context, Icons.article_outlined, 'No articles found yet');
     return Column(children: _blogs.take(3).map((blog) => Padding(
       padding: const EdgeInsets.only(bottom: 10),

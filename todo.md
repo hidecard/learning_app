@@ -14,6 +14,8 @@
 - [x] Add separate Android APK workflow
 - [x] Add separate Flutter Web workflow
 - [x] Add separate Windows EXE workflow
+- [x] Refresh bottom navigation with a floating Material 3 navigation dock, selected-state motion, and accessible labels
+- [x] Improve data loading feedback with a top progress indicator and animated shimmer skeleton cards
 
 ## Next product improvements
 
@@ -34,6 +36,6 @@
 - [ ] Add Windows code-signing certificate before public EXE distribution
 - [ ] Configure Firebase production rules and release configuration
 - [ ] Verify web hosting environment variables and Firebase authorized domains
-- [ ] Run `flutter analyze`, `flutter test`, `flutter build web --release`
+- [ ] Run `flutter analyze`, `flutter test`, `flutter build web --release` in CI and review the generated artifacts
 - [ ] Validate APK on a physical Android device
 - [ ] Validate Windows EXE on a clean Windows machine
