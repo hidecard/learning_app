@@ -5,6 +5,11 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(nexus_tech_learning LANGUAGES CXX)
 
+# flutter_inappwebview_windows still includes MSVC's deprecated experimental
+# coroutine header; keep the current Visual Studio toolchain from treating its
+# compatibility diagnostic as a build-stopping error.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "nexus_tech_learning")
