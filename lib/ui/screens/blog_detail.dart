@@ -41,7 +41,7 @@ class _BlogDetailState extends State<BlogDetail> {
       if (!await _service.toggleLike(_blog.id)) throw StateError('like failed');
       final stats = await _service.getStats(_blog.id);
       final liked = await _service.isLikedByUser(_blog.id);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _blog = _blog.copyWith(
             viewCount: stats.viewCount,
@@ -49,6 +49,7 @@ class _BlogDetailState extends State<BlogDetail> {
           );
           _liked = liked;
         });
+      }
     } catch (_) {
       Get.snackbar('Like not saved', 'Please sign in and try again.');
     }

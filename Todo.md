@@ -9,6 +9,8 @@
 - [x] Refresh premium activation screen with benefit comparison and active status
 - [x] Refresh edit profile, activation key and about pages for light/dark surfaces
 - [x] Improve global Material 3 light/dark theme tokens and component consistency
+- [x] Audit Blog detail and Activation key pages for dark-mode text visibility
+- [x] Replace hardcoded light surfaces in refreshed secondary pages with ColorScheme surfaces
 - [x] Add separate Android APK workflow
 - [x] Add separate Flutter Web workflow
 - [x] Add separate Windows EXE workflow

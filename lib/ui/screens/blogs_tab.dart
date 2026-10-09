@@ -98,7 +98,7 @@ class _BlogsTabState extends State<BlogsTab> {
       if (!await _service.toggleLike(blog.id)) throw StateError('like failed');
       final stats = await _service.getStats(blog.id);
       final liked = await _service.isLikedByUser(blog.id);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _liked[blog.id] = liked;
           _filtered = _filtered
@@ -112,6 +112,7 @@ class _BlogsTabState extends State<BlogsTab> {
               )
               .toList();
         });
+      }
     } catch (_) {
       Get.snackbar('Like not saved', 'Please sign in and try again.');
     }
