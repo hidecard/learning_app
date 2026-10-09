@@ -36,7 +36,13 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           'Premium activated',
           'Your premium learning content is unlocked.',
         );
-        if (mounted) Get.back();
+        if (mounted) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            Get.offNamed('/main');
+          }
+        }
       } else {
         Get.snackbar(
           'Invalid key',
@@ -83,6 +89,17 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Activation key'),
+        leading: IconButton(
+          tooltip: 'Back',
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Get.offNamed('/main');
+            }
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
         actions: [
           if (user?.email == 'ak1500@gmail.com')
             IconButton(

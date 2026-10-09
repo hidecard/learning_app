@@ -16,6 +16,8 @@
 - [x] Add separate Windows EXE workflow
 - [x] Refresh bottom navigation with a floating Material 3 navigation dock, selected-state motion, and accessible labels
 - [x] Improve data loading feedback with a top progress indicator and animated shimmer skeleton cards
+- [x] Fix Premium/Activation page exit handling with safe Navigator back and main-route fallback
+- [x] Add iOS-inspired liquid glass blur surfaces to Premium, Profile groups and bottom navigation
 
 ## Next product improvements
 

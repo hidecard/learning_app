@@ -7,6 +7,7 @@ import '../../logic/controllers/theme_controller.dart';
 import 'about_screen.dart';
 import 'activation_key_screen.dart';
 import 'edit_profile_screen.dart';
+import '../widgets/glass_surface.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -53,7 +54,10 @@ class ProfileTab extends StatelessWidget {
 
   Widget _label(BuildContext context, String text) => Padding(padding: const EdgeInsets.only(left: 4, bottom: 8), child: Text(text, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.1)));
 
-  Widget _group(BuildContext context, List<Widget> children) => Card(clipBehavior: Clip.antiAlias, child: Column(children: [for (var i = 0; i < children.length; i++) ...[children[i], if (i != children.length - 1) const Divider(height: 1, indent: 64)]]));
+  Widget _group(BuildContext context, List<Widget> children) => GlassSurface(
+    borderRadius: BorderRadius.circular(22),
+    child: Column(children: [for (var i = 0; i < children.length; i++) ...[children[i], if (i != children.length - 1) const Divider(height: 1, indent: 64)]]),
+  );
 
   Widget _row(BuildContext context, IconData icon, String title, String subtitle, VoidCallback onTap, {String? badge, bool danger = false}) {
     final colors = Theme.of(context).colorScheme;

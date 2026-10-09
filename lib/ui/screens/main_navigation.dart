@@ -9,6 +9,7 @@ import 'blogs_tab.dart';
 import 'courses_tab.dart';
 import 'home_tab.dart';
 import 'profile_tab.dart';
+import '../widgets/glass_surface.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -149,21 +150,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Container(
+      child: GlassSurface(
         height: 72,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: colors.outlineVariant.withValues(alpha: .55)),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow.withValues(alpha: .12),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
         child: Row(
           children: List.generate(items.length, (index) {
             final item = items[index];
