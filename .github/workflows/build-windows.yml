@@ -22,6 +22,11 @@ jobs:
       - run: flutter analyze
       - run: flutter test
       - run: flutter config --enable-windows-desktop
+      - name: Pin compatible CMake for Firebase Windows SDK
+        shell: pwsh
+        run: |
+          choco install cmake --version=3.31.6 --installargs 'ADD_CMAKE_TO_PATH=System' -y --force
+          echo 'C:\Program Files\CMake\bin' >> $env:GITHUB_PATH
       - run: flutter build windows --release
       - name: Archive Windows release
         shell: pwsh
