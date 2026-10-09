@@ -84,16 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Color(0xFF273031),
-              Color(0xFF0B0F10),
-              Colors.white,
-            ],
-          ),
+          color: Theme.of(context).colorScheme.surface,
         ),
         child: CustomScrollView(
           slivers: [
@@ -121,16 +112,7 @@ class _HomeScreenState extends State<HomeScreen>
                 titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
                 background: Container(
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white,
-                        Color(0xFF273031),
-                        Color(0xFF0B0F10),
-                        Colors.transparent,
-                      ],
-                    ),
+                    color: Color(0xFF2F6FED),
                   ),
                 ),
               ),
@@ -181,11 +163,11 @@ class _HomeScreenState extends State<HomeScreen>
                   child: TabBar(
                     controller: _tabController,
                     indicator: const BoxDecoration(
-                      color: Colors.white,
+                      color: Color(0xFFE8F0FF),
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Color(0xFF0B0F10).withValues(alpha: 0.6),
+                    labelColor: Color(0xFF2F6FED),
+                    unselectedLabelColor: Color(0xFF68758A),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(4),
                     tabs: [
@@ -291,15 +273,7 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white,
-              Color(0xFF273031),
-              Color(0xFF0B0F10),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -311,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         child: FloatingActionButton(
           onPressed: _loadData,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
           child: const Icon(Icons.refresh, color: Colors.white),
         ),

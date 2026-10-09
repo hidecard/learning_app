@@ -49,15 +49,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colors.primary.withValues(alpha: .12),
-              colors.surface,
-              colors.secondary.withValues(alpha: .10),
-            ],
-          ),
+          color: colors.surface,
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
@@ -95,7 +87,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       margin: const EdgeInsets.only(top: 82),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [colors.primary, colors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        color: const Color(0xFF2F6FED),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [BoxShadow(color: colors.primary.withValues(alpha: .22), blurRadius: 26, offset: const Offset(0, 12))],
       ),

@@ -43,9 +43,8 @@ class ProfileTab extends StatelessWidget {
   }
 
   Widget _profileCard(BuildContext context, UserModel user) {
-    final colors = Theme.of(context).colorScheme;
     final initials = user.name.trim().isEmpty ? '?' : user.name.trim()[0].toUpperCase();
-    return Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: LinearGradient(colors: [colors.primary, colors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(24)), child: Row(children: [
+    return Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF2F6FED), borderRadius: BorderRadius.circular(24)), child: Row(children: [
       CircleAvatar(radius: 31, backgroundColor: Colors.white.withValues(alpha: .18), child: Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 24))),
       const SizedBox(width: 15),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 19)), const SizedBox(height: 4), Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 12)), const SizedBox(height: 10), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .16), borderRadius: BorderRadius.circular(20)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(user.isPremium ? Icons.workspace_premium_rounded : Icons.school_outlined, size: 14, color: Colors.white), const SizedBox(width: 5), Text(user.isPremium ? 'Premium learner' : 'Free learner', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))]))]))

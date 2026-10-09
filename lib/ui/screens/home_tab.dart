@@ -110,11 +110,7 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFF2F6FED),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: SafeArea(
@@ -223,7 +219,7 @@ class _HomeTabState extends State<HomeTab> {
           borderRadius: BorderRadius.circular(20),
           onTap: () => Get.toNamed('/course-detail', arguments: course),
           child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(height: 64, decoration: BoxDecoration(gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primaryContainer, Theme.of(context).colorScheme.secondaryContainer]), borderRadius: BorderRadius.circular(14)), child: Center(child: Icon(Icons.play_arrow_rounded, size: 34, color: Theme.of(context).colorScheme.primary))),
+            Container(height: 64, decoration: BoxDecoration(color: const Color(0xFF2F6FED), borderRadius: BorderRadius.circular(14)), child: Center(child: Icon(Icons.play_arrow_rounded, size: 34, color: Theme.of(context).colorScheme.primary))),
             const Spacer(),
             Text(course.title?.isNotEmpty == true ? course.title! : 'Untitled course', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 5),

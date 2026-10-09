@@ -106,14 +106,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   height:
                       MediaQuery.of(context).padding.top + (isTablet ? 80 : 60),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.8),
-                        Colors.transparent,
-                      ],
-                    ),
+                    color: const Color(0xFF2F6FED),
                   ),
                   child: SafeArea(
                     child: Padding(
@@ -258,12 +251,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Colors.white,
-                                      Color(0xFF273031),
-                                    ],
-                                  ),
+                                  color: Color(0xFF2F6FED),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(

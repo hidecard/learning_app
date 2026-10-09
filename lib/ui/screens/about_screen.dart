@@ -22,9 +22,7 @@ class AboutScreen extends StatelessWidget {
                     width: 74,
                     height: 74,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [colors.primary, colors.secondary],
-                      ),
+                      color: const Color(0xFF2F6FED),
                       borderRadius: BorderRadius.circular(22),
                     ),
                     child: const Icon(

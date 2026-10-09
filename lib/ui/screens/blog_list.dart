@@ -166,18 +166,7 @@ class _BlogListState extends State<BlogList> {
                             height: 200,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color(
-                                    0xFFFFFFFF,
-                                  ).withValues(alpha: 0.1),
-                                  Color(
-                                    0xFFFFFFFF,
-                                  ).withValues(alpha: 0.05),
-                                ],
-                              ),
+                              color: const Color(0xFF2F6FED),
                             ),
                             child: Icon(
                               Icons.image_not_supported,

@@ -114,9 +114,7 @@ class _ActivationKeyScreenState extends State<ActivationKeyScreen> {
           Container(
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [colors.primary, colors.secondary],
-              ),
+              color: const Color(0xFF2F6FED),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(

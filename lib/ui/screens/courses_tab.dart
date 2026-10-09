@@ -170,12 +170,7 @@ class _CoursesTabState extends State<CoursesTab> {
                   width: 82,
                   height: 82,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.primaryContainer,
-                        colors.secondaryContainer,
-                      ],
-                    ),
+                    color: const Color(0xFF2F6FED),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(

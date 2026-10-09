@@ -84,15 +84,10 @@ class CourseDetail extends StatelessWidget {
     int freeCount,
     bool isPremium,
   ) {
-    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFF2F6FED),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Column(
