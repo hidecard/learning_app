@@ -5,7 +5,6 @@ import '../../data/models/blog_model.dart';
 import '../../data/models/course_model.dart';
 import '../../data/services/blog_service.dart';
 import '../../data/services/sheets_service.dart';
-import '../widgets/content_shimmer.dart';
 import 'blogs_tab.dart';
 import 'courses_tab.dart';
 import 'home_tab.dart';
