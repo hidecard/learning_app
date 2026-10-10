@@ -166,7 +166,7 @@ class _BlogListState extends State<BlogList> {
                             height: 200,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2F6FED),
+                              color: const Color(0xFF0B0F10),
                             ),
                             child: Icon(
                               Icons.image_not_supported,

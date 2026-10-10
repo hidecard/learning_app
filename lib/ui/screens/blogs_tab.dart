@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/blog_model.dart';
 import '../../data/services/blog_service.dart';
+import '../../data/services/learning_progress_service.dart';
 
 class BlogsTab extends StatefulWidget {
   final List<BlogModel> blogs;
@@ -22,10 +23,12 @@ class BlogsTab extends StatefulWidget {
 class _BlogsTabState extends State<BlogsTab> {
   final _search = TextEditingController();
   final _service = BlogService();
+  final _learning = LearningProgressService();
   String _category = 'All';
   List<String> _categories = ['All'];
   List<BlogModel> _filtered = [];
   final _liked = <String, bool>{};
+  final _saved = <String, bool>{};
   final _busy = <String, bool>{};
 
   @override
@@ -61,8 +64,29 @@ class _BlogsTabState extends State<BlogsTab> {
     _busy
       ..clear()
       ..addEntries(widget.blogs.map((blog) => MapEntry(blog.id, false)));
+    _saved
+      ..clear()
+      ..addEntries(widget.blogs.map((blog) => MapEntry(blog.id, false)));
     _apply();
     _loadLikes();
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    for (final blog in widget.blogs) {
+      _saved[blog.id] = await _learning.isBlogSaved(blog.id);
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleSaved(BlogModel blog) async {
+    final saved = await _learning.toggleBlogSaved(blog.id);
+    if (!mounted) return;
+    setState(() => _saved[blog.id] = saved);
+    Get.snackbar(
+      saved ? 'Saved' : 'Removed',
+      saved ? 'Article saved for later.' : 'Article removed from saved items.',
+    );
   }
 
   Future<void> _loadLikes() async {
@@ -279,6 +303,20 @@ class _BlogsTabState extends State<BlogsTab> {
                             ),
                           ),
                           const Spacer(),
+                          IconButton(
+                            onPressed: () => _toggleSaved(blog),
+                            iconSize: 19,
+                            constraints: const BoxConstraints(),
+                            padding: const EdgeInsets.only(right: 12),
+                            icon: Icon(
+                              _saved[blog.id] == true
+                                  ? Icons.bookmark_rounded
+                                  : Icons.bookmark_border_rounded,
+                              color: _saved[blog.id] == true
+                                  ? colors.primary
+                                  : colors.onSurfaceVariant,
+                            ),
+                          ),
                           IconButton(
                             onPressed: () => _like(blog),
                             iconSize: 19,

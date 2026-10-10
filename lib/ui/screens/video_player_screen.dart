@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
-import '../../logic/controllers/auth_controller.dart';
-import '../../logic/controllers/learning_state_controller.dart';
+import '../../data/services/learning_progress_service.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoInfo video;
   final String? courseTitle;
-  final CourseModel? course;
-  final int? lessonIndex;
+  final List<VideoInfo> playlist;
+  final int videoIndex;
 
-  const VideoPlayerScreen({super.key, required this.video, this.courseTitle, this.course, this.lessonIndex});
+  const VideoPlayerScreen({
+    super.key,
+    required this.video,
+    this.courseTitle,
+    this.playlist = const <VideoInfo>[],
+    this.videoIndex = 0,
+  });
 
   @override
   State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
@@ -20,6 +25,7 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   YoutubePlayerController? _controller;
   bool _hasReportedError = false;
+  final _progress = LearningProgressService();
 
   @override
   void initState() {
@@ -44,6 +50,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         forceHD: false,
       ),
     )..addListener(_listener);
+    _progress.markStarted(widget.courseTitle, widget.video);
   }
 
   void _listener() {
@@ -87,16 +94,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       player: YoutubePlayer(
         controller: controller,
         showVideoProgressIndicator: true,
-        progressIndicatorColor: Colors.white,
+        progressIndicatorColor: const Color(0xFFFFFFFF),
         progressColors: const ProgressBarColors(
-          playedColor: Colors.white,
+          playedColor: Color(0xFFFFFFFF),
           handleColor: Color(0xFF273031),
         ),
         onEnded: (metadata) {
-          if (widget.course != null && widget.lessonIndex != null) {
-            Get.find<LearningStateController>().completeLesson(widget.course!, widget.lessonIndex!);
-          }
-          _showVideoCompletedDialog();
+          _completeAndContinue();
         },
       ),
       builder: (context, player) => Scaffold(
@@ -113,7 +117,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   height:
                       MediaQuery.of(context).padding.top + (isTablet ? 80 : 60),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2F6FED),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.8),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                   child: SafeArea(
                     child: Padding(
@@ -205,7 +216,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 // Video Info Panel
                 Container(
                   decoration: BoxDecoration(
-                    color: Color(0xFF1A1A1A),
+                    color: const Color(0xFF1A1A1A),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -258,7 +269,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF2F6FED),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFFFFFFF),
+                                      Color(0xFF273031),
+                                    ],
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -302,42 +318,50 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                             SizedBox(width: isTablet ? 16 : 12),
                             Expanded(
-                              child: Obx(() {
-                                final downloaded = widget.course != null && widget.lessonIndex != null
-                                    ? Get.find<LearningStateController>().isLessonDownloaded(widget.course!, widget.lessonIndex!)
-                                    : false;
-                                return _buildActionButton(
-                                  icon: downloaded ? Icons.download_done_rounded : Icons.download_outlined,
-                                  label: downloaded ? 'Downloaded' : 'Download',
-                                  onTap: _downloadVideo,
-                                  isTablet: isTablet,
-                                );
-                              }),
+                              child: _buildActionButton(
+                                icon: Icons.download_outlined,
+                                label: 'Download',
+                                onTap: _downloadVideo,
+                                isTablet: isTablet,
+                              ),
                             ),
                           ],
                         ),
                       ),
 
-                      if (widget.course != null && widget.lessonIndex != null)
+                      if (widget.playlist.length > 1) ...[
+                        SizedBox(height: isTablet ? 16 : 12),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: isTablet ? 32 : 20),
-                          child: Row(children: [
-                            Expanded(child: OutlinedButton.icon(
-                              onPressed: widget.lessonIndex! > 0 ? () => _openLesson(widget.lessonIndex! - 1) : null,
-                              icon: const Icon(Icons.arrow_back_rounded),
-                              label: const Text('Previous'),
-                            )),
-                            const SizedBox(width: 12),
-                            Expanded(child: FilledButton.icon(
-                              onPressed: widget.lessonIndex! + 1 < (widget.course!.videos?.length ?? 0)
-                                  ? () => _openLesson(widget.lessonIndex! + 1)
-                                  : null,
-                              icon: const Icon(Icons.arrow_forward_rounded),
-                              label: const Text('Next lesson'),
-                            )),
-                          ]),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isTablet ? 32 : 20,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: widget.videoIndex > 0
+                                      ? () => _openLesson(widget.videoIndex - 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_left_rounded),
+                                  label: const Text('Previous'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      widget.videoIndex + 1 <
+                                          widget.playlist.length
+                                      ? () => _openLesson(widget.videoIndex + 1)
+                                      : null,
+                                  icon: const Icon(Icons.chevron_right_rounded),
+                                  label: const Text('Next lesson'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-
+                      ],
                       SizedBox(height: isTablet ? 24 : 20),
                     ],
                   ),
@@ -402,40 +426,24 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _downloadVideo() {
-    final isPremium = Get.find<AuthController>().currentUser.value?.isPremium == true;
-    final course = widget.course;
-    final index = widget.lessonIndex;
-    if (!isPremium) {
-      Get.snackbar('Premium feature', 'Activate Premium to save lessons for offline access.');
-      Get.toNamed('/premium');
-      return;
-    }
-    if (course == null || index == null) {
-      Get.snackbar('Offline save unavailable', 'This lesson is missing course information.');
-      return;
-    }
-    final learning = Get.find<LearningStateController>();
-    final downloaded = learning.isLessonDownloaded(course, index);
-    learning.toggleLessonDownload(course, index);
-    Get.snackbar(
-      downloaded ? 'Removed from offline library' : 'Saved for offline access',
-      downloaded
-          ? 'This lesson was removed from your device library.'
-          : 'Premium offline access is ready for this lesson.',
-    );
+    // Implement download functionality
+    Get.snackbar('Download', 'Download functionality coming soon!');
+  }
+
+  Future<void> _completeAndContinue() async {
+    await _progress.markCompleted(widget.courseTitle, widget.video);
+    if (mounted) _showVideoCompletedDialog();
   }
 
   void _openLesson(int index) {
-    final course = widget.course;
-    if (course == null || index < 0 || index >= (course.videos?.length ?? 0)) return;
-    Navigator.pushReplacement(
-      context,
+    if (index < 0 || index >= widget.playlist.length) return;
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => VideoPlayerScreen(
-          video: course.videos![index],
+          video: widget.playlist[index],
           courseTitle: widget.courseTitle,
-          course: course,
-          lessonIndex: index,
+          playlist: widget.playlist,
+          videoIndex: index,
         ),
       ),
     );
@@ -446,7 +454,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1A1A),
+        backgroundColor: const Color(0xFF1A1A1A),
         title: const Text(
           'Video Completed',
           style: TextStyle(color: Colors.white),
@@ -460,19 +468,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Replay',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Color(0xFFFFFFFF)),
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
+            onPressed: widget.videoIndex + 1 < widget.playlist.length
+                ? () {
+                    Navigator.pop(context);
+                    _openLesson(widget.videoIndex + 1);
+                  }
+                : () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFFFFFFFF),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Next Video'),
+            child: Text(
+              widget.videoIndex + 1 < widget.playlist.length
+                  ? 'Next Video'
+                  : 'Done',
+            ),
           ),
         ],
       ),

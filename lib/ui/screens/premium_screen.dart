@@ -88,7 +88,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       margin: const EdgeInsets.only(top: 82),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF2F6FED),
+        color: const Color(0xFF0B0F10),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [BoxShadow(color: colors.primary.withValues(alpha: .22), blurRadius: 26, offset: const Offset(0, 12))],
       ),

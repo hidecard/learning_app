@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: DecoratedBox(
           decoration: BoxDecoration(
-            color: const Color(0xFF2F6FED),
+            color: const Color(0xFF0B0F10),
         ),
         child: Center(
           child: AnimatedBuilder(

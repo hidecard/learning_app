@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'data/services/connectivity_service.dart';
+import 'data/services/learning_progress_service.dart';
 import 'firebase_options.dart';
 import 'logic/controllers/auth_controller.dart';
 import 'logic/controllers/premium_controller.dart';
@@ -18,10 +19,9 @@ import 'ui/screens/splash_screen.dart';
 import 'ui/widgets/connectivity_wrapper.dart';
 import 'ui/widgets/glass_surface.dart';
 
-const _ink = Color(0xFF172033);
-const _paper = Color(0xFFF7F9FC);
-const _brandBlue = Color(0xFF2F6FED);
-const _brandGold = Color(0xFFF4B740);
+const _ink = Color(0xFF0B0F10);
+const _paper = Color(0xFFF7F8F8);
+const _liquid = Color(0xFFC9D2D2);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +32,7 @@ Future<void> main() async {
   Get.put(LearningStateController(), permanent: true);
   Get.put(ThemeController(), permanent: true);
   Get.put(ConnectivityService(), permanent: true);
+  await LearningProgressService().touchStreak();
 
   runApp(const MyApp());
 }
@@ -42,34 +43,34 @@ class MyApp extends StatelessWidget {
   ThemeData _theme(Brightness brightness) {
     final colorScheme =
         ColorScheme.fromSeed(
-          seedColor: _brandBlue,
+          seedColor: _liquid,
           brightness: brightness,
           surface: brightness == Brightness.dark ? _ink : _paper,
         ).copyWith(
-          primary: _brandBlue,
-          onPrimary: Colors.white,
-          secondary: _brandGold,
-          onSecondary: _ink,
-          tertiary: Color(0xFF31A47A),
+          primary: brightness == Brightness.dark ? Colors.white : _ink,
+          onPrimary: brightness == Brightness.dark ? _ink : Colors.white,
+          secondary: brightness == Brightness.dark ? _liquid : Color(0xFF667070),
+          onSecondary: brightness == Brightness.dark ? _ink : Colors.white,
+          tertiary: _liquid,
           surfaceContainer: brightness == Brightness.dark
-              ? Color(0xFF222D42)
-              : Color(0xFFEAF0F8),
+              ? Color(0xFF1A2122)
+              : Color(0xFFE9EDED),
           surfaceContainerHighest: brightness == Brightness.dark
-              ? Color(0xFF2D3A52)
-              : Color(0xFFE0E8F3),
+              ? Color(0xFF273031)
+              : Color(0xFFDDE3E3),
         );
 
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
       brightness: brightness,
-      scaffoldBackgroundColor: brightness == Brightness.dark ? _ink : _paper,
+      scaffoldBackgroundColor: Colors.transparent,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerHighest
-            : Colors.white,
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: .58)
+            : Colors.white.withValues(alpha: .62),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -91,14 +92,14 @@ class MyApp extends StatelessWidget {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: brightness == Brightness.dark
-            ? colorScheme.surfaceContainer
-            : Colors.white,
+            ? colorScheme.surfaceContainer.withValues(alpha: .68)
+            : Colors.white.withValues(alpha: .68),
         surfaceTintColor: Colors.transparent,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: colorScheme.outlineVariant,
+            color: Colors.white.withValues(alpha: brightness == Brightness.dark ? .12 : .62),
           ),
         ),
       ),
@@ -117,16 +118,16 @@ class MyApp extends StatelessWidget {
       dialogTheme: DialogThemeData(
         elevation: 0,
         backgroundColor: brightness == Brightness.dark
-            ? colorScheme.surface
-            : Colors.white,
+            ? colorScheme.surface.withValues(alpha: .82)
+            : Colors.white.withValues(alpha: .86),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
         backgroundColor: brightness == Brightness.dark
-            ? colorScheme.surface
-            : Colors.white,
+            ? colorScheme.surface.withValues(alpha: .72)
+            : Colors.white.withValues(alpha: .72),
         surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.primaryContainer,
         labelTextStyle: WidgetStatePropertyAll(

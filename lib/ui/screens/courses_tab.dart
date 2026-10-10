@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
+import '../../data/services/learning_progress_service.dart';
 
 class CoursesTab extends StatefulWidget {
   final List<CourseModel> courses;
@@ -20,9 +21,11 @@ class CoursesTab extends StatefulWidget {
 
 class _CoursesTabState extends State<CoursesTab> {
   final _search = TextEditingController();
+  final _learning = LearningProgressService();
   String _category = 'All';
   List<String> _categories = ['All'];
   List<CourseModel> _filtered = [];
+  final _saved = <String, bool>{};
 
   @override
   void initState() {
@@ -52,6 +55,26 @@ class _CoursesTabState extends State<CoursesTab> {
     }
     _categories = values.toList()..sort();
     _apply();
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    for (final course in widget.courses) {
+      _saved[_learning.courseKey(course)] = await _learning.isCourseSaved(
+        course,
+      );
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleSaved(CourseModel course) async {
+    final saved = await _learning.toggleCourseSaved(course);
+    if (!mounted) return;
+    setState(() => _saved[_learning.courseKey(course)] = saved);
+    Get.snackbar(
+      saved ? 'Saved' : 'Removed',
+      saved ? 'Course saved for later.' : 'Course removed from saved items.',
+    );
   }
 
   void _apply() {
@@ -170,7 +193,7 @@ class _CoursesTabState extends State<CoursesTab> {
                   width: 82,
                   height: 82,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2F6FED),
+                    color: const Color(0xFF0B0F10),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -217,9 +240,19 @@ class _CoursesTabState extends State<CoursesTab> {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colors.onSurfaceVariant,
+                IconButton(
+                  onPressed: () => _toggleSaved(course),
+                  tooltip: _saved[_learning.courseKey(course)] == true
+                      ? 'Remove saved course'
+                      : 'Save course',
+                  icon: Icon(
+                    _saved[_learning.courseKey(course)] == true
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: _saved[_learning.courseKey(course)] == true
+                        ? colors.primary
+                        : colors.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),

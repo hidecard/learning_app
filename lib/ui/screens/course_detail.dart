@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/course_model.dart';
+import '../../data/services/learning_progress_service.dart';
 import '../../logic/controllers/auth_controller.dart';
-import '../../logic/controllers/learning_state_controller.dart';
 import 'video_player_screen.dart';
 
 class CourseDetail extends StatelessWidget {
   const CourseDetail({super.key});
+  static final _progress = LearningProgressService();
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,6 @@ class CourseDetail extends StatelessWidget {
     final videos = course.videos ?? const <VideoInfo>[];
     final isPremium =
         Get.find<AuthController>().currentUser.value?.isPremium == true;
-    final learning = Get.find<LearningStateController>();
     final colors = Theme.of(context).colorScheme;
     final freeCount = videos.length < 10 ? videos.length : 10;
 
@@ -23,11 +23,6 @@ class CourseDetail extends StatelessWidget {
       appBar: AppBar(
         title: Text(course.title ?? 'Course'),
         actions: [
-          Obx(() => IconButton(
-            tooltip: learning.isCourseSaved(course) ? 'Remove saved course' : 'Save course',
-            onPressed: () => learning.toggleCourseSaved(course),
-            icon: Icon(learning.isCourseSaved(course) ? Icons.bookmark : Icons.bookmark_border),
-          )),
           IconButton(
             onPressed: () => Get.toNamed('/premium'),
             icon: const Icon(Icons.workspace_premium_outlined),
@@ -40,6 +35,7 @@ class CourseDetail extends StatelessWidget {
             child: _header(
               context,
               course,
+              videos,
               videos.length,
               freeCount,
               isPremium,
@@ -55,22 +51,6 @@ class CourseDetail extends StatelessWidget {
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
-                Obx(() {
-                  final progress = learning.progressFor(course);
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 14),
-                      Row(children: [
-                        Expanded(child: LinearProgressIndicator(value: progress, minHeight: 7)),
-                        const SizedBox(width: 10),
-                        Text('${(progress * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w800)),
-                      ]),
-                      const SizedBox(height: 6),
-                      Text('${learning.completedCount(course)} of ${videos.length} lessons completed', style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12)),
-                    ],
-                  );
-                }),
                 const SizedBox(height: 6),
                 Text(
                   '${videos.length} lessons · Start with the first lesson and learn at your pace.',
@@ -90,7 +70,7 @@ class CourseDetail extends StatelessWidget {
                       entry.value,
                       isPremium,
                       course.title,
-                      course,
+                      videos,
                     ),
                   ),
               ]),
@@ -104,14 +84,20 @@ class CourseDetail extends StatelessWidget {
   Widget _header(
     BuildContext context,
     CourseModel course,
+    List<VideoInfo> videos,
     int lessonCount,
     int freeCount,
     bool isPremium,
   ) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF2F6FED),
+        gradient: LinearGradient(
+          colors: [colors.primary, colors.secondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Column(
@@ -159,6 +145,17 @@ class CourseDetail extends StatelessWidget {
                 isPremium ? Icons.verified_outlined : Icons.lock_outline,
                 isPremium ? 'Premium active' : 'Free plan',
               ),
+              FutureBuilder<double>(
+                future: _progress.courseProgress(course.title, videos),
+                builder: (context, snapshot) {
+                  final value = snapshot.data ?? 0;
+                  return _pill(
+                    context,
+                    Icons.track_changes_rounded,
+                    '${(value * 100).round()}% complete',
+                  );
+                },
+              ),
             ],
           ),
         ],
@@ -195,11 +192,10 @@ class CourseDetail extends StatelessWidget {
     VideoInfo video,
     bool isPremium,
     String? courseTitle,
-    CourseModel course,
+    List<VideoInfo> playlist,
   ) {
     final locked = index >= 10 && !isPremium;
     final colors = Theme.of(context).colorScheme;
-    final completed = Get.find<LearningStateController>().isLessonCompleted(course, index);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Card(
@@ -211,8 +207,8 @@ class CourseDetail extends StatelessWidget {
                   () => VideoPlayerScreen(
                     video: video,
                     courseTitle: courseTitle,
-                    course: course,
-                    lessonIndex: index,
+                    playlist: playlist,
+                    videoIndex: index,
                   ),
                 ),
           child: Padding(
@@ -224,23 +220,15 @@ class CourseDetail extends StatelessWidget {
                   height: 58,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
-                    color: completed
-                        ? colors.tertiaryContainer
-                        : locked
-                            ? colors.surfaceContainerHighest
-                            : colors.primaryContainer,
+                    color: locked
+                        ? colors.surfaceContainerHighest
+                        : colors.primaryContainer,
                   ),
                   child: Icon(
-                    completed
-                        ? Icons.check_circle_rounded
-                        : locked
-                            ? Icons.lock_outline_rounded
-                            : Icons.play_arrow_rounded,
-                    color: completed
-                        ? colors.tertiary
-                        : locked
-                            ? colors.onSurfaceVariant
-                            : colors.primary,
+                    locked
+                        ? Icons.lock_outline_rounded
+                        : Icons.play_arrow_rounded,
+                    color: locked ? colors.onSurfaceVariant : colors.primary,
                     size: 28,
                   ),
                 ),

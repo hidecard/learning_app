@@ -79,7 +79,7 @@ class CourseList extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2F6FED),
+                      color: const Color(0xFF0B0F10),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(

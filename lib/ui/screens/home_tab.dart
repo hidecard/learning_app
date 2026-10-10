@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/blog_model.dart';
 import '../../data/models/course_model.dart';
-import '../../logic/controllers/learning_state_controller.dart';
-import '../widgets/content_shimmer.dart';
+import '../../data/services/learning_progress_service.dart';
 import 'main_navigation.dart';
 import 'video_player_screen.dart';
 
@@ -30,6 +29,7 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final _searchController = TextEditingController();
+  final _progress = LearningProgressService();
   List<CourseModel> _courses = const [];
   List<BlogModel> _blogs = const [];
 
@@ -44,7 +44,8 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void didUpdateWidget(covariant HomeTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.courses != widget.courses || oldWidget.blogs != widget.blogs) {
+    if (oldWidget.courses != widget.courses ||
+        oldWidget.blogs != widget.blogs) {
       _filterContent();
     }
   }
@@ -62,13 +63,20 @@ class _HomeTabState extends State<HomeTab> {
       _courses = query.isEmpty
           ? widget.courses
           : widget.courses
-              .where((course) => (course.title ?? '').toLowerCase().contains(query))
-              .toList(growable: false);
+                .where(
+                  (course) =>
+                      (course.title ?? '').toLowerCase().contains(query),
+                )
+                .toList(growable: false);
       _blogs = query.isEmpty
           ? widget.blogs
           : widget.blogs
-              .where((blog) => '${blog.title} ${blog.content} ${blog.category}'.toLowerCase().contains(query))
-              .toList(growable: false);
+                .where(
+                  (blog) => '${blog.title} ${blog.content} ${blog.category}'
+                      .toLowerCase()
+                      .contains(query),
+                )
+                .toList(growable: false);
     });
   }
 
@@ -85,16 +93,26 @@ class _HomeTabState extends State<HomeTab> {
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 32),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildStats(context),
-                  Obx(() => _buildContinueLearning(context)),
-                  const SizedBox(height: 28),
-                  _sectionHeader(context, 'Featured courses', 'View all', 1),
-                  const SizedBox(height: 14),
-                  _buildCourses(context),
-                  const SizedBox(height: 28),
-                  _sectionHeader(context, 'Fresh from the blog', 'View all', 2),
-                  const SizedBox(height: 14),
-                  _buildBlogs(context),
+                  if (_searchController.text.trim().isNotEmpty)
+                    _buildSearchResults(context)
+                  else ...[
+                    _buildStats(context),
+                    _buildStreak(context),
+                    _buildContinueLearning(context),
+                    const SizedBox(height: 28),
+                    _sectionHeader(context, 'Featured courses', 'View all', 1),
+                    const SizedBox(height: 14),
+                    _buildCourses(context),
+                    const SizedBox(height: 28),
+                    _sectionHeader(
+                      context,
+                      'Fresh from the blog',
+                      'View all',
+                      2,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildBlogs(context),
+                  ],
                   if (widget.errorMessage != null) ...[
                     const SizedBox(height: 20),
                     _buildError(context),
@@ -108,228 +126,562 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
+  Widget _buildSearchResults(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final query = _searchController.text.trim();
+    final total = _courses.length + _blogs.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Search results',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$total results for “$query”',
+          style: TextStyle(color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: 20),
+        if (_courses.isNotEmpty) ...[
+          _sectionHeader(context, 'Courses', 'View all', 1),
+          const SizedBox(height: 12),
+          _buildCourses(context),
+          const SizedBox(height: 24),
+        ],
+        if (_blogs.isNotEmpty) ...[
+          _sectionHeader(context, 'Articles', 'View all', 2),
+          const SizedBox(height: 12),
+          _buildBlogs(context),
+        ],
+        if (total == 0)
+          _empty(
+            context,
+            Icons.search_off_rounded,
+            'No courses or articles match your search',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStreak(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return FutureBuilder<int>(
+      future: _progress.touchStreak(),
+      builder: (context, snapshot) {
+        final streak = snapshot.data ?? 1;
+        return Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: colors.tertiaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.local_fire_department_rounded,
+                  color: colors.tertiary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '$streak-day learning streak',
+                    style: TextStyle(
+                      color: colors.onTertiaryContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  streak == 1 ? 'Keep going' : 'Great work',
+                  style: TextStyle(
+                    color: colors.onTertiaryContainer.withValues(alpha: .75),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContinueLearning(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _progress.lastLessonKey(),
+      builder: (context, snapshot) {
+        final key = snapshot.data;
+        if (key == null) return const SizedBox.shrink();
+
+        for (final course in widget.courses) {
+          final videos = course.videos ?? const <VideoInfo>[];
+          for (var index = 0; index < videos.length; index++) {
+            final video = videos[index];
+            if (_progress.lessonKey(course.title, video) != key) continue;
+            final colors = Theme.of(context).colorScheme;
+            return Padding(
+              padding: const EdgeInsets.only(top: 18),
+              child: Card(
+                color: colors.primaryContainer,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Get.to(
+                    () => VideoPlayerScreen(
+                      video: video,
+                      courseTitle: course.title,
+                      playlist: videos,
+                      videoIndex: index,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            Icons.play_arrow_rounded,
+                            color: colors.onPrimary,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'CONTINUE LEARNING',
+                                style: TextStyle(
+                                  color: colors.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: .8,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                video.title ?? 'Your next lesson',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                course.title ?? 'Course lesson',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: colors.onSurfaceVariant,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: colors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
   Widget _buildHero(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF2F6FED),
+        gradient: LinearGradient(
+          colors: [colors.primary, colors.secondary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: SafeArea(
         bottom: false,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: .18), shape: BoxShape.circle),
-              child: const Icon(Icons.auto_awesome, color: Colors.white),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.auto_awesome, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CODENEST',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Learn something useful today.',
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: widget.onRefresh,
+                  icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('NEXUS TECH', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
-                SizedBox(height: 3),
-                Text('Learn something useful today.', style: TextStyle(color: Colors.white70, fontSize: 13)),
-              ]),
+            const SizedBox(height: 24),
+            Text(
+              'Build your next skill',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            IconButton(onPressed: widget.onRefresh, icon: const Icon(Icons.refresh_rounded, color: Colors.white)),
-          ]),
-          const SizedBox(height: 24),
-          Text('Build your next skill', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          const Text('Short lessons, practical ideas, real progress.', style: TextStyle(color: Colors.white70, fontSize: 14)),
-          const SizedBox(height: 18),
-          TextField(
-            controller: _searchController,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              hintText: 'Search courses and articles',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: _searchController.text.isEmpty ? null : IconButton(onPressed: _searchController.clear, icon: const Icon(Icons.close_rounded)),
-              filled: true,
-              fillColor: colors.surface,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            const SizedBox(height: 6),
+            const Text(
+              'Short lessons, practical ideas, real progress.',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
-          ),
-        ]),
+            const SizedBox(height: 18),
+            TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'Search courses and articles',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: _searchController.clear,
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                filled: true,
+                fillColor: colors.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildStats(BuildContext context) {
-    return Row(children: [
-      _stat(context, Icons.school_outlined, '${widget.courses.length}', 'Courses'),
-      const SizedBox(width: 12),
-      _stat(context, Icons.article_outlined, '${widget.blogs.length}', 'Articles'),
-      const SizedBox(width: 12),
-      _stat(context, Icons.play_circle_outline, '${widget.courses.fold<int>(0, (sum, c) => sum + (c.videos?.length ?? 0))}', 'Lessons'),
-    ]);
+    return Row(
+      children: [
+        _stat(
+          context,
+          Icons.school_outlined,
+          '${widget.courses.length}',
+          'Courses',
+        ),
+        const SizedBox(width: 12),
+        _stat(
+          context,
+          Icons.article_outlined,
+          '${widget.blogs.length}',
+          'Articles',
+        ),
+        const SizedBox(width: 12),
+        _stat(
+          context,
+          Icons.play_circle_outline,
+          '${widget.courses.fold<int>(0, (sum, c) => sum + (c.videos?.length ?? 0))}',
+          'Lessons',
+        ),
+      ],
+    );
   }
 
-  Widget _buildContinueLearning(BuildContext context) {
-    final learning = Get.find<LearningStateController>();
-    CourseModel? selected;
-    for (final course in widget.courses) {
-      if ((course.videos?.isNotEmpty ?? false) && learning.progressFor(course) < 1) {
-        selected = course;
-        break;
-      }
-    }
-    if (selected == null) return const SizedBox.shrink();
-    final course = selected;
-    final index = learning.resumeIndex(course).clamp(0, course.videos!.length - 1).toInt();
-    final progress = learning.progressFor(course);
-    return Card(
-      margin: const EdgeInsets.only(top: 18),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => Get.to(() => VideoPlayerScreen(
-          video: course.videos![index],
-          courseTitle: course.title,
-          course: course,
-          lessonIndex: index,
-        )),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
-              child: Icon(Icons.play_arrow_rounded, color: Theme.of(context).colorScheme.primary),
+  Widget _stat(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: colors.primary, size: 21),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Continue learning', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800, fontSize: 12)),
-              const SizedBox(height: 4),
-              Text(course.title ?? 'Your course', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 7),
-              LinearProgressIndicator(value: progress, minHeight: 5),
-            ])),
-            const SizedBox(width: 10),
-            Text('${(progress * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w800)),
-          ]),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _stat(BuildContext context, IconData icon, String value, String label) {
-    final colors = Theme.of(context).colorScheme;
-    return Expanded(child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-      decoration: BoxDecoration(color: colors.surfaceContainerLow, borderRadius: BorderRadius.circular(16)),
-      child: Column(children: [Icon(icon, color: colors.primary, size: 21), const SizedBox(height: 6), Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)), const SizedBox(height: 2), Text(label, style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11))]),
-    ));
-  }
-
-  Widget _sectionHeader(BuildContext context, String title, String action, int tab) => Row(children: [
-    Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800))),
-    TextButton(onPressed: () => MainNavigation.navigateToTab(tab), child: Text(action)),
-  ]);
+  Widget _sectionHeader(
+    BuildContext context,
+    String title,
+    String action,
+    int tab,
+  ) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ),
+      TextButton(
+        onPressed: () => MainNavigation.navigateToTab(tab),
+        child: Text(action),
+      ),
+    ],
+  );
 
   Widget _buildCourses(BuildContext context) {
     if (widget.isLoading) {
-      return SizedBox(
-        height: 178,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: 2,
-          separatorBuilder: (context, index) => const SizedBox(width: 12),
-          itemBuilder: (context, index) => Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: 198,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    ContentShimmer(height: 64),
-                    Spacer(),
-                    ContentShimmer(height: 14, width: 150),
-                    SizedBox(height: 9),
-                    ContentShimmer(height: 11, width: 86),
-                  ],
+      return const SizedBox(
+        height: 160,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_courses.isEmpty) {
+      return _empty(context, Icons.school_outlined, 'No courses found yet');
+    }
+    return SizedBox(
+      height: 178,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: _courses.take(6).length,
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final course = _courses[index];
+          return SizedBox(
+            width: 230,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => Get.toNamed('/course-detail', arguments: course),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 64,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primaryContainer,
+                              Theme.of(context).colorScheme.secondaryContainer,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.play_arrow_rounded,
+                            size: 34,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        course.title?.isNotEmpty == true
+                            ? course.title!
+                            : 'Untitled course',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        '${course.videos?.length ?? 0} lessons',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      );
-    }
-    if (_courses.isEmpty) return _empty(context, Icons.school_outlined, 'No courses found yet');
-    return SizedBox(height: 178, child: ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: _courses.take(6).length,
-      separatorBuilder: (context, index) => const SizedBox(width: 12),
-      itemBuilder: (context, index) {
-        final course = _courses[index];
-        return SizedBox(width: 230, child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => Get.toNamed('/course-detail', arguments: course),
-          child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(height: 64, decoration: BoxDecoration(color: const Color(0xFF2F6FED), borderRadius: BorderRadius.circular(14)), child: Center(child: Icon(Icons.play_arrow_rounded, size: 34, color: Theme.of(context).colorScheme.primary))),
-            const Spacer(),
-            Text(course.title?.isNotEmpty == true ? course.title! : 'Untitled course', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 5),
-            Text('${course.videos?.length ?? 0} lessons', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
-          ]))),
-        ));
-      },
-    ));
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildBlogs(BuildContext context) {
     if (widget.isLoading) {
-      return Column(
-        children: List.generate(
-          2,
-          (index) => Card(
-            margin: const EdgeInsets.only(bottom: 10),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: const [
-                  ContentShimmer(height: 58, width: 58),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      return const SizedBox(
+        height: 100,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_blogs.isEmpty) {
+      return _empty(context, Icons.article_outlined, 'No articles found yet');
+    }
+    return Column(
+      children: _blogs
+          .take(3)
+          .map(
+            (blog) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Card(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Get.toNamed('/blog-detail', arguments: blog),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
                       children: [
-                        ContentShimmer(height: 10, width: 78),
-                        SizedBox(height: 9),
-                        ContentShimmer(height: 13),
-                        SizedBox(height: 7),
-                        ContentShimmer(height: 10, width: 110),
+                        Container(
+                          width: 58,
+                          height: 58,
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(Icons.lightbulb_outline_rounded),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                blog.category.toUpperCase(),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: .8,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                blog.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                '${blog.viewCount} views  ·  ${blog.likeCount} likes',
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      );
-    }
-    if (_blogs.isEmpty) return _empty(context, Icons.article_outlined, 'No articles found yet');
-    return Column(children: _blogs.take(3).map((blog) => Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Card(child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () => Get.toNamed('/blog-detail', arguments: blog),
-        child: Padding(padding: const EdgeInsets.all(14), child: Row(children: [
-          Container(width: 58, height: 58, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(14)), child: const Icon(Icons.lightbulb_outline_rounded)),
-          const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(blog.category.toUpperCase(), style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: .8)), const SizedBox(height: 5), Text(blog.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 5), Text('${blog.viewCount} views  ·  ${blog.likeCount} likes', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11))])),
-          Icon(Icons.chevron_right_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ])),
-      )),
-    )).toList());
+          )
+          .toList(),
+    );
   }
 
-  Widget _empty(BuildContext context, IconData icon, String text) => SizedBox(height: 110, child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(icon, color: Theme.of(context).colorScheme.outline, size: 28), const SizedBox(height: 6), Text(text, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))])));
+  Widget _empty(BuildContext context, IconData icon, String text) => SizedBox(
+    height: 110,
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Theme.of(context).colorScheme.outline, size: 28),
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
-  Widget _buildError(BuildContext context) => Card(color: Theme.of(context).colorScheme.errorContainer, child: ListTile(leading: Icon(Icons.cloud_off_rounded, color: Theme.of(context).colorScheme.onErrorContainer), title: Text(widget.errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)), trailing: TextButton(onPressed: widget.onRefresh, child: const Text('Retry'))));
+  Widget _buildError(BuildContext context) => Card(
+    color: Theme.of(context).colorScheme.errorContainer,
+    child: ListTile(
+      leading: Icon(
+        Icons.cloud_off_rounded,
+        color: Theme.of(context).colorScheme.onErrorContainer,
+      ),
+      title: Text(
+        widget.errorMessage!,
+        style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+      ),
+      trailing: TextButton(
+        onPressed: widget.onRefresh,
+        child: const Text('Retry'),
+      ),
+    ),
+  );
 }

@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen>
                 titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
                 background: Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2F6FED),
+                    color: Color(0xFF0B0F10),
                   ),
                 ),
               ),
@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen>
                       color: Color(0xFFE8F0FF),
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
-                    labelColor: Color(0xFF2F6FED),
+                    labelColor: Color(0xFF0B0F10),
                     unselectedLabelColor: Color(0xFF68758A),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.all(4),
