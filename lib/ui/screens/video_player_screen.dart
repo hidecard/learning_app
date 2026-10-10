@@ -297,12 +297,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                             SizedBox(width: isTablet ? 16 : 12),
                             Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.bookmark_border,
-                                label: 'Save',
-                                onTap: _saveVideo,
-                                isTablet: isTablet,
-                              ),
+                              child: Obx(() {
+                                final saved = Get.find<LearningStateController>()
+                                    .isVideoSaved(widget.courseTitle, widget.video);
+                                return _buildActionButton(
+                                  icon: saved
+                                      ? Icons.bookmark_rounded
+                                      : Icons.bookmark_border,
+                                  label: saved ? 'Saved' : 'Save',
+                                  onTap: _saveVideo,
+                                  isTablet: isTablet,
+                                );
+                              }),
                             ),
                             SizedBox(width: isTablet ? 16 : 12),
                             Expanded(
@@ -319,6 +325,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                           ],
                         ),
+                      ),
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isTablet ? 32 : 20,
+                        ),
+                        child: Obx(() {
+                          final note = Get.find<LearningStateController>()
+                              .noteForVideo(widget.courseTitle, widget.video);
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: _editNote,
+                              icon: Icon(
+                                note.isEmpty
+                                    ? Icons.edit_note_rounded
+                                    : Icons.sticky_note_2_rounded,
+                              ),
+                              label: Text(note.isEmpty ? 'Add lesson note' : 'Edit lesson note'),
+                            ),
+                          );
+                        }),
                       ),
 
                       if (widget.playlist.length > 1) ...[
@@ -413,8 +441,52 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _saveVideo() {
-    // Implement save functionality
-    Get.snackbar('Saved', 'Video saved to your library!');
+    final learning = Get.find<LearningStateController>();
+    final saved = learning.isVideoSaved(widget.courseTitle, widget.video);
+    learning.toggleVideoSaved(widget.courseTitle, widget.video);
+    Get.snackbar(
+      saved ? 'Removed' : 'Saved',
+      saved ? 'Lesson removed from saved items.' : 'Lesson saved to your library.',
+    );
+  }
+
+  Future<void> _editNote() async {
+    final learning = Get.find<LearningStateController>();
+    final controller = TextEditingController(
+      text: learning.noteForVideo(widget.courseTitle, widget.video),
+    );
+    final note = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Lesson note'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 5,
+          maxLength: 500,
+          decoration: const InputDecoration(
+            hintText: 'Write a short note about this lesson',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Save note'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (note == null) return;
+    await learning.saveVideoNote(widget.courseTitle, widget.video, note);
+    Get.snackbar(
+      'Note saved',
+      note.trim().isEmpty ? 'Lesson note removed.' : 'Your note is saved on this device.',
+    );
   }
 
   void _downloadVideo() {

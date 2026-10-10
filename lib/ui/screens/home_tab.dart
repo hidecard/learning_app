@@ -7,6 +7,14 @@ import '../../data/services/learning_progress_service.dart';
 import 'main_navigation.dart';
 import 'video_player_screen.dart';
 
+class _LessonMatch {
+  final CourseModel course;
+  final VideoInfo video;
+  final int index;
+
+  const _LessonMatch(this.course, this.video, this.index);
+}
+
 class HomeTab extends StatefulWidget {
   final List<BlogModel> blogs;
   final List<CourseModel> courses;
@@ -32,6 +40,7 @@ class _HomeTabState extends State<HomeTab> {
   final _progress = LearningProgressService();
   List<CourseModel> _courses = const [];
   List<BlogModel> _blogs = const [];
+  List<_LessonMatch> _lessons = const [];
 
   @override
   void initState() {
@@ -77,6 +86,17 @@ class _HomeTabState extends State<HomeTab> {
                       .contains(query),
                 )
                 .toList(growable: false);
+      _lessons = query.isEmpty
+          ? const []
+          : [
+              for (final course in widget.courses)
+                for (final entry in
+                    (course.videos ?? const <VideoInfo>[]).asMap().entries)
+                  if ('${course.title ?? ''} ${entry.value.title ?? ''} ${entry.value.category ?? ''}'
+                      .toLowerCase()
+                      .contains(query))
+                    _LessonMatch(course, entry.value, entry.key),
+            ];
     });
   }
 
@@ -129,7 +149,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildSearchResults(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final query = _searchController.text.trim();
-    final total = _courses.length + _blogs.length;
+    final total = _courses.length + _blogs.length + _lessons.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -145,6 +165,12 @@ class _HomeTabState extends State<HomeTab> {
           style: TextStyle(color: colors.onSurfaceVariant),
         ),
         const SizedBox(height: 20),
+        if (_lessons.isNotEmpty) ...[
+          _sectionHeader(context, 'Lessons', 'View courses', 1),
+          const SizedBox(height: 12),
+          ..._lessons.take(6).map((match) => _lessonSearchCard(context, match)),
+          const SizedBox(height: 12),
+        ],
         if (_courses.isNotEmpty) ...[
           _sectionHeader(context, 'Courses', 'View all', 1),
           const SizedBox(height: 12),
@@ -160,9 +186,37 @@ class _HomeTabState extends State<HomeTab> {
           _empty(
             context,
             Icons.search_off_rounded,
-            'No courses or articles match your search',
+            'No courses, lessons or articles match your search',
           ),
       ],
+    );
+  }
+
+  Widget _lessonSearchCard(BuildContext context, _LessonMatch match) {
+    final colors = Theme.of(context).colorScheme;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        onTap: () => Get.toNamed('/course-detail', arguments: match.course),
+        leading: CircleAvatar(
+          backgroundColor: colors.primaryContainer,
+          foregroundColor: colors.primary,
+          child: const Icon(Icons.play_lesson_outlined),
+        ),
+        title: Text(
+          match.video.title?.isNotEmpty == true
+              ? match.video.title!
+              : 'Untitled lesson',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          '${match.course.title ?? 'Course'} · Lesson ${match.index + 1}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+      ),
     );
   }
 

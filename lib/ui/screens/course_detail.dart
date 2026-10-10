@@ -16,7 +16,6 @@ class CourseDetail extends StatelessWidget {
     final videos = course.videos ?? const <VideoInfo>[];
     final isPremium =
         Get.find<AuthController>().currentUser.value?.isPremium == true;
-    final colors = Theme.of(context).colorScheme;
     final freeCount = videos.length < 10 ? videos.length : 10;
 
     return Scaffold(
@@ -29,55 +28,62 @@ class CourseDetail extends StatelessWidget {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: _header(
-              context,
-              course,
-              videos,
-              videos.length,
-              freeCount,
-              isPremium,
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                Text(
-                  'Course lessons',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final header = _header(context, course, videos, videos.length, freeCount, isPremium);
+          final lessons = _lessonList(context, videos, isPremium, course.title);
+          if (constraints.maxWidth >= 900) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: 360, child: SingleChildScrollView(child: header)),
+                Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(24), child: lessons)),
+              ],
+            );
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: header),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                  child: lessons,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  '${videos.length} lessons · Start with the first lesson and learn at your pace.',
-                  style: TextStyle(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (videos.isEmpty)
-                  _empty(context)
-                else
-                  ...videos.asMap().entries.map(
-                    (entry) => _lesson(
-                      context,
-                      entry.key,
-                      entry.value,
-                      isPremium,
-                      course.title,
-                      videos,
-                    ),
-                  ),
-              ]),
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _lessonList(
+    BuildContext context,
+    List<VideoInfo> videos,
+    bool isPremium,
+    String? courseTitle,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Course lessons',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '${videos.length} lessons · Start with the first lesson and learn at your pace.',
+          style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
+        ),
+        const SizedBox(height: 16),
+        if (videos.isEmpty)
+          _empty(context)
+        else
+          ...videos.asMap().entries.map(
+            (entry) => _lesson(context, entry.key, entry.value, isPremium, courseTitle, videos),
+          ),
+      ],
     );
   }
 

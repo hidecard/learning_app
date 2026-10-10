@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +11,8 @@ class LearningStateController extends GetxController {
   final savedCourses = <String>{}.obs;
   final savedBlogs = <String>{}.obs;
   final downloadedLessons = <String>{}.obs;
+  final savedLessons = <String>{}.obs;
+  final lessonNotes = <String, String>{}.obs;
   final resumeIndexes = <String, int>{}.obs;
   final isReady = false.obs;
   SharedPreferences? _prefs;
@@ -53,6 +57,33 @@ class LearningStateController extends GetxController {
 
   bool isVideoDownloaded(String? courseTitle, VideoInfo video) =>
       downloadedLessons.contains(videoLessonKey(courseTitle, video));
+
+  bool isVideoSaved(String? courseTitle, VideoInfo video) =>
+      savedLessons.contains(videoLessonKey(courseTitle, video));
+
+  String noteForVideo(String? courseTitle, VideoInfo video) =>
+      lessonNotes[videoLessonKey(courseTitle, video)] ?? '';
+
+  Future<void> toggleVideoSaved(String? courseTitle, VideoInfo video) async {
+    final key = videoLessonKey(courseTitle, video);
+    savedLessons.contains(key) ? savedLessons.remove(key) : savedLessons.add(key);
+    await _persist();
+  }
+
+  Future<void> saveVideoNote(
+    String? courseTitle,
+    VideoInfo video,
+    String note,
+  ) async {
+    final key = videoLessonKey(courseTitle, video);
+    final value = note.trim();
+    if (value.isEmpty) {
+      lessonNotes.remove(key);
+    } else {
+      lessonNotes[key] = value;
+    }
+    await _persist();
+  }
 
   Future<void> toggleVideoDownload(String? courseTitle, VideoInfo video) async {
     final key = videoLessonKey(courseTitle, video);
@@ -103,6 +134,16 @@ class LearningStateController extends GetxController {
     downloadedLessons.assignAll(
       _prefs?.getStringList('downloaded_lessons') ?? const [],
     );
+    savedLessons.assignAll(_prefs?.getStringList('saved_lessons') ?? const []);
+    final rawNotes = _prefs?.getString('lesson_notes');
+    if (rawNotes != null) {
+      final decoded = jsonDecode(rawNotes);
+      if (decoded is Map) {
+        lessonNotes.assignAll(
+          decoded.map((key, value) => MapEntry('$key', '$value')),
+        );
+      }
+    }
     final rawResume = _prefs?.getStringList('resume_indexes') ?? const [];
     for (final entry in rawResume) {
       final split = entry.split('::');
@@ -121,6 +162,8 @@ class LearningStateController extends GetxController {
       prefs.setStringList('saved_courses', savedCourses.toList()),
       prefs.setStringList('saved_blogs', savedBlogs.toList()),
       prefs.setStringList('downloaded_lessons', downloadedLessons.toList()),
+      prefs.setStringList('saved_lessons', savedLessons.toList()),
+      prefs.setString('lesson_notes', jsonEncode(lessonNotes)),
       prefs.setStringList(
         'resume_indexes',
         resumeIndexes.entries.map((entry) => '${entry.key}::${entry.value}').toList(),

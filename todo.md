@@ -22,11 +22,11 @@
 ## Next product improvements
 
 - [x] Add percentage-based progress to course cards and Home recommendations
-- [ ] Add daily learning goals and achievement badges
-- [ ] Add lesson notes and bookmarks inside the video player
+- [x] Add daily learning goals and achievement badges
+- [x] Add lesson notes and bookmarks inside the video player
 - [ ] Add actual first-party offline media download progress, storage management and expiry handling
-- [ ] Add global search results for lessons and saved items
-- [ ] Add responsive tablet/desktop two-column course detail layout
+- [x] Add global search results for lessons and saved items
+- [x] Add responsive tablet/desktop two-column course detail layout
 - [ ] Add accessibility audit for contrast, semantics and text scaling
 
 ## Release checklist
