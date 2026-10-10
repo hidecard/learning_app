@@ -144,7 +144,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 Icons.arrow_back,
                                 color: Colors.white,
                               ),
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: _closePlayer,
                             ),
                           ),
                           SizedBox(width: isTablet ? 16 : 12),
@@ -430,6 +430,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     Get.snackbar('Download', 'Download functionality coming soon!');
   }
 
+  void _closePlayer() {
+    _controller?.pause();
+    if (mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _completeAndContinue() async {
     await _progress.markCompleted(widget.courseTitle, widget.video);
     if (mounted) _showVideoCompletedDialog();
@@ -453,7 +460,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A1A),
         title: const Text(
           'Video Completed',
@@ -465,7 +472,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text(
               'Replay',
               style: TextStyle(color: Color(0xFFFFFFFF)),
@@ -474,12 +481,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           ElevatedButton(
             onPressed: widget.videoIndex + 1 < widget.playlist.length
                 ? () {
-                    Navigator.pop(context);
+                    Navigator.of(dialogContext).pop();
                     _openLesson(widget.videoIndex + 1);
                   }
                 : () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
+                    Navigator.of(dialogContext).pop();
+                    _closePlayer();
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFFFFF),
