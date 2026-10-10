@@ -168,10 +168,17 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget _buildStreak(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return FutureBuilder<int>(
-      future: _progress.touchStreak(),
+    return FutureBuilder<List<int>>(
+      future: Future.wait([
+        _progress.touchStreak(),
+        _progress.dailyCompleted(),
+        _progress.completedLessonCount(),
+      ]),
       builder: (context, snapshot) {
-        final streak = snapshot.data ?? 1;
+        final values = snapshot.data ?? const [1, 0, 0];
+        final streak = values[0];
+        final dailyCompleted = values[1];
+        final lessonCount = values[2];
         return Padding(
           padding: const EdgeInsets.only(top: 14),
           child: Container(
@@ -188,21 +195,33 @@ class _HomeTabState extends State<HomeTab> {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    '$streak-day learning streak',
-                    style: TextStyle(
-                      color: colors.onTertiaryContainer,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$streak-day learning streak',
+                        style: TextStyle(
+                          color: colors.onTertiaryContainer,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Daily goal: $dailyCompleted/${LearningProgressService.dailyGoal} lesson',
+                        style: TextStyle(
+                          color: colors.onTertiaryContainer.withValues(alpha: .75),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  streak == 1 ? 'Keep going' : 'Great work',
-                  style: TextStyle(
-                    color: colors.onTertiaryContainer.withValues(alpha: .75),
-                    fontSize: 12,
+                if (lessonCount >= 1)
+                  Chip(
+                    label: Text(lessonCount >= 10 ? '10 lessons' : 'First lesson'),
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: colors.surface,
                   ),
-                ),
               ],
             ),
           ),
@@ -313,11 +332,7 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: colors.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: SafeArea(
@@ -518,12 +533,7 @@ class _HomeTabState extends State<HomeTab> {
                       Container(
                         height: 64,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).colorScheme.primaryContainer,
-                              Theme.of(context).colorScheme.secondaryContainer,
-                            ],
-                          ),
+                          color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Center(

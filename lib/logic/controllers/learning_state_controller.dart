@@ -48,6 +48,20 @@ class LearningStateController extends GetxController {
   bool isLessonDownloaded(CourseModel course, int index) =>
       downloadedLessons.contains(lessonKey(course, index));
 
+  String videoLessonKey(String? courseTitle, VideoInfo video) =>
+      'course:${courseTitle?.trim().isNotEmpty == true ? courseTitle!.trim() : 'untitled'}:lesson:${video.youtubeId ?? video.title ?? 'lesson'}';
+
+  bool isVideoDownloaded(String? courseTitle, VideoInfo video) =>
+      downloadedLessons.contains(videoLessonKey(courseTitle, video));
+
+  Future<void> toggleVideoDownload(String? courseTitle, VideoInfo video) async {
+    final key = videoLessonKey(courseTitle, video);
+    downloadedLessons.contains(key)
+        ? downloadedLessons.remove(key)
+        : downloadedLessons.add(key);
+    await _persist();
+  }
+
   int resumeIndex(CourseModel course) => resumeIndexes[courseKey(course)] ?? 0;
 
   Future<void> setResume(CourseModel course, int index) async {

@@ -3,6 +3,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
 import '../../data/services/learning_progress_service.dart';
+import '../../logic/controllers/auth_controller.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoInfo video;
@@ -112,20 +114,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
             return Column(
               children: [
-                // Custom App Bar with Glass Effect
+                // Plain app bar with clear video context
                 Container(
                   height:
                       MediaQuery.of(context).padding.top + (isTablet ? 80 : 60),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.8),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
+                  color: Colors.black,
                   child: SafeArea(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
@@ -269,12 +262,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFFFFFFF),
-                                      Color(0xFF273031),
-                                    ],
-                                  ),
+                                  color: const Color(0xFF273031),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -318,12 +306,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                             SizedBox(width: isTablet ? 16 : 12),
                             Expanded(
-                              child: _buildActionButton(
-                                icon: Icons.download_outlined,
-                                label: 'Download',
-                                onTap: _downloadVideo,
-                                isTablet: isTablet,
-                              ),
+                              child: Obx(() {
+                                final saved = Get.find<LearningStateController>()
+                                    .isVideoDownloaded(widget.courseTitle, widget.video);
+                                return _buildActionButton(
+                                  icon: saved ? Icons.download_done_rounded : Icons.download_outlined,
+                                  label: saved ? 'Saved offline' : 'Download',
+                                  onTap: _downloadVideo,
+                                  isTablet: isTablet,
+                                );
+                              }),
                             ),
                           ],
                         ),
@@ -426,8 +418,19 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _downloadVideo() {
-    // Implement download functionality
-    Get.snackbar('Download', 'Download functionality coming soon!');
+    final isPremium = Get.find<AuthController>().currentUser.value?.isPremium == true;
+    if (!isPremium) {
+      Get.snackbar('Premium feature', 'Activate Premium to save lessons for offline access.');
+      Get.toNamed('/premium');
+      return;
+    }
+    final learning = Get.find<LearningStateController>();
+    final saved = learning.isVideoDownloaded(widget.courseTitle, widget.video);
+    learning.toggleVideoDownload(widget.courseTitle, widget.video);
+    Get.snackbar(
+      saved ? 'Removed from offline library' : 'Saved for offline access',
+      saved ? 'This lesson was removed from this device.' : 'You can find it in your Profile library.',
+    );
   }
 
   void _closePlayer() {

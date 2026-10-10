@@ -93,11 +93,7 @@ class CourseDetail extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colors.primary, colors.secondary],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: colors.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: Column(

@@ -17,7 +17,6 @@ import 'ui/screens/main_navigation.dart';
 import 'ui/screens/premium_screen.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/widgets/connectivity_wrapper.dart';
-import 'ui/widgets/glass_surface.dart';
 
 const _ink = Color(0xFF0B0F10);
 const _paper = Color(0xFFF7F8F8);
@@ -64,13 +63,13 @@ class MyApp extends StatelessWidget {
       colorScheme: colorScheme,
       useMaterial3: true,
       brightness: brightness,
-      scaffoldBackgroundColor: Colors.transparent,
+      scaffoldBackgroundColor: brightness == Brightness.dark ? _ink : _paper,
       visualDensity: VisualDensity.adaptivePlatformDensity,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: brightness == Brightness.dark
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: .58)
-            : Colors.white.withValues(alpha: .62),
+            ? colorScheme.surfaceContainerHighest
+            : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -92,14 +91,14 @@ class MyApp extends StatelessWidget {
         elevation: 0,
         margin: EdgeInsets.zero,
         color: brightness == Brightness.dark
-            ? colorScheme.surfaceContainer.withValues(alpha: .68)
-            : Colors.white.withValues(alpha: .68),
+            ? colorScheme.surfaceContainer
+            : Colors.white,
         surfaceTintColor: Colors.transparent,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: Colors.white.withValues(alpha: brightness == Brightness.dark ? .12 : .62),
+            color: colorScheme.outlineVariant,
           ),
         ),
       ),
@@ -118,16 +117,16 @@ class MyApp extends StatelessWidget {
       dialogTheme: DialogThemeData(
         elevation: 0,
         backgroundColor: brightness == Brightness.dark
-            ? colorScheme.surface.withValues(alpha: .82)
-            : Colors.white.withValues(alpha: .86),
+            ? colorScheme.surface
+            : Colors.white,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
         backgroundColor: brightness == Brightness.dark
-            ? colorScheme.surface.withValues(alpha: .72)
-            : Colors.white.withValues(alpha: .72),
+            ? colorScheme.surface
+            : Colors.white,
         surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.primaryContainer,
         labelTextStyle: WidgetStatePropertyAll(
@@ -161,10 +160,9 @@ class MyApp extends StatelessWidget {
       theme: _theme(Brightness.light),
       darkTheme: _theme(Brightness.dark),
       themeMode: themeController.themeMode,
-      builder: (context, child) =>
-          GlassBackdrop(
-            child: ConnectivityWrapper(child: child ?? const SizedBox.shrink()),
-          ),
+      builder: (context, child) => ConnectivityWrapper(
+        child: child ?? const SizedBox.shrink(),
+      ),
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const SplashScreen()),

@@ -10,6 +10,9 @@ class LearningProgressService {
   static const _readingProgressKey = 'learning_reading_progress';
   static const _streakCountKey = 'learning_streak_count';
   static const _streakDateKey = 'learning_streak_date';
+  static const _dailyCompletedKey = 'learning_daily_completed';
+  static const _dailyDateKey = 'learning_daily_date';
+  static const dailyGoal = 1;
 
   String lessonKey(String? courseTitle, VideoInfo video) {
     final course = (courseTitle ?? 'course').trim().toLowerCase();
@@ -25,10 +28,33 @@ class LearningProgressService {
     final prefs = await SharedPreferences.getInstance();
     final completed = prefs.getStringList(_completedKey) ?? <String>[];
     final key = lessonKey(courseTitle, video);
-    if (!completed.contains(key)) completed.add(key);
+    final isNewCompletion = !completed.contains(key);
+    if (isNewCompletion) completed.add(key);
     await prefs.setStringList(_completedKey, completed);
     await prefs.setString(_lastLessonKey, key);
+    if (isNewCompletion) {
+      final todayKey = _dateKey(DateTime.now());
+      if (prefs.getString(_dailyDateKey) != todayKey) {
+        await prefs.setString(_dailyDateKey, todayKey);
+        await prefs.setInt(_dailyCompletedKey, 0);
+      }
+      final dailyCount = prefs.getInt(_dailyCompletedKey) ?? 0;
+      await prefs.setInt(_dailyCompletedKey, dailyCount + 1);
+    }
   }
+
+  Future<int> dailyCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getString(_dailyDateKey) != _dateKey(DateTime.now())) return 0;
+    return prefs.getInt(_dailyCompletedKey) ?? 0;
+  }
+
+  Future<int> completedLessonCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_completedKey) ?? <String>[]).length;
+  }
+
+  String _dateKey(DateTime value) => '${value.year}-${value.month}-${value.day}';
 
   Future<bool> isCompleted(String? courseTitle, VideoInfo video) async {
     final prefs = await SharedPreferences.getInstance();

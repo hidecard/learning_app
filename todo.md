@@ -3,8 +3,8 @@
 ## Completed
 
 - [x] Refresh course, blog, detail, premium, profile and admin experiences
-- [x] Apply CodeNest logo and black/white/neutral liquid-glass brand system
-- [x] Add floating liquid-glass bottom navigation and shimmer loading states
+- [x] Apply CodeNest logo and a black/white/neutral learning-app brand system
+- [x] Add clear opaque bottom navigation and shimmer loading states
 - [x] Fix Premium/Activation safe back handling
 - [x] Persist last lesson and completed lesson state locally
 - [x] Add Continue Learning card to the Home dashboard
@@ -24,7 +24,7 @@
 - [x] Add percentage-based progress to course cards and Home recommendations
 - [ ] Add daily learning goals and achievement badges
 - [ ] Add lesson notes and bookmarks inside the video player
-- [ ] Add offline download progress, storage management and expiry handling
+- [ ] Add actual first-party offline media download progress, storage management and expiry handling
 - [ ] Add global search results for lessons and saved items
 - [ ] Add responsive tablet/desktop two-column course detail layout
 - [ ] Add accessibility audit for contrast, semantics and text scaling
