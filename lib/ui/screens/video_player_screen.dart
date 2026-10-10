@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
@@ -133,10 +134,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: Colors.white,
-                              ),
+                              tooltip: 'Close video',
+                              icon: const Icon(Icons.arrow_back, color: Colors.white),
                               onPressed: _closePlayer,
                             ),
                           ),
@@ -177,10 +176,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon: const Icon(
-                                Icons.share,
-                                color: Colors.white,
-                              ),
+                              tooltip: 'Copy lesson link',
+                              icon: const Icon(Icons.share, color: Colors.white),
                               onPressed: _shareVideo,
                             ),
                           ),
@@ -431,8 +428,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _shareVideo() {
-    // Implement share functionality
-    Get.snackbar('Share', 'Share functionality coming soon!');
+    final id = widget.video.youtubeId;
+    if (id == null || id.isEmpty) {
+      Get.snackbar('Share unavailable', 'This lesson does not have a shareable link.');
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: 'https://www.youtube.com/watch?v=$id'));
+    Get.snackbar('Lesson link copied', 'You can paste the link anywhere to share this lesson.');
   }
 
   void _likeVideo() {

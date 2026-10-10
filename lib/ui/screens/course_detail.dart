@@ -23,6 +23,7 @@ class CourseDetail extends StatelessWidget {
         title: Text(course.title ?? 'Course'),
         actions: [
           IconButton(
+            tooltip: 'Premium access',
             onPressed: () => Get.toNamed('/premium'),
             icon: const Icon(Icons.workspace_premium_outlined),
           ),

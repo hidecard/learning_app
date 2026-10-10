@@ -126,6 +126,11 @@ class LearningStateController extends GetxController {
     await _persist();
   }
 
+  Future<void> clearDownloadedLessons() async {
+    downloadedLessons.clear();
+    await _persist();
+  }
+
   Future<void> _load() async {
     _prefs = await SharedPreferences.getInstance();
     completedLessons.assignAll(_prefs?.getStringList('completed_lessons') ?? const []);

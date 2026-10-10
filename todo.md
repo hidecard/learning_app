@@ -27,7 +27,7 @@
 - [ ] Add actual first-party offline media download progress, storage management and expiry handling
 - [x] Add global search results for lessons and saved items
 - [x] Add responsive tablet/desktop two-column course detail layout
-- [ ] Add accessibility audit for contrast, semantics and text scaling
+- [x] Add accessibility audit for contrast, semantics and text scaling
 
 ## Release checklist
 
@@ -35,6 +35,6 @@
 - [ ] Add Windows code-signing certificate before public EXE distribution
 - [ ] Configure Firebase production rules and release configuration
 - [ ] Verify web hosting environment variables and Firebase authorized domains
-- [ ] Run Flutter analyze, tests and release builds in CI and review artifacts
+- [x] Run Flutter analyze, tests and release builds in CI and review artifacts
 - [ ] Validate APK on a physical Android device
 - [ ] Validate Windows EXE on a clean Windows machine

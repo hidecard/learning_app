@@ -17,7 +17,7 @@ class ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = Get.find<AuthController>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile'), actions: [IconButton(onPressed: auth.signOut, icon: const Icon(Icons.logout_rounded))]),
+      appBar: AppBar(title: const Text('Profile'), actions: [IconButton(tooltip: 'Sign out', onPressed: auth.signOut, icon: const Icon(Icons.logout_rounded))]),
       body: Obx(() {
         final user = auth.currentUser.value;
         if (user == null) return const Center(child: CircularProgressIndicator());
@@ -42,7 +42,7 @@ class ProfileTab extends StatelessWidget {
             return _group(context, [
               _row(context, Icons.bookmark_outline_rounded, 'Saved courses', '${learning.savedCourses.length} saved courses', () => Get.snackbar('Saved courses', 'Open a course from your saved library when it appears in the course list.')),
               _row(context, Icons.article_outlined, 'Saved articles', '${learning.savedBlogs.length} saved articles', () => Get.snackbar('Saved articles', 'Open an article from your saved library when it appears in the article list.')),
-              _row(context, Icons.download_done_rounded, 'Offline lessons', '${learning.downloadedLessons.length} lessons saved on this device', () => Get.snackbar('Offline lessons', 'Open a saved lesson from its course page to continue learning.')),
+              _row(context, Icons.download_done_rounded, 'Offline lessons', '${learning.downloadedLessons.length} lessons saved on this device', () => _manageOfflineLessons(context, learning)),
             ]);
           }),
           const SizedBox(height: 20),
@@ -78,4 +78,29 @@ class ProfileTab extends StatelessWidget {
   Widget _themeRow(BuildContext context) => Obx(() { final theme = Get.find<ThemeController>(); return ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5), leading: Container(width: 38, height: 38, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: .11), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.dark_mode_outlined)), title: const Text('Dark mode', style: TextStyle(fontWeight: FontWeight.w700)), subtitle: const Text('Adjust the app appearance', style: TextStyle(fontSize: 12)), trailing: Switch(value: theme.isDarkMode.value, onChanged: (_) => theme.toggleTheme())); });
 
   void _confirmLogout(BuildContext context, AuthController auth) => showDialog(context: context, builder: (_) => AlertDialog(title: const Text('Sign out?'), content: const Text('Your learning content will stay safe on this device.'), actions: [TextButton(onPressed: Get.back, child: const Text('Cancel')), FilledButton(onPressed: () { Get.back(); auth.signOut(); }, child: const Text('Sign out'))]));
+
+  void _manageOfflineLessons(BuildContext context, LearningStateController learning) {
+    if (learning.downloadedLessons.isEmpty) {
+      Get.snackbar('Offline lessons', 'No lessons are saved on this device yet.');
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Manage offline lessons'),
+        content: Text('${learning.downloadedLessons.length} lesson entries are saved on this device. You can clear them to free local storage state.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          FilledButton.tonal(
+            onPressed: () async {
+              await learning.clearDownloadedLessons();
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+              Get.snackbar('Offline library cleared', 'Saved lesson entries were removed from this device.');
+            },
+            child: const Text('Clear library'),
+          ),
+        ],
+      ),
+    );
+  }
 }
