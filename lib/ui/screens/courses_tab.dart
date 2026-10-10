@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/course_model.dart';
 import '../../data/services/learning_progress_service.dart';
+import '../../logic/controllers/learning_state_controller.dart';
 
 class CoursesTab extends StatefulWidget {
   final List<CourseModel> courses;
@@ -172,6 +173,7 @@ class _CoursesTabState extends State<CoursesTab> {
 
   Widget _card(BuildContext context, CourseModel course) {
     final colors = Theme.of(context).colorScheme;
+    final learningState = Get.find<LearningStateController>();
     final count = course.videos?.length ?? 0;
     final categories = (course.videos ?? const <VideoInfo>[])
         .map((video) => video.category)
@@ -179,7 +181,10 @@ class _CoursesTabState extends State<CoursesTab> {
         .toSet()
         .take(2)
         .join(' · ');
-    return Padding(
+    return Obx(() {
+      final completed = learningState.completedCount(course);
+      final progress = learningState.progressFor(course);
+      return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         clipBehavior: Clip.antiAlias,
@@ -228,6 +233,37 @@ class _CoursesTabState extends State<CoursesTab> {
                           fontSize: 12,
                         ),
                       ),
+                      if (count > 0) ...[
+                        const SizedBox(height: 9),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 5,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${(progress * 100).round()}%',
+                              style: TextStyle(
+                                color: colors.primary,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '$completed of $count completed',
+                          style: TextStyle(
+                            color: colors.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 10),
                       Text(
                         'View course →',
@@ -260,6 +296,7 @@ class _CoursesTabState extends State<CoursesTab> {
         ),
       ),
     );
+    });
   }
 
   Widget _empty(BuildContext context) => Padding(

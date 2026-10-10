@@ -21,7 +21,7 @@
 
 ## Next product improvements
 
-- [ ] Add percentage-based progress to course cards and Home recommendations
+- [x] Add percentage-based progress to course cards and Home recommendations
 - [ ] Add daily learning goals and achievement badges
 - [ ] Add lesson notes and bookmarks inside the video player
 - [ ] Add offline download progress, storage management and expiry handling
