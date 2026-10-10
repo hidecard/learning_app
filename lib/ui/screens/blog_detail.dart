@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/models/blog_model.dart';
 import '../../data/services/blog_service.dart';
+import '../../data/services/learning_progress_service.dart';
 
 class BlogDetail extends StatefulWidget {
   final BlogModel blog;
@@ -13,25 +14,60 @@ class BlogDetail extends StatefulWidget {
 
 class _BlogDetailState extends State<BlogDetail> {
   final _service = BlogService();
+  final _learning = LearningProgressService();
+  final _scrollController = ScrollController();
   late BlogModel _blog;
   bool _liked = false;
+  bool _saved = false;
   bool _busy = false;
+  double _readingProgress = 0;
 
   @override
   void initState() {
     super.initState();
     _blog = widget.blog;
+    _scrollController.addListener(_onScroll);
     _hydrate();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final max = _scrollController.position.maxScrollExtent;
+    final value = max <= 0 ? 0.0 : _scrollController.offset / max;
+    if ((value - _readingProgress).abs() > .03) {
+      setState(() => _readingProgress = value.clamp(0, 1));
+      _learning.saveReadingProgress(_blog.id, _readingProgress);
+    }
   }
 
   Future<void> _hydrate() async {
     final viewed = await _service.updateBlogViewCount(_blog);
     final liked = await _service.isLikedByUser(_blog.id);
+    final saved = await _learning.isBlogSaved(_blog.id);
+    final progress = await _learning.readingProgress(_blog.id);
     if (!mounted) return;
     setState(() {
       _blog = viewed;
       _liked = liked;
+      _saved = saved;
+      _readingProgress = progress;
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleSaved() async {
+    final saved = await _learning.toggleBlogSaved(_blog.id);
+    if (!mounted) return;
+    setState(() => _saved = saved);
+    Get.snackbar(
+      saved ? 'Saved' : 'Removed',
+      saved ? 'Article saved for later.' : 'Article removed from saved items.',
+    );
   }
 
   Future<void> _toggleLike() async {
@@ -64,6 +100,13 @@ class _BlogDetailState extends State<BlogDetail> {
         title: const Text('Article'),
         actions: [
           IconButton(
+            onPressed: _toggleSaved,
+            tooltip: _saved ? 'Remove saved article' : 'Save article',
+            icon: Icon(
+              _saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+            ),
+          ),
+          IconButton(
             onPressed: _toggleLike,
             tooltip: 'Like article',
             icon: _busy
@@ -88,78 +131,91 @@ class _BlogDetailState extends State<BlogDetail> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_blog.imageUrl?.isNotEmpty == true)
-              Image.network(
-                _blog.imageUrl!,
-                height: 230,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _imageFallback(context),
-              )
-            else
-              _imageFallback(context),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
+      body: Column(
+        children: [
+          LinearProgressIndicator(
+            value: _readingProgress == 0 ? null : _readingProgress,
+            minHeight: 3,
+            backgroundColor: colors.surfaceContainerHighest,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _meta(context, Icons.sell_outlined, _blog.category),
-                      _meta(
-                        context,
-                        Icons.visibility_outlined,
-                        '${_blog.viewCount} views',
-                      ),
-                      _meta(
-                        context,
-                        Icons.favorite_border_rounded,
-                        '${_blog.likeCount} likes',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    _blog.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.15,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Divider(color: colors.outlineVariant),
-                  const SizedBox(height: 18),
-                  Text(
-                    _blog.content,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(height: 1.75),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _toggleLike,
-                      icon: Icon(
-                        _liked
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                      ),
-                      label: Text(_liked ? 'Liked' : 'Like this article'),
+                  if (_blog.imageUrl?.isNotEmpty == true)
+                    Image.network(
+                      _blog.imageUrl!,
+                      height: 230,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _imageFallback(context),
+                    )
+                  else
+                    _imageFallback(context),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 36),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _meta(context, Icons.sell_outlined, _blog.category),
+                            _meta(
+                              context,
+                              Icons.visibility_outlined,
+                              '${_blog.viewCount} views',
+                            ),
+                            _meta(
+                              context,
+                              Icons.favorite_border_rounded,
+                              '${_blog.likeCount} likes',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          _blog.title,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                height: 1.15,
+                              ),
+                        ),
+                        const SizedBox(height: 18),
+                        Divider(color: colors.outlineVariant),
+                        const SizedBox(height: 18),
+                        Text(
+                          _blog.content,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(height: 1.75),
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: _toggleLike,
+                            icon: Icon(
+                              _liked
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                            ),
+                            label: Text(_liked ? 'Liked' : 'Like this article'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

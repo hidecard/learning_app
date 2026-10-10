@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../data/models/course_model.dart';
+import '../../data/services/learning_progress_service.dart';
 import '../../logic/controllers/auth_controller.dart';
 import 'video_player_screen.dart';
 
 class CourseDetail extends StatelessWidget {
   const CourseDetail({super.key});
+  static final _progress = LearningProgressService();
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class CourseDetail extends StatelessWidget {
             child: _header(
               context,
               course,
+              videos,
               videos.length,
               freeCount,
               isPremium,
@@ -81,6 +84,7 @@ class CourseDetail extends StatelessWidget {
   Widget _header(
     BuildContext context,
     CourseModel course,
+    List<VideoInfo> videos,
     int lessonCount,
     int freeCount,
     bool isPremium,
@@ -140,6 +144,17 @@ class CourseDetail extends StatelessWidget {
                 context,
                 isPremium ? Icons.verified_outlined : Icons.lock_outline,
                 isPremium ? 'Premium active' : 'Free plan',
+              ),
+              FutureBuilder<double>(
+                future: _progress.courseProgress(course.title, videos),
+                builder: (context, snapshot) {
+                  final value = snapshot.data ?? 0;
+                  return _pill(
+                    context,
+                    Icons.track_changes_rounded,
+                    '${(value * 100).round()}% complete',
+                  );
+                },
               ),
             ],
           ),
