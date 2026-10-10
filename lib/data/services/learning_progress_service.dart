@@ -6,7 +6,10 @@ class LearningProgressService {
   static const _lastLessonKey = 'learning_last_lesson';
   static const _completedKey = 'learning_completed_lessons';
   static const _savedBlogsKey = 'learning_saved_blogs';
+  static const _savedCoursesKey = 'learning_saved_courses';
   static const _readingProgressKey = 'learning_reading_progress';
+  static const _streakCountKey = 'learning_streak_count';
+  static const _streakDateKey = 'learning_streak_date';
 
   String lessonKey(String? courseTitle, VideoInfo video) {
     final course = (courseTitle ?? 'course').trim().toLowerCase();
@@ -66,6 +69,53 @@ class LearningProgressService {
     }
     await prefs.setStringList(_savedBlogsKey, saved);
     return !isSaved;
+  }
+
+  String courseKey(CourseModel course) =>
+      (course.id ?? course.title ?? 'course').trim().toLowerCase();
+
+  Future<bool> isCourseSaved(CourseModel course) async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_savedCoursesKey) ?? <String>[]).contains(
+      courseKey(course),
+    );
+  }
+
+  Future<bool> toggleCourseSaved(CourseModel course) async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList(_savedCoursesKey) ?? <String>[];
+    final key = courseKey(course);
+    final isSaved = saved.contains(key);
+    if (isSaved) {
+      saved.remove(key);
+    } else {
+      saved.add(key);
+    }
+    await prefs.setStringList(_savedCoursesKey, saved);
+    return !isSaved;
+  }
+
+  Future<int> touchStreak() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayKey = '${today.year}-${today.month}-${today.day}';
+    final previousKey = prefs.getString(_streakDateKey);
+    var count = prefs.getInt(_streakCountKey) ?? 0;
+    if (previousKey == todayKey) return count;
+    final previous = previousKey == null
+        ? null
+        : DateTime.tryParse(previousKey);
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+    count =
+        previous != null &&
+            previous.year == yesterday.year &&
+            previous.month == yesterday.month &&
+            previous.day == yesterday.day
+        ? count + 1
+        : 1;
+    await prefs.setString(_streakDateKey, todayKey);
+    await prefs.setInt(_streakCountKey, count);
+    return count;
   }
 
   Future<void> saveReadingProgress(String blogId, double value) async {

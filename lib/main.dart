@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'data/services/connectivity_service.dart';
+import 'data/services/learning_progress_service.dart';
 import 'firebase_options.dart';
 import 'logic/controllers/auth_controller.dart';
 import 'logic/controllers/premium_controller.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
   Get.put(PremiumController(), permanent: true);
   Get.put(ThemeController(), permanent: true);
   Get.put(ConnectivityService(), permanent: true);
+  await LearningProgressService().touchStreak();
 
   runApp(const MyApp());
 }

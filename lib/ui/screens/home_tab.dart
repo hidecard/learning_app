@@ -94,6 +94,7 @@ class _HomeTabState extends State<HomeTab> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildStats(context),
+                  _buildStreak(context),
                   _buildContinueLearning(context),
                   const SizedBox(height: 28),
                   _sectionHeader(context, 'Featured courses', 'View all', 1),
@@ -113,6 +114,51 @@ class _HomeTabState extends State<HomeTab> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStreak(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return FutureBuilder<int>(
+      future: _progress.touchStreak(),
+      builder: (context, snapshot) {
+        final streak = snapshot.data ?? 1;
+        return Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: colors.tertiaryContainer,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.local_fire_department_rounded,
+                  color: colors.tertiary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '$streak-day learning streak',
+                    style: TextStyle(
+                      color: colors.onTertiaryContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  streak == 1 ? 'Keep going' : 'Great work',
+                  style: TextStyle(
+                    color: colors.onTertiaryContainer.withValues(alpha: .75),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

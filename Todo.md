@@ -15,8 +15,11 @@
 - [x] Add Continue Learning card to the Home dashboard
 - [x] Add playlist-aware previous/next lesson navigation in the video player
 - [x] Add saved article bookmarks from the Articles tab and Blog detail
+- [x] Add saved course bookmarks from the Courses tab
 - [x] Add article reading progress indicator with local persistence
+- [x] Add estimated reading time to articles
 - [x] Add course completion percentage to Course detail
+- [x] Add daily learning streak tracking and Home streak banner
 - [x] Add separate Android APK workflow
 - [x] Add separate Flutter Web workflow
 - [x] Add separate Windows EXE workflow
@@ -24,9 +27,7 @@
 ## Next product improvements
 
 - [ ] Add percentage-based lesson watch progress to course cards and detail
-- [ ] Add saved/bookmarked courses
 - [ ] Add global search results for courses, lessons and articles
-- [ ] Add estimated reading time to articles
 - [ ] Add offline lesson download state and offline library
 - [ ] Add streaks, daily learning goals and achievement badges
 - [ ] Add responsive tablet/desktop two-column course detail layout

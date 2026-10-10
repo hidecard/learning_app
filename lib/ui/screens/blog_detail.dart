@@ -95,6 +95,10 @@ class _BlogDetailState extends State<BlogDetail> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final wordCount = _blog.content.trim().isEmpty
+        ? 0
+        : _blog.content.trim().split(RegExp(r'\s+')).length;
+    final readingMinutes = (wordCount / 200).ceil().clamp(1, 99);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Article'),
@@ -174,6 +178,11 @@ class _BlogDetailState extends State<BlogDetail> {
                               context,
                               Icons.favorite_border_rounded,
                               '${_blog.likeCount} likes',
+                            ),
+                            _meta(
+                              context,
+                              Icons.schedule_outlined,
+                              '$readingMinutes min read',
                             ),
                           ],
                         ),
