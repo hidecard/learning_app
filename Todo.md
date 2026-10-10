@@ -20,16 +20,17 @@
 - [x] Add estimated reading time to articles
 - [x] Add course completion percentage to Course detail
 - [x] Add daily learning streak tracking and Home streak banner
+- [x] Add combined global search results for courses and articles on Home
+- [x] Keep cached learning UI accessible offline with a retry banner
 - [x] Add separate Android APK workflow
 - [x] Add separate Flutter Web workflow
 - [x] Add separate Windows EXE workflow
 
 ## Next product improvements
 
-- [ ] Add percentage-based lesson watch progress to course cards and detail
-- [ ] Add global search results for courses, lessons and articles
+- [ ] Add percentage-based lesson watch progress to course cards
 - [ ] Add offline lesson download state and offline library
-- [ ] Add streaks, daily learning goals and achievement badges
+- [ ] Add daily learning goals and achievement badges
 - [ ] Add responsive tablet/desktop two-column course detail layout
 - [ ] Add accessibility audit for text contrast, semantics and text scaling
 

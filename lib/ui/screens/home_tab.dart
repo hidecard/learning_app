@@ -93,17 +93,26 @@ class _HomeTabState extends State<HomeTab> {
               padding: const EdgeInsets.fromLTRB(20, 22, 20, 32),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildStats(context),
-                  _buildStreak(context),
-                  _buildContinueLearning(context),
-                  const SizedBox(height: 28),
-                  _sectionHeader(context, 'Featured courses', 'View all', 1),
-                  const SizedBox(height: 14),
-                  _buildCourses(context),
-                  const SizedBox(height: 28),
-                  _sectionHeader(context, 'Fresh from the blog', 'View all', 2),
-                  const SizedBox(height: 14),
-                  _buildBlogs(context),
+                  if (_searchController.text.trim().isNotEmpty)
+                    _buildSearchResults(context)
+                  else ...[
+                    _buildStats(context),
+                    _buildStreak(context),
+                    _buildContinueLearning(context),
+                    const SizedBox(height: 28),
+                    _sectionHeader(context, 'Featured courses', 'View all', 1),
+                    const SizedBox(height: 14),
+                    _buildCourses(context),
+                    const SizedBox(height: 28),
+                    _sectionHeader(
+                      context,
+                      'Fresh from the blog',
+                      'View all',
+                      2,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildBlogs(context),
+                  ],
                   if (widget.errorMessage != null) ...[
                     const SizedBox(height: 20),
                     _buildError(context),
@@ -114,6 +123,46 @@ class _HomeTabState extends State<HomeTab> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchResults(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final query = _searchController.text.trim();
+    final total = _courses.length + _blogs.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Search results',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$total results for “$query”',
+          style: TextStyle(color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: 20),
+        if (_courses.isNotEmpty) ...[
+          _sectionHeader(context, 'Courses', 'View all', 1),
+          const SizedBox(height: 12),
+          _buildCourses(context),
+          const SizedBox(height: 24),
+        ],
+        if (_blogs.isNotEmpty) ...[
+          _sectionHeader(context, 'Articles', 'View all', 2),
+          const SizedBox(height: 12),
+          _buildBlogs(context),
+        ],
+        if (total == 0)
+          _empty(
+            context,
+            Icons.search_off_rounded,
+            'No courses or articles match your search',
+          ),
+      ],
     );
   }
 
